@@ -1,0 +1,13 @@
+contextlib2==0.5.1
+ecdsa==0.13
+Fabric==1.11.1
+invoke==0.12.2
+Jinja2==2.8
+MarkupSafe==0.23
+paramiko==1.16.0
+prettytable==0.7.2
+pycrypto==2.6.1
+requests==2.9.1
+simplejson==3.8.2
+six==1.10.0
+streamparse==2.1.4
