@@ -9,6 +9,7 @@
           options
           "spouts.mails.MailSpout"
           ["mail"]
+          :p 2           
           )
     }
     ;; bolt configuration
@@ -17,6 +18,7 @@
           {"mails-spout" :shuffle}
           "bolts.mailparse.MailParser"
           []
+          :p 2
           )
     }
   ]
