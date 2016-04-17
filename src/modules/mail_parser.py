@@ -13,7 +13,7 @@ import time
 log = logging.getLogger(__name__)
 
 
-class ParseMail(object):
+class MailParser(object):
 
     """Class to tokenize mail. """
 
@@ -171,4 +171,4 @@ class ParseMail(object):
 
 
 if __name__ == '__main__':
-    p = ParseMail()
+    p = MailParser()
