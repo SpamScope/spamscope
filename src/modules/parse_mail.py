@@ -70,7 +70,7 @@ class ParseMail(object):
                     self._attachments.append(
                         {
                             "filename": filename,
-                            "payload": p.get_payload(decode=True),
+                            "payload": p.get_payload(decode=False)
                         }
                     )
                 else:
