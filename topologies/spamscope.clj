@@ -8,17 +8,24 @@
     {"mails-spout" (python-spout-spec
           options
           "spouts.mails.MailSpout"
-          ["mail"]
-          :p 2           
+          ["mail_path"]
+          :p 1           
           )
     }
     ;; bolt configuration
-    {"mailparse-bolt" (python-bolt-spec
+    {"tokenizer-bolt" (python-bolt-spec
           options
           {"mails-spout" :shuffle}
-          "bolts.mailparse.MailParser"
+          "bolts.tokenizer.Tokenizer"
+          ["mail_path", "mail"]
+          :p 1
+          )
+    "phishing-bolt" (python-bolt-spec
+          options
+          {"tokenizer-bolt" ["mail_path"]}
+          "bolts.phishing.Phishing"
           []
-          :p 2
+          :p 1
           )
     }
   ]

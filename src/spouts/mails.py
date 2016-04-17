@@ -14,5 +14,4 @@ class MailSpout(Spout):
 
     def next_tuple(self):
         for i in self._mails_iglob:
-            with open(i) as mail:
-                self.emit([mail.read().encode('base64')])
+            self.emit([i])
