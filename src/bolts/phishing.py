@@ -21,9 +21,10 @@ class Phishing(Bolt):
                 r_string += i[0] + " "
             r_string = r_string.strip()
 
-            self.log(
-                "Path: {}. Matchs: {}".format(
-                    mail_path,
-                    r_string,
-                )
-            )
+            # self.log(
+                # "Path: {}. Matchs: {}".format(
+                    # mail_path,
+                    # r_string,
+                # )
+            # )
+        self.emit([mail_path])

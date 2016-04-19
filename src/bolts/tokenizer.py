@@ -8,7 +8,6 @@ class Tokenizer(Bolt):
 
     def process(self, tup):
         mail_path = tup.values[0]
-        self.log('Mail in analysis: {}'.format(mail_path), 'info')
         p = MailParser()
         p.parse_from_file(mail_path)
         self.emit(
