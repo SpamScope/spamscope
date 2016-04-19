@@ -24,7 +24,14 @@
           options
           {"tokenizer-bolt" ["mail_path"]}
           "bolts.phishing.Phishing"
-          []
+          ["mail_path"]
+          :p 1
+          )
+    "attachments-bolt" (python-bolt-spec
+          options
+          {"tokenizer-bolt" ["mail_path"]}
+          "bolts.attachments.Attachments"
+          ["mail_path", "with_attachment", "attachments_json"]
           :p 1
           )
     }
