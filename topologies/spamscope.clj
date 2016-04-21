@@ -34,6 +34,13 @@
           ["mail_path", "with_attachment", "attachments_json"]
           :p 1
           )
+    "forms-bolt" (python-bolt-spec
+          options
+          {"tokenizer-bolt" ["mail_path"]}
+          "bolts.forms.Forms"
+          ["mail_path", "forms"]
+          :p 1
+          )
     }
   ]
 )
