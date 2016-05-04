@@ -1,30 +1,34 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
 
-from pyparsing import oneOf
-import json
+from modules.utils import search_words
+import re
+try:
+    import simplejson as json
+except:
+    import json
 
 
 class Phishing(Bolt):
+    outputs = ['message_id', 'phishing']
+
+    # TODO: Handling Tick Tuples reload keywords
 
     def initialize(self, conf, ctx):
-        self.parser_ = oneOf('intesa cartasi marche')('phishing')
+        self.keywords = [
+            "banca marche",
+            "cartasi",
+            "amazon",
+            "dropbox",
+            "aosta",
+        ]
 
     def process(self, tup):
-        mail_path = tup.values[0]
+        message_id = tup.values[0]
         mail = json.loads(tup.values[1])
+        words_list = re.findall(r"[\w]+", mail.get("body"))
+        phishing = False
 
-        results = self.parser_.searchString(mail["body"])
-        if results:
-            r_string = ""
-            for i in results.asList():
-                r_string += i[0] + " "
-            r_string = r_string.strip()
-
-            # self.log(
-                # "Path: {}. Matchs: {}".format(
-                    # mail_path,
-                    # r_string,
-                # )
-            # )
-        self.emit([mail_path])
+        if search_words(self.keywords, words_list):
+            phishing = True
+        self.emit([message_id, phishing])

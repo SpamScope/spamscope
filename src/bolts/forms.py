@@ -2,16 +2,20 @@ from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
 
 from lxml import html
-import json
+try:
+    import simplejson as json
+except:
+    import json
 
 
 class Forms(Bolt):
+    outputs = ['message_id', 'forms']
 
     def process(self, tup):
-        mail_path = tup.values[0]
+        message_id = tup.values[0]
         mail = json.loads(tup.values[1])
         forms = False
-        body = mail.get('body', None)
+        body = mail.get('body')
 
         if body:
             try:
@@ -20,9 +24,6 @@ class Forms(Bolt):
                 if results:
                     forms = True
             except:
-                self.log("Failed parsing body part", level="error")
+                self.log("Failed parsing body part", level="warn")
 
-        if forms:
-            self.log("Path: {}, Forms: {}".format(mail_path, forms))
-
-        self.emit([mail_path, forms])
+        self.emit([message_id, forms])

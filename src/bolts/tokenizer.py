@@ -5,14 +5,12 @@ from modules.mail_parser import MailParser
 
 
 class Tokenizer(Bolt):
+    outputs = ['message_id', 'mail']
 
     def process(self, tup):
         mail_path = tup.values[0]
         p = MailParser()
         p.parse_from_file(mail_path)
-        self.emit(
-            [
-                mail_path,
-                p.parsed_mail_json,
-            ]
-        )
+        mail = p.parsed_mail_json
+        message_id = p.message_id
+        self.emit([message_id, mail])
