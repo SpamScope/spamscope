@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from email.header import decode_header
 import datetime
 import email
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 
 class MailParser(object):
 
-    """Class to tokenize mail. """
+    """Class to parse mail. """
 
     def parse_from_file(self, fd):
         try:

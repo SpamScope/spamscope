@@ -3,20 +3,25 @@ from streamparse.bolt import Bolt
 
 from modules.utils import fingerprints
 
-import json
+try:
+    import simplejson as json
+except:
+    import json
 
 
 class Attachments(Bolt):
+    outputs = ['message_id', 'with_attachments', 'attachments_json']
 
     def process(self, tup):
-        mail_path = tup.values[0]
+        message_id = tup.values[0]
         mail = json.loads(tup.values[1])
-
+        attachments = mail.get('attachments', [])
+        with_attachments = False
         attachments_json = None
-        with_attachment = False
-        attachments = mail.get('attachments', None)
 
         if attachments:
+            with_attachments = True
+
             for a in attachments:
                 md5, sha1, sha256, sha512, ssdeep_ = fingerprints(
                     a["payload"].decode('base64')
@@ -27,16 +32,11 @@ class Attachments(Bolt):
                 a['sha512'] = sha512
                 a['ssdeep'] = ssdeep_
 
+                # TODO: check on virustotal
+
             attachments_json = json.dumps(
                 attachments,
                 ensure_ascii=False,
             )
 
-            with_attachment = True
-
-        if with_attachment:
-            self.log(
-                "Path: {}, Attachment: {}".format(mail_path, with_attachment)
-            )
-
-        self.emit([mail_path, with_attachment, attachments_json])
+        self.emit([message_id, with_attachments, attachments_json])

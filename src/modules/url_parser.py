@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from pyparsing import \
     Combine, \
     Group, \
@@ -13,52 +14,82 @@ from pyparsing import \
     nums, \
     oneOf
 
-'''
-Reference:
-https://www.accelebrate.com/blog/pyparseltongue-parsing-text-with-pyparsing://www.accelebrate.com/blog/pyparseltongue-parsing-text-with-pyparsing/
+import urlnorm
+import logging
 
-URL grammar
-  url ::= scheme '://' [userinfo] host [port] [path] [query] [fragment]
-  scheme ::= http | https | ftp | file
-  userinfo ::= url_chars+ ':' url_chars+ '@'
-  host ::= alphanums | host (. + alphanums)
-  port ::= ':' nums
-  path ::= url_chars+
-  query ::= '?' + query_pairs
-  query_pairs ::= query_pairs | (query_pairs '&' query_pair)
-  query_pair = url_chars+ '=' url_chars+
-  fragment = '#' + url_chars
-  url_chars = alphanums + '-_.~%+'
-'''
+log = logging.getLogger(__name__)
 
-url_chars = alphanums + '-_.~%+'
 
-fragment = Combine((Suppress('#') + Word(url_chars)))('fragment')
+def url_parser(url):
 
-scheme = oneOf('http https ftp file')('scheme')
-host = Combine(delimitedList(Word(url_chars), '.'))('host')
-port = Suppress(':') + Word(nums)('port')
-user_info = (
-    Word(url_chars)('username') +
-    Suppress(':') +
-    Word(url_chars)('password') +
-    Suppress('@')
-)
+    '''
+    Reference:
+    https://www.accelebrate.com/blog/pyparseltongue-parsing-text-with-pyparsing://www.accelebrate.com/blog/pyparseltongue-parsing-text-with-pyparsing/
 
-query_pair = Group(Word(url_chars) + Suppress('=') + Word(url_chars))
-query = Group(Suppress('?') + delimitedList(query_pair, '&'))('query')
+    URL grammar
+    url ::= scheme '://' [userinfo] host [port] [path] [query] [fragment]
+    scheme ::= http | https | ftp | file
+    userinfo ::= url_chars+ ':' url_chars+ '@'
+    host ::= alphanums | host (. + alphanums)
+    port ::= ':' nums
+    path ::= url_chars+
+    query ::= '?' + query_pairs
+    query_pairs ::= query_pairs | (query_pairs '&' query_pair)
+    query_pair = url_chars+ '=' url_chars+
+    fragment = '#' + url_chars
+    url_chars = alphanums + '-_.~%+'
+    '''
 
-path = Combine(
-    Suppress('/') + OneOrMore(~query + Word(url_chars + '/'))
-)('path')
+    url_chars = alphanums + '-_.~%+'
 
-url_parser = (
-    scheme +
-    Suppress('://') +
-    Optional(user_info) +
-    host +
-    Optional(port) +
-    Optional(path) +
-    Optional(query) +
-    Optional(fragment)
-)
+    fragment = Combine((Suppress('#') + Word(url_chars)))('fragment')
+
+    scheme = oneOf('http https ftp file')('scheme')
+    host = Combine(delimitedList(Word(url_chars), '.'))('host')
+    port = Suppress(':') + Word(nums)('port')
+    user_info = (
+        Word(url_chars)('username') +
+        Suppress(':') +
+        Word(url_chars)('password') +
+        Suppress('@')
+    )
+
+    query_pair = Group(Word(url_chars) + Suppress('=') + Word(url_chars))
+    query = Group(Suppress('?') + delimitedList(query_pair, '&'))('query')
+
+    path = Combine(
+        Suppress('/') + OneOrMore(~query + Word(url_chars + '/'))
+    )('path')
+
+    url_parser = (
+        scheme +
+        Suppress('://') +
+        Optional(user_info) +
+        host +
+        Optional(port) +
+        Optional(path) +
+        Optional(query) +
+        Optional(fragment)
+    )
+
+    return url_parser.parseString(url)
+
+
+def extract_urls(text, regex):
+    results = dict()
+
+    for i in regex.finditer(text):
+        try:
+            url = urlnorm.norm(i.group(1).strip())
+            url_parsed = url_parser(url)
+            if results.get(url_parsed.host):
+                results[url_parsed.host].add(url)
+            else:
+                results[url_parsed.host] = set(url)
+            log.debug("Parsed domain: {}".format(url_parsed.host))
+        except urlnorm.InvalidUrl:
+            log.warning("Parsing invalid url: {}".format(url))
+        except:
+            log.exception("Failed parsing url: {}".format(url))
+
+    return results

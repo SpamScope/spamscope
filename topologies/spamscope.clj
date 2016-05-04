@@ -8,7 +8,7 @@
     {"mails-spout" (python-spout-spec
           options
           "spouts.mails.MailSpout"
-          ["mail_path"]
+          ["message_id"]
           :p 1           
           )
     }
@@ -17,28 +17,40 @@
           options
           {"mails-spout" :shuffle}
           "bolts.tokenizer.Tokenizer"
-          ["mail_path", "mail"]
+          ["message_id", "mail"]
           :p 1
           )
     "phishing-bolt" (python-bolt-spec
           options
-          {"tokenizer-bolt" ["mail_path"]}
+          {"tokenizer-bolt" ["message_id"]}
           "bolts.phishing.Phishing"
-          ["mail_path"]
+          ["message_id", "phishing"]
           :p 1
           )
     "attachments-bolt" (python-bolt-spec
           options
-          {"tokenizer-bolt" ["mail_path"]}
+          {"tokenizer-bolt" ["message_id"]}
           "bolts.attachments.Attachments"
-          ["mail_path", "with_attachment", "attachments_json"]
+          ["message_id", "with_attachments", "attachments_json"]
           :p 1
           )
     "forms-bolt" (python-bolt-spec
           options
-          {"tokenizer-bolt" ["mail_path"]}
+          {"tokenizer-bolt" ["message_id"]}
           "bolts.forms.Forms"
-          ["mail_path", "forms"]
+          ["message_id", "forms"]
+          :p 1
+          )
+    "json-bolt" (python-bolt-spec
+          options
+          {
+           "tokenizer-bolt" ["message_id"]
+           "phishing-bolt" ["message_id"]
+           "attachments-bolt" ["message_id"]
+           "forms-bolt" ["message_id"]
+           }
+          "bolts.json_maker.JsonMaker"
+          []
           :p 1
           )
     }
