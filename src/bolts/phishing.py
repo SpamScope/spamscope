@@ -5,12 +5,12 @@ from modules.utils import search_words
 import re
 try:
     import simplejson as json
-except:
+except ImportError:
     import json
 
 
 class Phishing(Bolt):
-    outputs = ['message_id', 'phishing']
+    outputs = ['sha256_random', 'phishing']
 
     # TODO: Handling Tick Tuples reload keywords
 
@@ -24,11 +24,25 @@ class Phishing(Bolt):
         ]
 
     def process(self, tup):
-        message_id = tup.values[0]
-        mail = json.loads(tup.values[1])
-        words_list = re.findall(r"[\w]+", mail.get("body"))
+        sha256_random = tup.values[0]
         phishing = False
 
-        if search_words(self.keywords, words_list):
-            phishing = True
-        self.emit([message_id, phishing])
+        try:
+            mail = json.loads(tup.values[1])
+            words_list = re.findall(r"[\w]+", mail.get("body"))
+
+            if search_words(self.keywords, words_list):
+                phishing = True
+                self.log("Phishing for mail '{}'".format(sha256_random))
+
+        except Exception as e:
+            self.log(
+                "Failed processing phishing for mail '{}".format(
+                    sha256_random
+                ),
+                level="error"
+            )
+            self.raise_exception(e, tup)
+
+        finally:
+            self.emit([sha256_random, phishing])

@@ -3,20 +3,23 @@ from streamparse.bolt import Bolt
 
 try:
     import simplejson as json
-except:
+except ImportError:
     import json
 
 
 class JsonMaker(Bolt):
+    outputs = ['sha256_random', 'mail']
 
     def initialize(self, storm_conf, context):
         self.mails = {}
-        self.input_bolts = set([
-            "tokenizer-bolt",
-            "phishing-bolt",
-            "attachments-bolt",
-            "forms-bolt",
-        ])
+        self.input_bolts = set(
+            [
+                "tokenizer-bolt",
+                "phishing-bolt",
+                "attachments-bolt",
+                "forms-bolt",
+            ]
+        )
 
     def _compose_output(self, greedy_data):
         mail = json.loads(greedy_data['tokenizer-bolt'][1])
@@ -27,28 +30,31 @@ class JsonMaker(Bolt):
             mail['attachments'] = json.loads(
                 greedy_data['attachments-bolt'][2]
             )
-
-        return json.dumps(
-            mail,
-            indent=4,
-            ensure_ascii=False,
-        )
+        return json.dumps(mail, ensure_ascii=False)
 
     def process(self, tup):
-        bolt = tup.component
-        message_id = tup.values[0]
-        values = tup.values
+        try:
+            bolt = tup.component
+            sha256_random = tup.values[0]
+            values = tup.values
 
-        if self.mails.get(message_id, None):
-            self.mails[message_id][bolt] = values
-        else:
-            self.mails[message_id] = {bolt: values}
+            if self.mails.get(sha256_random, None):
+                self.mails[sha256_random][bolt] = values
+            else:
+                self.mails[sha256_random] = {bolt: values}
 
-        diff = self.input_bolts - set(self.mails[message_id].keys())
+            diff = self.input_bolts - set(self.mails[sha256_random].keys())
+            if not diff:
+                output_json = self._compose_output(self.mails[sha256_random])
+                self.log(
+                    "New JSON for mail '{}'".format(sha256_random),
+                    level="debug"
+                )
+                self.emit([sha256_random, output_json])
 
-        if not diff:
-            self.log("JSON for mail '{}'".format(message_id))
-            output_json = self._compose_output(self.mails[message_id])
-
-            with open("/tmp/mails/{}.json".format(message_id), "w") as f:
-                f.write(output_json.encode('utf-8'))
+        except Exception as e:
+            self.log(
+                "Failed process json for mail: {}".format(sha256_random),
+                level="error"
+            )
+            self.raise_exception(e, tup)

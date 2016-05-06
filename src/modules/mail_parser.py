@@ -5,11 +5,15 @@ from __future__ import unicode_literals
 from email.header import decode_header
 import datetime
 import email
-import json
 import logging
 import random
 import string
 import time
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 log = logging.getLogger(__name__)
 

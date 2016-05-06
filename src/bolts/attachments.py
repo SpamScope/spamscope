@@ -5,38 +5,53 @@ from modules.utils import fingerprints
 
 try:
     import simplejson as json
-except:
+except ImportError:
     import json
 
 
 class Attachments(Bolt):
-    outputs = ['message_id', 'with_attachments', 'attachments_json']
+    outputs = ['sha256_random', 'with_attachments', 'attachments_json']
 
     def process(self, tup):
-        message_id = tup.values[0]
-        mail = json.loads(tup.values[1])
-        attachments = mail.get('attachments', [])
+        sha256_mail_random = tup.values[0]
         with_attachments = False
         attachments_json = None
 
-        if attachments:
-            with_attachments = True
+        try:
+            mail = json.loads(tup.values[1])
+            attachments = mail.get('attachments', [])
 
-            for a in attachments:
-                md5, sha1, sha256, sha512, ssdeep_ = fingerprints(
-                    a["payload"].decode('base64')
+            if attachments:
+                with_attachments = True
+                self.log(
+                    "Attachments for mail '{}'".format(sha256_mail_random)
                 )
-                a['md5'] = md5
-                a['sha1'] = sha1
-                a['sha256'] = sha256
-                a['sha512'] = sha512
-                a['ssdeep'] = ssdeep_
 
-                # TODO: check on virustotal
+                for a in attachments:
+                    md5, sha1, sha256, sha512, ssdeep_ = fingerprints(
+                        a["payload"].decode('base64')
+                    )
+                    a['md5'] = md5
+                    a['sha1'] = sha1
+                    a['sha256'] = sha256
+                    a['sha512'] = sha512
+                    a['ssdeep'] = ssdeep_
 
-            attachments_json = json.dumps(
-                attachments,
-                ensure_ascii=False,
+                    # TODO: check on virustotal
+
+                attachments_json = json.dumps(
+                    attachments,
+                    ensure_ascii=False,
+                )
+
+        except Exception as e:
+            self.log(
+                "Failed process attachments for mail: {}".format(
+                    sha256_mail_random
+                ),
+                level="error"
             )
+            self.raise_exception(e, tup)
 
-        self.emit([message_id, with_attachments, attachments_json])
+        finally:
+            self.emit([sha256_mail_random, with_attachments, attachments_json])
