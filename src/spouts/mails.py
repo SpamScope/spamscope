@@ -3,20 +3,18 @@ from streamparse.spout import Spout
 
 import glob
 import os
+import time
 
 
 class MailSpout(Spout):
     outputs = ['mail_path']
 
     def initialize(self, stormconf, context):
-        mails_path = '/home/fedelemantuano/Desktop/mails'
+        mails_path = '/home/fedelemantuano/Desktop/mails/test'
         # TODO: get from QueueItem
         self._mails_iglob = glob.iglob(os.path.join(mails_path, '*heidi*'))
 
     def next_tuple(self):
         for i in self._mails_iglob:
             self.emit([i])
-
-    def fail(self, tup_id):
-        # TODO: mark failed tup
-        pass
+            time.sleep(0.1)

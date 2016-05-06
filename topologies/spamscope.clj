@@ -8,7 +8,7 @@
     {"mails-spout" (python-spout-spec
           options
           "spouts.mails.MailSpout"
-          ["message_id"]
+          ["mail_path"]
           :p 1           
           )
     }
@@ -17,41 +17,48 @@
           options
           {"mails-spout" :shuffle}
           "bolts.tokenizer.Tokenizer"
-          ["message_id", "mail"]
+          ["sha256_random", "mail"]
           :p 1
           )
     "phishing-bolt" (python-bolt-spec
           options
-          {"tokenizer-bolt" ["message_id"]}
+          {"tokenizer-bolt" ["sha256_random"]}
           "bolts.phishing.Phishing"
-          ["message_id", "phishing"]
+          ["sha256_random", "phishing"]
           :p 1
           )
     "attachments-bolt" (python-bolt-spec
           options
-          {"tokenizer-bolt" ["message_id"]}
+          {"tokenizer-bolt" ["sha256_random"]}
           "bolts.attachments.Attachments"
-          ["message_id", "with_attachments", "attachments_json"]
+          ["sha256_random", "with_attachments", "attachments_json"]
           :p 1
           )
     "forms-bolt" (python-bolt-spec
           options
-          {"tokenizer-bolt" ["message_id"]}
+          {"tokenizer-bolt" ["sha256_random"]}
           "bolts.forms.Forms"
-          ["message_id", "forms"]
+          ["sha256_random", "forms"]
           :p 1
           )
     "json-bolt" (python-bolt-spec
           options
           {
-           "tokenizer-bolt" ["message_id"]
-           "phishing-bolt" ["message_id"]
-           "attachments-bolt" ["message_id"]
-           "forms-bolt" ["message_id"]
+           "tokenizer-bolt" ["sha256_random"]
+           "phishing-bolt" ["sha256_random"]
+           "attachments-bolt" ["sha256_random"]
+           "forms-bolt" ["sha256_random"]
            }
           "bolts.json_maker.JsonMaker"
-          []
+          ["sha256_random", "mail"]
           :p 1
+          )
+    "output-debug-bolt" (python-bolt-spec
+          options
+          {"json-bolt" :shuffle}
+          "bolts.output_debug.OutputDebug"
+          []
+          :p 2
           )
     }
   ]

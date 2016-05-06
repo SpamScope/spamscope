@@ -4,26 +4,34 @@ from streamparse.bolt import Bolt
 from lxml import html
 try:
     import simplejson as json
-except:
+except ImportError:
     import json
 
 
 class Forms(Bolt):
-    outputs = ['message_id', 'forms']
+    outputs = ['sha256_random', 'forms']
 
     def process(self, tup):
-        message_id = tup.values[0]
-        mail = json.loads(tup.values[1])
+        sha256_random = tup.values[0]
         forms = False
-        body = mail.get('body')
 
-        if body:
-            try:
+        try:
+            mail = json.loads(tup.values[1])
+            body = mail.get('body')
+
+            if body.strip():
                 tree = html.fromstring(body)
                 results = tree.xpath('//form')
                 if results:
                     forms = True
-            except:
-                self.log("Failed parsing body part", level="warn")
+                    self.log("Forms for mail '{}'".format(sha256_random))
 
-        self.emit([message_id, forms])
+        except Exception as e:
+            self.log(
+                "Failed parsing body part for mail '{}".format(sha256_random),
+                level="error"
+            )
+            self.raise_exception(e, tup)
+
+        finally:
+            self.emit([sha256_random, forms])
