@@ -18,36 +18,40 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
+class InvalidMail(ValueError):
+    pass
+
+
+class NotUnicodeError(ValueError):
+    pass
+
+
 class MailParser(object):
 
     """Class to parse mail. """
 
     def parse_from_file(self, fd):
-        try:
-            with open(fd) as mail:
-                self._message = email.message_from_file(mail)
-                self._parse()
-        except:
-            log.exception("Failed parsing mail from file")
+        with open(fd) as mail:
+            self._message = email.message_from_file(mail)
+            self._parse()
 
     def parse_from_string(self, s):
-        try:
-            self._message = email.message_from_string(s)
-            self._parse()
-        except:
-            log.exception("Failed parsing mail from string")
+        self._message = email.message_from_string(s)
+        self._parse()
 
     def _decode_header_part(self, header):
         output = u''
-        try:
-            for i in decode_header(header):
-                if i[1]:
-                    output += unicode(i[0], i[1], errors='ignore').strip()
-                else:
-                    output += unicode(i[0], errors='ignore').strip()
-            return output
-        except:
-            return header
+
+        for i in decode_header(header):
+            if i[1]:
+                output += unicode(i[0], i[1], errors='ignore').strip()
+            else:
+                output += unicode(i[0], errors='ignore').strip()
+
+        if not isinstance(output, unicode):
+            raise NotUnicodeError("Header part is not unicode")
+
+        return output
 
     def _force_unicode(self, s):
         try:
@@ -61,9 +65,18 @@ class MailParser(object):
                 s,
                 errors='ignore',
             )
+
+        if not isinstance(u, unicode):
+            raise NotUnicodeError("Body part is not unicode")
+
         return u
 
     def _parse(self):
+        if not self._message.keys():
+            raise InvalidMail(
+                "Mail without headers: {}".format(self._message.as_string())
+            )
+
         self._attachments = list()
         self._text_plain = list()
 
@@ -173,7 +186,3 @@ class MailParser(object):
     def random_message_id(self):
         random_s = ''.join(random.choice(string.lowercase) for i in range(20))
         return "<" + random_s + "@nothing-message-id>"
-
-
-if __name__ == '__main__':
-    p = MailParser()

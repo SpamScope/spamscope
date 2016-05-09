@@ -29,7 +29,7 @@ class Phishing(Bolt):
 
         try:
             mail = json.loads(tup.values[1])
-            words_list = re.findall(r"[\w]+", mail.get("body"))
+            words_list = set(re.findall(r"[\w]+", mail.get("body")))
 
             if search_words(self.keywords, words_list):
                 phishing = True
