@@ -9,6 +9,8 @@ import unittest
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 mail_test1 = os.path.join(root, 'unittest', 'mails', 'mail_test1')
+mail_test2 = os.path.join(root, 'unittest', 'mails', 'mail_test2')
+mail_test3 = os.path.join(root, 'unittest', 'mails', 'mail_test3')
 sys.path.append(root)
 import src.modules.mail_parser as mail_parser
 
@@ -21,6 +23,20 @@ class TestMailParser(unittest.TestCase):
             mail_parser.InvalidMail,
             self.parser.parse_from_string,
             "fake mail"
+        )
+
+    def test_valid_date_mail(self):
+        self.assertRaises(
+            mail_parser.InvalidDateMail,
+            self.parser.parse_from_file,
+            mail_test2,
+        )
+
+    def test_failed_parsing_date_mail(self):
+        self.assertRaises(
+            mail_parser.FailedParsingDateMail,
+            self.parser.parse_from_file,
+            mail_test3,
         )
 
     def test_parsing_know_values(self):
@@ -44,6 +60,13 @@ class TestMailParser(unittest.TestCase):
 
         result = len(self.parser.attachments_list)
         self.assertEqual(3, result)
+
+        raw = "Sun, 29 Nov 2015 09:45:18 +0100"
+        raw_utc = datetime.datetime(
+            2015, 11, 29, 8, 45, 18, 0
+        ).isoformat()
+        result = self.parser.date_mail.isoformat()
+        self.assertEqual(raw_utc, result)
 
     def test_types(self):
         self.parser.parse_from_file(mail_test1)

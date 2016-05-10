@@ -5,9 +5,9 @@
 (defn spamscope [options]
    [
     ;; spout configuration
-    {"mails-spout" (python-spout-spec
+    {"files-mails-spout" (python-spout-spec
           options
-          "spouts.mails.MailSpout"
+          "spouts.files_mails.FilesMailSpout"
           ["mail_path"]
           :p 1           
           )
@@ -15,7 +15,7 @@
     ;; bolt configuration
     {"tokenizer-bolt" (python-bolt-spec
           options
-          {"mails-spout" :shuffle}
+          {"files-mails-spout" :shuffle}
           "bolts.tokenizer.Tokenizer"
           ["sha256_random", "mail"]
           :p 1

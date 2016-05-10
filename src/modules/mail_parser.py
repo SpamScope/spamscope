@@ -26,6 +26,14 @@ class NotUnicodeError(ValueError):
     pass
 
 
+class InvalidDateMail(ValueError):
+    pass
+
+
+class FailedParsingDateMail(ValueError):
+    pass
+
+
 class MailParser(object):
 
     """Class to parse mail. """
@@ -160,13 +168,18 @@ class MailParser(object):
     @property
     def date_mail(self):
         date_ = self._message.get('date')
+
+        if not date_:
+            raise InvalidDateMail('Mail without date header')
+
         try:
-            if date_:
-                d = email.utils.parsedate(date_)
-                t = time.mktime(d)
-                return datetime.datetime.fromtimestamp(t)
+            d = email.utils.parsedate(date_)
+            t = time.mktime(d)
+            return datetime.datetime.utcfromtimestamp(t)
         except:
-            return None
+            raise FailedParsingDateMail(
+                'Failed parsing mail date: {}'.format(date_)
+            )
 
     @property
     def parsed_mail_obj(self):

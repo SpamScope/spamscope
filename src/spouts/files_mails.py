@@ -6,7 +6,7 @@ import os
 import time
 
 
-class MailSpout(Spout):
+class FilesMailSpout(Spout):
     outputs = ['mail_path']
 
     def initialize(self, stormconf, context):
@@ -18,3 +18,6 @@ class MailSpout(Spout):
         for i in self._mails_iglob:
             self.emit([i])
             time.sleep(0.1)
+
+    def process_tick(self, freq):
+        pass
