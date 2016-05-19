@@ -7,3 +7,4 @@ _resources
 logs
 virtualenvs
 unittest/mails/
+conf/components/spouts.yml

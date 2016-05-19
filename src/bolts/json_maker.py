@@ -8,7 +8,6 @@ except ImportError:
 
 
 class JsonMaker(Bolt):
-    outputs = ['sha256_random', 'mail']
 
     def initialize(self, storm_conf, context):
         self.mails = {}

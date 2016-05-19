@@ -10,7 +10,6 @@ except ImportError:
 
 
 class Attachments(Bolt):
-    outputs = ['sha256_random', 'with_attachments', 'attachments_json']
 
     def process(self, tup):
         sha256_mail_random = tup.values[0]

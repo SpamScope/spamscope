@@ -11,7 +11,7 @@
           ["mail_path", "mail_server", "mailbox", "priority"]
           :p 1           
           :conf {
-                 "spouts.conf", "/home/fedelemantuano/Development/Projects/github.com/spamscope/conf/components/spouts.yml",
+                 "spouts.conf", "/path/spouts.yml",
                  }
           )
     }

@@ -12,11 +12,13 @@ except ImportError:
 
 
 class Tokenizer(Bolt):
-    outputs = ['sha256_random', 'mail']
 
     def process(self, tup):
         try:
             mail_path = tup.values[0]
+            mail_server = tup.values[1]
+            mailbox = tup.values[2]
+            priority = tup.values[3]
 
             # Parsing mail
             p = MailParser()
@@ -32,6 +34,11 @@ class Tokenizer(Bolt):
             mail['sha256'] = sha256
             mail['sha512'] = sha512
             mail['ssdeep_'] = ssdeep_
+
+            # Data mail sources
+            mail['mail_server'] = mail_server
+            mail['mailbox'] = mailbox
+            mail['priority'] = priority
 
             # Serialize mail
             mail_date = mail.get('date')

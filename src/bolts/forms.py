@@ -9,7 +9,6 @@ except ImportError:
 
 
 class Forms(Bolt):
-    outputs = ['sha256_random', 'forms']
 
     def process(self, tup):
         sha256_random = tup.values[0]

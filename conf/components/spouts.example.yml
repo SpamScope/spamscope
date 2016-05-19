@@ -1,0 +1,28 @@
+# Spouts configurations
+
+# Spout file on file system
+files-mails-spout:
+
+    # Reload new mails after reload.mails analyzed
+    reload.mails: 100
+    
+    post_processing:
+
+        # move or remove mails?
+        what: remove 
+            
+        # if move where
+        where: /mnt/testing/spamscope/mails/moved
+
+    # Mailboxes
+    mailboxes: 
+        test: 
+            mail_server: hostname
+            file_key: key_in_filename
+            priority: 1
+            path_mails: /path/mails1
+        test1: 
+            mail_server: hostname
+            file_key: key_in_filename
+            priority: 2
+            path_mails: /path/mails2
