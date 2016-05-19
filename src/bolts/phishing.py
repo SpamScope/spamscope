@@ -10,8 +10,6 @@ except ImportError:
 
 
 class Phishing(Bolt):
-    outputs = ['sha256_random', 'phishing']
-
     # TODO: Handling Tick Tuples reload keywords
 
     def initialize(self, conf, ctx):

@@ -4,7 +4,13 @@
 from __future__ import unicode_literals
 from pyparsing import CaselessLiteral
 import hashlib
+import logging
+import os
 import ssdeep
+import yaml
+from exceptions import ImproperlyConfigured
+
+log = logging.getLogger(__name__)
 
 
 def fingerprints(data):
@@ -53,3 +59,42 @@ def search_words(to_search, words_list):
             return True
 
     return False
+
+
+class MailItem(object):
+    def __init__(
+        self,
+        filename,
+        mail_server='localhost',
+        mailbox='localhost',
+        priority=None
+    ):
+        self.filename = filename
+        self.mail_server = mail_server
+        self.mailbox = mailbox
+        self.priority = priority
+        self.timestamp = os.path.getctime(filename)
+
+    def __cmp__(self, other):
+        if self.priority > other.priority:
+            return 1
+        if self.priority < other.priority:
+            return -1
+
+        if self.timestamp > other.timestamp:
+            return 1
+        if self.timestamp < other.timestamp:
+            return -1
+
+        return 0
+
+
+def load_config(config_file):
+    try:
+        with open(config_file, 'r') as c:
+            return yaml.load(c)
+    except:
+        log.exception("Config file {} not loaded".format(config_file))
+        raise ImproperlyConfigured(
+            "Config file {} not loaded".format(config_file)
+        )
