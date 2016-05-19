@@ -8,3 +8,4 @@ logs
 virtualenvs
 unittest/mails/
 conf/components/spouts.yml
+topologies/spamscope.clj
