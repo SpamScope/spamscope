@@ -1,11 +1,12 @@
 *.pyc
 .*.swp
 .DS_Store
+.env
 .ropeproject
 _build
 _resources
-logs
-virtualenvs
-unittest/mails/
 conf/components/spouts.yml
+logs
 topologies/spamscope.clj
+unittest/mails/
+virtualenvs
