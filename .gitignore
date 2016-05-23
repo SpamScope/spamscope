@@ -9,4 +9,5 @@ conf/components/spouts.yml
 logs
 topologies/spamscope.clj
 unittest/mails/
+unittest/samples/
 virtualenvs
