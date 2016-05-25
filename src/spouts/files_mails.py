@@ -37,6 +37,8 @@ class FilesMailSpout(AbstractSpout):
         self.load_mails()
 
     def load_mails(self):
+        """This function load mails in a priority queue. """
+
         mailboxes = self.conf['mailboxes']
 
         for k, v in mailboxes.iteritems():
@@ -96,9 +98,8 @@ class FilesMailSpout(AbstractSpout):
             self.load_mails()
 
     def ack(self, tup_id):
-        """
-        Acknowledge tup_id, that is path_mail
-        """
+        """Acknowledge tup_id, that is the path_mail. """
+
         self.queue.task_done()
 
         try:
