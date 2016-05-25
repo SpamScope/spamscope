@@ -24,7 +24,7 @@ import logging
 import os
 import ssdeep
 import yaml
-from exceptions import ImproperlyConfigured
+from errors import ImproperlyConfigured
 
 log = logging.getLogger(__name__)
 
