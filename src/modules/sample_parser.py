@@ -17,10 +17,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import glob
 import hashlib
 import logging
 import os
 import patoolib
+import shutil
 import ssdeep
 import tempfile
 
@@ -31,14 +33,14 @@ class Base64Error(ValueError):
     pass
 
 
-class FailedTempIO(Exception):
+class TempIOError(Exception):
     pass
 
 
 class SampleParser(object):
 
     def fingerprints_from_base64(self, data):
-        """This function return the fingerprints of data:
+        """This function return the fingerprints of data from base64:
             - md5
             - sha1
             - sha256
@@ -87,46 +89,119 @@ class SampleParser(object):
 
         return md5, sha1, sha256, sha512, ssdeep_
 
-    def is_archive_from_base64(self, data):
-        """This function return True if data is a archive, else False."""
+    def is_archive_from_base64(self, data, write_sample=False):
+        """If write_sample=False this function return only a boolean:
+            True if data is a archive, else False.
+        Else write_sample=True this function return a tuple:
+            (is_archive, path_sample)
+        Data is in base64.
+        """
 
         try:
             data = data.decode('base64')
         except:
             raise Base64Error("Data '{}' is NOT correct".format(data))
 
-        return self.is_archive(data)
+        return self.is_archive(data, write_sample)
 
-    def is_archive(self, data):
-        """This function return True if data is a archive, else False."""
+    def is_archive(self, data, write_sample=False):
+        """If write_sample=False this function return only a boolean:
+            True if data is a archive, else False.
+        Else write_sample=True this function return a tuple:
+            (is_archive, path_sample)
+        """
 
-        archive = True
+        is_archive = True
         try:
             temp = tempfile.mkstemp()[1]
             with open(temp, 'wb') as f:
                 f.write(data)
         except:
-            raise FailedTempIO("Failed opening '{}' file".format(temp))
+            raise TempIOError("Failed opening '{}' file".format(temp))
 
         try:
-            patoolib.test_archive(temp)
+            patoolib.test_archive(temp, verbosity=-1)
         except:
-            archive = False
+            is_archive = False
         finally:
-            os.remove(temp)
+            if write_sample:
+                return is_archive, temp
+            else:
+                os.remove(temp)
+                return is_archive
 
-        return archive
-
-    def extract_archive_from_base64(self, data, filename):
-        """Extract archive and put file in a list of dictionaries."""
+    def parse_sample_from_base64(self, data, filename):
+        """Analyze sample and add metadata.
+        If it's a archive, extract it and put files in a list of dictionaries.
+        Data is in base64.
+        """
 
         try:
             data = data.decode('base64')
         except:
             raise Base64Error("Data '{}' is NOT correct".format(data))
 
-        return self.extract_archive(data, filename)
+        return self.parse_sample(data, filename)
 
-    def extract_archive(self, data, filename):
-        """Extract archive and put file in a list of dictionaries."""
-        return []
+    def parse_sample(self, data, filename):
+        """Analyze sample and add metadata.
+        If it's an archive, extract it and put files in a list of dictionaries.
+        """
+
+        # Sample
+        is_archive, file_ = self.is_archive(data, write_sample=True)
+        size = os.path.getsize(file_)
+        md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(data)
+
+        result = {
+            'filename': filename,
+            'payload': data.encode('base64'),
+            'size': size,
+            'md5': md5,
+            'sha1': sha1,
+            'sha256': sha256,
+            'sha512': sha512,
+            'ssdeep': ssdeep_,
+            'is_archive': is_archive,
+        }
+
+        # Check if it's a archive
+        if not is_archive:
+            if os.path.exists(file_):
+                os.remove(file_)
+            return result
+
+        else:
+            result['files'] = list()
+            temp_dir = tempfile.mkdtemp()
+            patoolib.extract_archive(file_, outdir=temp_dir, verbosity=-1)
+
+            for i in glob.iglob(os.path.join(temp_dir, '*')):
+                with open(i, 'rb') as f:
+                    i_data = f.read()
+                    i_filename = os.path.basename(i)
+                    i_size = os.path.getsize(i)
+                    md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
+                        i_data
+                    )
+
+                    result['files'].append(
+                        {
+                            'filename': i_filename,
+                            'payload': i_data.encode('base64'),
+                            'size': i_size,
+                            'md5': md5,
+                            'sha1': sha1,
+                            'sha256': sha256,
+                            'sha512': sha512,
+                            'ssdeep': ssdeep_,
+                        }
+                    )
+
+            if os.path.exists(file_):
+                os.remove(file_)
+
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+
+            return result
