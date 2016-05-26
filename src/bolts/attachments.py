@@ -17,8 +17,6 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
 
-from modules.utils import fingerprints
-
 try:
     import simplejson as json
 except ImportError:
@@ -37,25 +35,24 @@ class Attachments(Bolt):
             attachments = mail.get('attachments', [])
 
             if attachments:
+                from modules.sample_parser import SampleParser
+                new_attachments = list()
                 with_attachments = True
+
                 self.log(
                     "Attachments for mail '{}'".format(sha256_mail_random)
                 )
 
                 for a in attachments:
-                    md5, sha1, sha256, sha512, ssdeep_ = fingerprints(
-                        a["payload"].decode('base64')
+                    new_attachments.append(
+                        SampleParser().parse_sample_from_base64(
+                            data=a['payload'],
+                            filename=a['filename'],
+                        )
                     )
-                    a['md5'] = md5
-                    a['sha1'] = sha1
-                    a['sha256'] = sha256
-                    a['sha512'] = sha512
-                    a['ssdeep'] = ssdeep_
-
-                    # TODO: check on virustotal
 
                 attachments_json = json.dumps(
-                    attachments,
+                    new_attachments,
                     ensure_ascii=False,
                 )
 
