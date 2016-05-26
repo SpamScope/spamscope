@@ -17,7 +17,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import glob
 import hashlib
 import logging
 import os
@@ -176,27 +175,30 @@ class SampleParser(object):
             temp_dir = tempfile.mkdtemp()
             patoolib.extract_archive(file_, outdir=temp_dir, verbosity=-1)
 
-            for i in glob.iglob(os.path.join(temp_dir, '*')):
-                with open(i, 'rb') as f:
-                    i_data = f.read()
-                    i_filename = os.path.basename(i)
-                    i_size = os.path.getsize(i)
-                    md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
-                        i_data
-                    )
+            for path, subdirs, files in os.walk(temp_dir):
+                for name in files:
+                    i = os.path.join(path, name)
 
-                    result['files'].append(
-                        {
-                            'filename': i_filename,
-                            'payload': i_data.encode('base64'),
-                            'size': i_size,
-                            'md5': md5,
-                            'sha1': sha1,
-                            'sha256': sha256,
-                            'sha512': sha512,
-                            'ssdeep': ssdeep_,
-                        }
-                    )
+                    with open(i, 'rb') as f:
+                        i_data = f.read()
+                        i_filename = os.path.basename(i)
+                        i_size = os.path.getsize(i)
+                        md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
+                            i_data
+                        )
+
+                        result['files'].append(
+                            {
+                                'filename': i_filename,
+                                'payload': i_data.encode('base64'),
+                                'size': i_size,
+                                'md5': md5,
+                                'sha1': sha1,
+                                'sha256': sha256,
+                                'sha512': sha512,
+                                'ssdeep': ssdeep_,
+                            }
+                        )
 
             if os.path.exists(file_):
                 os.remove(file_)
