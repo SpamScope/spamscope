@@ -17,15 +17,39 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
 
+import os
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 
 class OutputDebug(Bolt):
+    """ Output tokenized mails on files. """
+
+    def initialize(self, conf, ctx):
+        self.output_path = "/tmp/mails"
+
+        if not os.path.exists(self.output_path):
+            os.makedirs(self.output_path)
 
     def process(self, tup):
         try:
             sha256_random = tup.values[0]
-            mail = tup.values[1]
+            mail = json.dumps(
+                json.loads(tup.values[1]),
+                ensure_ascii=False,
+                indent=4,
+            )
 
-            with open("/tmp/mails/{}.json".format(sha256_random), "w") as f:
+            with open(
+                os.path.join(
+                    self.output_path,
+                    "{}.json".format(sha256_random)
+                ),
+                "w"
+            ) as f:
                 f.write(mail.encode('utf-8'))
 
         except Exception as e:

@@ -28,6 +28,7 @@ except ImportError:
 
 
 class Tokenizer(Bolt):
+    """Split the mail in token parts (body, attachments, etc.). """
 
     def process(self, tup):
         try:
@@ -42,14 +43,13 @@ class Tokenizer(Bolt):
             mail = p.parsed_mail_obj
 
             # Fingerprints of body mail
-            md5, sha1, sha256, sha512, ssdeep_ = fingerprints(
-                p.body.encode('utf-8')
-            )
-            mail['md5'] = md5
-            mail['sha1'] = sha1
-            mail['sha256'] = sha256
-            mail['sha512'] = sha512
-            mail['ssdeep_'] = ssdeep_
+            (
+                mail['md5'],
+                mail['sha1'],
+                mail['sha256'],
+                mail['sha512'],
+                mail['ssdeep_'],
+            ) = fingerprints(p.body.encode('utf-8'))
 
             # Data mail sources
             mail['mail_server'] = mail_server
@@ -71,7 +71,7 @@ class Tokenizer(Bolt):
                 random.choice('0123456789') for i in range(10)
             )
 
-            self.emit([sha256 + random_s, mail_json])
+            self.emit([mail['sha256'] + random_s, mail_json])
 
         except Exception as e:
             self.log(
