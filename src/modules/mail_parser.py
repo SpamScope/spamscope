@@ -103,8 +103,27 @@ class MailParser(object):
 
         self._attachments = list()
         self._text_plain = list()
+        self._defects = list()
+        self._has_defects = False
 
         for p in self._message.walk():
+            part_content_type = p.get_content_type()
+
+            # Get all part defects
+            part_defects = {part_content_type: list()}
+
+            for e in p.defects:
+                part_defects[part_content_type].append(
+                    "{}: {}".format(e.__class__.__name__, e.__doc__)
+                )
+
+            # Tag mail with defect
+            if part_defects[part_content_type]:
+                self._has_defects = True
+
+            # Save all defects
+            self._defects.append(part_defects)
+
             if not p.is_multipart():
                 f = p.get_filename()
                 if f:
@@ -131,6 +150,8 @@ class MailParser(object):
             "message_id": self.message_id,
             "subject": self.subject,
             "to": self.to_,
+            "defects": self._defects,
+            "has_defects": self._has_defects,
         }
 
     @property
@@ -215,3 +236,11 @@ class MailParser(object):
     def random_message_id(self):
         random_s = ''.join(random.choice(string.lowercase) for i in range(20))
         return "<" + random_s + "@nothing-message-id>"
+
+    @property
+    def defects(self):
+        return self._defects
+
+    @property
+    def has_defects(self):
+        return self._has_defects

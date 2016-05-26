@@ -27,6 +27,7 @@ root = os.path.join(base_path, '..')
 mail_test1 = os.path.join(root, 'unittest', 'mails', 'mail_test1')
 mail_test2 = os.path.join(root, 'unittest', 'mails', 'mail_test2')
 mail_test3 = os.path.join(root, 'unittest', 'mails', 'mail_test3')
+mail_malformed = os.path.join(root, 'unittest', 'mails', 'mail_malformed')
 sys.path.append(root)
 import src.modules.mail_parser as mail_parser
 
@@ -74,6 +75,9 @@ class TestMailParser(unittest.TestCase):
         result = self.parser.subject
         self.assertEqual(raw, result)
 
+        result = self.parser.has_defects
+        self.assertEqual(False, result)
+
         result = len(self.parser.attachments_list)
         self.assertEqual(3, result)
 
@@ -108,6 +112,9 @@ class TestMailParser(unittest.TestCase):
         result = self.parser.from_
         self.assertIsInstance(result, unicode)
 
+    def test_defects(self):
+        self.parser.parse_from_file(mail_malformed)
+        self.assertEqual(True, self.parser.has_defects)
 
 if __name__ == '__main__':
     unittest.main()
