@@ -15,20 +15,23 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from streamparse.bolt import Bolt
+from bolts.abstracts import AbstractBolt
 
 from modules.utils import search_words
 import re
+
 try:
     import simplejson as json
 except ImportError:
     import json
 
 
-class Phishing(Bolt):
+class Phishing(AbstractBolt):
     # TODO: Handling Tick Tuples reload keywords
 
-    def initialize(self, conf, ctx):
+    def initialize(self, stormconf, context):
+        super(Phishing, self).initialize(stormconf, context)
+
         self.keywords = [
             "banca marche",
             "cartasi",

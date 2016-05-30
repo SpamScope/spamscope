@@ -25,7 +25,7 @@ except ImportError:
 
 class JsonMaker(Bolt):
 
-    def initialize(self, storm_conf, context):
+    def initialize(self, stormconf, context):
         self.mails = {}
         self.input_bolts = set(
             [

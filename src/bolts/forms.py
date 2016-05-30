@@ -18,6 +18,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
 
 from lxml import html
+
 try:
     import simplejson as json
 except ImportError:
