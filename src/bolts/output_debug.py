@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from streamparse.bolt import Bolt
+from bolts.abstracts import AbstractBolt
 
 import os
 
@@ -25,14 +25,17 @@ except ImportError:
     import json
 
 
-class OutputDebug(Bolt):
-    """ Output tokenized mails on files. """
+class OutputDebug(AbstractBolt):
+    """Output tokenized mails on files. """
 
-    def initialize(self, conf, ctx):
-        self.output_path = "/tmp/mails"
+    def initialize(self, stormconf, context):
+        super(OutputDebug, self).initialize(stormconf, context)
 
-        if not os.path.exists(self.output_path):
-            os.makedirs(self.output_path)
+        self._json_indent = self.conf['json.indent']
+
+        self._output_path = self.conf['output.path']
+        if not os.path.exists(self._output_path):
+            os.makedirs(self._output_path)
 
     def process(self, tup):
         try:
@@ -40,12 +43,12 @@ class OutputDebug(Bolt):
             mail = json.dumps(
                 json.loads(tup.values[1]),
                 ensure_ascii=False,
-                indent=4,
+                indent=self._json_indent,
             )
 
             with open(
                 os.path.join(
-                    self.output_path,
+                    self._output_path,
                     "{}.json".format(sha256_random)
                 ),
                 "w"

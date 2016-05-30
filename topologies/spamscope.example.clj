@@ -29,6 +29,9 @@
           "bolts.phishing.Phishing"
           ["sha256_random", "phishing"]
           :p 1
+          :conf {
+                 "bolts.conf", "/path/bolts.yml",
+                 }
           )
     "attachments-bolt" (python-bolt-spec
           options
@@ -36,6 +39,9 @@
           "bolts.attachments.Attachments"
           ["sha256_random", "with_attachments", "attachments_json"]
           :p 1
+          :conf {
+                 "bolts.conf", "/path/bolts.yml",
+                 }
           )
     "forms-bolt" (python-bolt-spec
           options
@@ -62,6 +68,9 @@
           "bolts.output_debug.OutputDebug"
           []
           :p 2
+          :conf {
+                 "bolts.conf", "/path/bolts.yml",
+                 }
           )
     }
   ]
