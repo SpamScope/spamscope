@@ -30,6 +30,9 @@ except ImportError:
 class Tokenizer(Bolt):
     """Split the mail in token parts (body, attachments, etc.). """
 
+    def initialize(self, stormconf, context):
+        self.p = MailParser()
+
     def process(self, tup):
         try:
             mail_path = tup.values[0]
@@ -38,9 +41,9 @@ class Tokenizer(Bolt):
             priority = tup.values[3]
 
             # Parsing mail
-            p = MailParser()
-            p.parse_from_file(mail_path)
-            mail = p.parsed_mail_obj
+            self.p = MailParser()
+            self.p.parse_from_file(mail_path)
+            mail = self.p.parsed_mail_obj
 
             # Fingerprints of body mail
             (
@@ -49,7 +52,7 @@ class Tokenizer(Bolt):
                 mail['sha256'],
                 mail['sha512'],
                 mail['ssdeep_'],
-            ) = fingerprints(p.body.encode('utf-8'))
+            ) = fingerprints(self.p.body.encode('utf-8'))
 
             # Data mail sources
             mail['mail_server'] = mail_server
