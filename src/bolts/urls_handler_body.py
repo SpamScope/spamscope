@@ -40,14 +40,11 @@ class UrlsHandlerBody(AbstractBolt):
             body = mail.get('body', None)
 
             if body:
-                urls = self.extractor.extract(body)
-                if urls:
-                    with_urls_body = True
+                self.extractor.extract(body)
+                urls_json = self.extractor.urls_json
 
-                    urls_json = json.dumps(
-                        urls,
-                        ensure_ascii=False,
-                    )
+                if urls_json:
+                    with_urls_body = True
 
         except Exception as e:
             self.log(

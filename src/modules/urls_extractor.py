@@ -17,10 +17,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from __future__ import unicode_literals
+# from __future__ import unicode_literals
 import logging
 import re
-import urlnorm
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 try:
     from pyfaup.faup import Faup
@@ -33,6 +37,18 @@ log = logging.getLogger(__name__)
 
 
 class NotUnicodeError(ValueError):
+    pass
+
+
+class FailedFaupParsing(Exception):
+    pass
+
+
+class FailedRegexUrl(Exception):
+    pass
+
+
+class FailedReturnJsonUrls(Exception):
     pass
 
 
@@ -72,24 +88,50 @@ class UrlsExtractor(object):
         if not isinstance(text, unicode):
             raise NotUnicodeError("The given text is not in unicode")
 
-        results = dict()
+        self._results = dict()
 
         for i in self._url_regex.finditer(text):
 
             try:
+                """
+                import urlnorm
                 url = urlnorm.norm(i.group(0).strip())
+
+                Can't use urlnorm because can't manage domain like
+                http://contentsr,xn--90afavbplfx2a6a5b2a,xn--p1ai/
+
+                After norm it's impossible tokenize this kind of urls
+                """
+
+                url = i.group(0).strip()
+            except:
+                raise FailedRegexUrl("Failed parsing regex urls")
+
+            try:
                 self._faup.decode(url)
                 tokens = self._faup.get()
 
                 # Get results for domain
-                domain = results.get(tokens['domain'], None)
+                domain = self._results.get(tokens['domain'], None)
 
                 if domain:
                     domain.append(tokens)
                 else:
-                    results[tokens['domain']] = [tokens]
+                    self._results[tokens['domain']] = [tokens]
 
-            except urlnorm.InvalidUrl:
-                pass
+            except:
+                raise FailedFaupParsing("Failed tokenize url with Faup")
 
-        return results
+    @property
+    def urls_obj(self):
+        return self._results
+
+    @property
+    def urls_json(self):
+        try:
+            return json.dumps(
+                self.urls_obj,
+                ensure_ascii=False
+            )
+        except:
+            raise FailedReturnJsonUrls("Failed make JSON from urls result")
