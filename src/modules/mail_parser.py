@@ -18,12 +18,11 @@ limitations under the License.
 """
 
 from __future__ import unicode_literals
+from email.errors import HeaderParseError
 from email.header import decode_header
 import datetime
 import email
 import logging
-import random
-import string
 import time
 
 try:
@@ -39,10 +38,6 @@ class InvalidMail(ValueError):
 
 
 class NotUnicodeError(ValueError):
-    pass
-
-
-class InvalidDateMail(ValueError):
     pass
 
 
@@ -66,11 +61,17 @@ class MailParser(object):
     def _decode_header_part(self, header):
         output = u''
 
-        for i in decode_header(header):
-            if i[1]:
-                output += unicode(i[0], i[1], errors='ignore').strip()
-            else:
-                output += unicode(i[0], errors='ignore').strip()
+        try:
+            for i in decode_header(header):
+                if i[1]:
+                    output += unicode(i[0], i[1], errors='ignore').strip()
+                else:
+                    output += unicode(i[0], errors='ignore').strip()
+
+        # Header parsing failed, when header has charset Shift_JIS
+        except HeaderParseError:
+            log.error("Failed decoding header part: {}".format(header))
+            output += header
 
         if not isinstance(output, unicode):
             raise NotUnicodeError("Header part is not unicode")
@@ -105,7 +106,9 @@ class MailParser(object):
         self._text_plain = list()
         self._defects = list()
         self._has_defects = False
+        self._anomalies = list()
 
+        # walk all mail parts
         for p in self._message.walk():
             part_content_type = p.get_content_type()
 
@@ -152,6 +155,7 @@ class MailParser(object):
             "to": self.to_,
             "defects": self._defects,
             "has_defects": self._has_defects,
+            "charset": self.charset,
         }
 
     @property
@@ -168,9 +172,12 @@ class MailParser(object):
 
     @property
     def message_id(self):
-        return self._decode_header_part(
-            self._message.get('message-id', self.random_message_id)
-        )
+        message_id = self._message.get('message-id', None)
+        if not message_id:
+            self._anomalies.append('mail_without_message-id')
+            return None
+        else:
+            return self._decode_header_part(message_id)
 
     @property
     def to_(self):
@@ -207,7 +214,8 @@ class MailParser(object):
         date_ = self._message.get('date')
 
         if not date_:
-            raise InvalidDateMail('Mail without date header')
+            self._anomalies.append('mail_without_date')
+            return None
 
         try:
             d = email.utils.parsedate(date_)
@@ -233,14 +241,22 @@ class MailParser(object):
         )
 
     @property
-    def random_message_id(self):
-        random_s = ''.join(random.choice(string.lowercase) for i in range(20))
-        return "<" + random_s + "@nothing-message-id>"
-
-    @property
     def defects(self):
+        """The defects property contains a list of
+        all the problems found when parsing this message.
+        """
         return self._defects
 
     @property
     def has_defects(self):
+        """Boolean: True if mail has defects. """
         return self._has_defects
+
+    @property
+    def anomalies(self):
+        """The anomalies property contains a list of
+        all anomalies in mail:
+            - mail_without_date
+            - mail_without_message-id
+        """
+        return self._anomalies

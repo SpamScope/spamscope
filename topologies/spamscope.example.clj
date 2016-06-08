@@ -9,7 +9,7 @@
           options
           "spouts.files_mails.FilesMailSpout"
           ["mail_path", "mail_server", "mailbox", "priority"]
-          :p 1           
+          :p 1 ;; MUST be 1 for this spout          
           :conf {
                  "spouts.conf", "/path/spouts.yml",
                  }
@@ -43,6 +43,16 @@
                  "bolts.conf", "/path/bolts.yml",
                  }
           )
+    "urls_handler_body-bolt" (python-bolt-spec
+          options
+          {"tokenizer-bolt" ["sha256_random"]}
+          "bolts.urls_handler_body.UrlsHandlerBody"
+          ["sha256_random", "with_urls_body", "urls"]
+          :p 1
+          :conf {
+                 "bolts.conf", "/path/bolts.yml",
+                 }
+          )
     "forms-bolt" (python-bolt-spec
           options
           {"tokenizer-bolt" ["sha256_random"]}
@@ -57,17 +67,18 @@
            "phishing-bolt" ["sha256_random"]
            "attachments-bolt" ["sha256_random"]
            "forms-bolt" ["sha256_random"]
+           "urls_handler_body-bolt" ["sha256_random"]
            }
           "bolts.json_maker.JsonMaker"
           ["sha256_random", "mail"]
-          :p 1
+          :p 2
           )
     "output-debug-bolt" (python-bolt-spec
           options
           {"json-bolt" :shuffle}
           "bolts.output_debug.OutputDebug"
           []
-          :p 2
+          :p 1
           :conf {
                  "bolts.conf", "/path/bolts.yml",
                  }
