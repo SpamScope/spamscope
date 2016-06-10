@@ -26,6 +26,9 @@ from modules.errors import ImproperlyConfigured
 from modules.utils import MailItem
 
 
+MAIL_PATH = "path"
+
+
 class FilesMailSpout(AbstractSpout):
 
     def initialize(self, stormconf, context):
@@ -83,6 +86,7 @@ class FilesMailSpout(AbstractSpout):
                         mail.mail_server,
                         mail.mailbox,
                         mail.priority,
+                        MAIL_PATH,
                     ],
                     tup_id=mail.filename,
                 )
