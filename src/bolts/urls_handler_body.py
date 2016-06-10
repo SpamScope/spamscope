@@ -16,8 +16,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
-
-import os
+from modules.urls_extractor import UrlsExtractor
 
 try:
     import simplejson as json
@@ -25,39 +24,36 @@ except ImportError:
     import json
 
 
-class OutputDebug(AbstractBolt):
-    """Output tokenized mails on files. """
+class UrlsHandlerBody(AbstractBolt):
 
     def initialize(self, stormconf, context):
-        super(OutputDebug, self).initialize(stormconf, context)
-
-        self._json_indent = self.conf['json.indent']
-
-        self._output_path = self.conf['output.path']
-        if not os.path.exists(self._output_path):
-            os.makedirs(self._output_path)
+        super(UrlsHandlerBody, self).initialize(stormconf, context)
+        self.extractor = UrlsExtractor()
 
     def process(self, tup):
-        try:
-            sha256_random = tup.values[0]
-            mail = json.dumps(
-                json.loads(tup.values[1]),
-                ensure_ascii=False,
-                indent=self._json_indent,
-            )
+        sha256_mail_random = tup.values[0]
+        with_urls_body = False
+        urls_json = None
 
-            with open(
-                os.path.join(
-                    self._output_path,
-                    "{}.json".format(sha256_random)
-                ),
-                "w"
-            ) as f:
-                f.write(mail.encode('utf-8'))
+        try:
+            mail = json.loads(tup.values[1])
+            body = mail.get('body', None)
+
+            if body:
+                self.extractor.extract(body)
+                urls_json = self.extractor.urls_json
+
+                if urls_json:
+                    with_urls_body = True
 
         except Exception as e:
             self.log(
-                "Failed process json for mail: {}".format(sha256_random),
-                "error"
+                "Failed process urls for mail: {}".format(
+                    sha256_mail_random
+                ),
+                level="error"
             )
             self.raise_exception(e, tup)
+
+        finally:
+            self.emit([sha256_mail_random, with_urls_body, urls_json])

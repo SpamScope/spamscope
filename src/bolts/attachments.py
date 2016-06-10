@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from streamparse.bolt import Bolt
+from bolts.abstracts import AbstractBolt
 
 try:
     import simplejson as json
@@ -23,7 +23,10 @@ except ImportError:
     import json
 
 
-class Attachments(Bolt):
+class Attachments(AbstractBolt):
+
+    def initialize(self, stormconf, context):
+        super(Attachments, self).initialize(stormconf, context)
 
     def process(self, tup):
         sha256_mail_random = tup.values[0]

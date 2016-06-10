@@ -25,7 +25,7 @@ except ImportError:
 
 class JsonMaker(Bolt):
 
-    def initialize(self, storm_conf, context):
+    def initialize(self, stormconf, context):
         self.mails = {}
         self.input_bolts = set(
             [
@@ -33,18 +33,34 @@ class JsonMaker(Bolt):
                 "phishing-bolt",
                 "attachments-bolt",
                 "forms-bolt",
+                "urls_handler_body-bolt",
             ]
         )
 
     def _compose_output(self, greedy_data):
+        # Tokenizer
         mail = json.loads(greedy_data['tokenizer-bolt'][1])
+
+        # Phishing
         mail['with_phishing'] = greedy_data['phishing-bolt'][1]
+
+        # Forms
         mail['with_forms'] = greedy_data['forms-bolt'][1]
+
+        # Attachments
         mail['with_attachments'] = greedy_data['attachments-bolt'][1]
         if mail['with_attachments']:
             mail['attachments'] = json.loads(
                 greedy_data['attachments-bolt'][2]
             )
+
+        # Urls in body
+        mail['with_urls_body'] = greedy_data['urls_handler_body-bolt'][1]
+        if mail['with_urls_body']:
+            mail['urls_body'] = json.loads(
+                greedy_data['urls_handler_body-bolt'][2]
+            )
+
         return json.dumps(mail, ensure_ascii=False)
 
     def process(self, tup):
