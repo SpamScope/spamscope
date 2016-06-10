@@ -1,0 +1,12 @@
+# Bolts configurations
+
+# Phishing bolt configuration
+phishing-bolt:
+
+# Attachments bolt configuration
+attachments-bolt:
+
+# Output debug bolt configuration
+output-debug-bolt:
+    json.indent: 4
+    output.path: /tmp/mails

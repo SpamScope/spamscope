@@ -43,10 +43,10 @@ class TestMailParser(unittest.TestCase):
         )
 
     def test_valid_date_mail(self):
-        self.assertRaises(
-            mail_parser.InvalidDateMail,
-            self.parser.parse_from_file,
-            mail_test2,
+        self.parser.parse_from_file(mail_test2),
+        self.assertIn(
+            "mail_without_date",
+            self.parser.anomalies,
         )
 
     def test_failed_parsing_date_mail(self):
@@ -95,9 +95,6 @@ class TestMailParser(unittest.TestCase):
         self.assertIsInstance(result, dict)
 
         result = self.parser.parsed_mail_json
-        self.assertIsInstance(result, unicode)
-
-        result = self.parser.random_message_id
         self.assertIsInstance(result, unicode)
 
         result = self.parser.headers

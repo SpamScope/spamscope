@@ -26,6 +26,9 @@ from modules.errors import ImproperlyConfigured
 from modules.utils import MailItem
 
 
+MAIL_PATH = "path"
+
+
 class FilesMailSpout(AbstractSpout):
 
     def initialize(self, stormconf, context):
@@ -72,7 +75,6 @@ class FilesMailSpout(AbstractSpout):
 
     def next_tuple(self):
         if not self.queue.empty():
-            self.log("Queue mails size is: {}".format(self.queue.qsize()))
 
             # After reload.mails mails put new items in priority queue
             if (self.count % self.conf['reload.mails']):
@@ -84,6 +86,7 @@ class FilesMailSpout(AbstractSpout):
                         mail.mail_server,
                         mail.mailbox,
                         mail.priority,
+                        MAIL_PATH,
                     ],
                     tup_id=mail.filename,
                 )
@@ -94,7 +97,7 @@ class FilesMailSpout(AbstractSpout):
         else:
             # Wait for new mails
             self.log("Queue mails is empty")
-            time.sleep(0.5)
+            time.sleep(1)
             self.load_mails()
 
     def ack(self, tup_id):
@@ -105,6 +108,7 @@ class FilesMailSpout(AbstractSpout):
         try:
             # Remove from tail analyzed mail
             self.queue_tail.remove(tup_id)
+            self.log("Mails to process: {}".format(len(self.queue_tail)))
         except KeyError:
             pass
 

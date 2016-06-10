@@ -4,6 +4,8 @@
 
 SpamScope lets you run Python code against real-time streams of mails via [Apache Storm](http://storm.apache.org/). Use [streamparse](https://github.com/Parsely/streamparse) with which you can create Storm bolts (functionalities) and spouts (mails sources) in Python. 
 
+![Schema topology](doc/images/schema_topology.png?raw=true "Schema topology")
+
 ### Distributed
 SpamScope use Apache Storm that allows you to start small and scale horizontally as you grow. Simply add more worker.
 

@@ -5,6 +5,7 @@
 .ropeproject
 _build
 _resources
+conf/components/bolts.yml
 conf/components/spouts.yml
 logs
 topologies/spamscope.clj
