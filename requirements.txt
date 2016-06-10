@@ -19,4 +19,3 @@ six==1.10.0
 ssdeep==3.1.1
 streamparse==2.1.4
 tika==1.12.1
-urlnorm==1.1.3
