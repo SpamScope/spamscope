@@ -8,7 +8,7 @@
     {"files-mails-spout" (python-spout-spec
           options
           "spouts.files_mails.FilesMailSpout"
-          ["mail_path", "mail_server", "mailbox", "priority"]
+          ["mail_path", "mail_server", "mailbox", "priority", "kind_data"]
           :p 1 ;; MUST be 1 for this spout          
           :conf {
                  "spouts.conf", "/path/spouts.yml",

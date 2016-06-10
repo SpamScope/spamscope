@@ -30,76 +30,109 @@ except ImportError:
     import json
 
 
+MAIL_STRING = "string"
+MAIL_PATH = "path"
+
+
+class InvalidKindData(ValueError):
+    pass
+
+
 class Tokenizer(Bolt):
     """Split the mail in token parts (body, attachments, etc.). """
 
     def initialize(self, stormconf, context):
         self.p = MailParser()
 
-    def process(self, tup):
-        try:
-            mail_path = tup.values[0]
-            mail_server = tup.values[1]
-            mailbox = tup.values[2]
-            priority = tup.values[3]
-
-            # Parsing mail
-            if os.path.exists(mail_path):
-                self.p.parse_from_file(mail_path)
-                mail = self.p.parsed_mail_obj
-
-                # Fingerprints of body mail
-                (
-                    mail['md5'],
-                    mail['sha1'],
-                    mail['sha256'],
-                    mail['sha512'],
-                    mail['ssdeep_'],
-                ) = fingerprints(self.p.body.encode('utf-8'))
-
-                # Data mail sources
-                mail['mail_server'] = mail_server
-                mail['mailbox'] = mailbox
-                mail['priority'] = priority
-
-                # Serialize mail
-                mail_date = mail.get('date')
-
-                if mail_date:
-                    mail['date'] = mail_date.isoformat()
-                else:
-                    mail['date'] = datetime.datetime.utcnow().isoformat()
-
-                # Check message-id
-                if not mail.get('message_id'):
-                    # to identify mail
-                    self.random_message_id()
-
-                mail_json = json.dumps(
-                    mail,
-                    ensure_ascii=False,
-                )
-
-                # Attach anomalies
-                mail['anomalies'] = self.p.anomalies
-
-                # Attach charset
-                mail['charset'] = self.p.charset
-
-                # if two mails have the same sha256
-                random_s = '_' + ''.join(
-                    random.choice('0123456789') for i in range(10)
-                )
-
-                self.emit([mail['sha256'] + random_s, mail_json])
-
-        except Exception as e:
-            self.log(
-                "Failed parsing mail path: {}".format(mail_path),
-                "error"
-            )
-            self.raise_exception(e, tup)
-
     def random_message_id(self):
         random_s = ''.join(random.choice(string.lowercase) for i in range(20))
         return "<" + random_s + "@nothing-message-id>"
+
+    def tokenizer(self, mail_server, mailbox, priority):
+
+        # Mail object
+        mail = self.p.parsed_mail_obj
+
+        # Fingerprints of body mail
+        (
+            mail['md5'],
+            mail['sha1'],
+            mail['sha256'],
+            mail['sha512'],
+            mail['ssdeep'],
+        ) = fingerprints(self.p.body.encode('utf-8'))
+
+        # Data mail sources
+        mail['mail_server'] = mail_server
+        mail['mailbox'] = mailbox
+        mail['priority'] = priority
+
+        # Serialize mail
+        mail_date = mail.get('date')
+
+        if mail_date:
+            mail['date'] = mail_date.isoformat()
+        else:
+            mail['date'] = datetime.datetime.utcnow().isoformat()
+
+        # Check message-id
+        if not mail.get('message_id'):
+            # to identify mail
+            mail['message_id'] = self.random_message_id()
+
+        # Attach anomalies
+        mail['anomalies'] = self.p.anomalies
+
+        # Attach charset
+        mail['charset'] = self.p.charset
+
+        # Mail JSON
+        mail_json = json.dumps(
+            mail,
+            ensure_ascii=False,
+        )
+
+        # if two mails have the same sha256
+        random_s = '_' + ''.join(
+            random.choice('0123456789') for i in range(10)
+        )
+
+        return mail['sha256'] + random_s, mail_json
+
+    def process(self, tup):
+        try:
+            mail_data = tup.values[0]
+            mail_server = tup.values[1]
+            mailbox = tup.values[2]
+            priority = tup.values[3]
+            kind_data = tup.values[4]
+
+            # Check if kind_data is correct
+            if kind_data != MAIL_STRING and kind_data != MAIL_PATH:
+                raise InvalidKindData(
+                    "Invalid kind of data '{}'. Choose '{}' or '{}'".format(
+                        kind_data,
+                        MAIL_STRING,
+                        MAIL_PATH,
+                    )
+                )
+
+            # Parsing mail
+            if kind_data == MAIL_PATH:
+                if os.path.exists(mail_data):
+                    self.p.parse_from_file(mail_data)
+
+            else:
+                self.p.parse_from_string(mail_data)
+
+            # Tokenizer and emit
+            self.emit(
+                self.tokenizer(mail_server, mailbox, priority)
+            )
+
+        except Exception as e:
+            self.log(
+                "Failed parsing mail path: {}".format(mail_data),
+                "error"
+            )
+            self.raise_exception(e, tup)
