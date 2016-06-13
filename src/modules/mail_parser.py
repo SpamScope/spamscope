@@ -106,6 +106,7 @@ class MailParser(object):
         self._text_plain = list()
         self._defects = list()
         self._has_defects = False
+        self._has_anomalies = False
         self._anomalies = list()
 
         # walk all mail parts
@@ -153,10 +154,19 @@ class MailParser(object):
             "message_id": self.message_id,
             "subject": self.subject,
             "to": self.to_,
-            "defects": self._defects,
-            "has_defects": self._has_defects,
             "charset": self.charset,
+            "has_defects": self._has_defects,
+            "has_anomalies": self._has_anomalies,
         }
+
+        # Add defects
+        if self.has_defects:
+            self._mail["defects"] = self.defects
+
+        # Add anomalies
+        if self.has_anomalies:
+            self._mail["anomalies"] = self.anomalies
+            self._mail["has_anomalies"] = True
 
     @property
     def body(self):
@@ -260,3 +270,10 @@ class MailParser(object):
             - mail_without_message-id
         """
         return self._anomalies
+
+    @property
+    def has_anomalies(self):
+        if self.anomalies:
+            return True
+        else:
+            return False
