@@ -11,6 +11,7 @@ patool==1.12
 prettytable==0.7.2
 pycparser==2.14
 pycrypto==2.6.1
+pyfaup==1.0
 pyparsing==2.1.1
 PyYAML==3.11
 requests==2.10.0
@@ -18,4 +19,4 @@ simplejson==3.8.2
 six==1.10.0
 ssdeep==3.1.1
 streamparse==2.1.4
-tika==1.12.1
+tika==1.13

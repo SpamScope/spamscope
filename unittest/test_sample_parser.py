@@ -24,6 +24,7 @@ import unittest
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 sample_zip = os.path.join(root, 'unittest', 'samples', 'test.zip')
+sample_zip_1 = os.path.join(root, 'unittest', 'samples', 'test1.zip')
 sample_txt = os.path.join(root, 'unittest', 'samples', 'test.txt')
 sys.path.append(root)
 import src.modules.sample_parser as sample_parser
@@ -33,11 +34,8 @@ class TestSampleParser(unittest.TestCase):
     parser = sample_parser.SampleParser()
 
     def test_errors(self):
-        self.assertRaises(
-            sample_parser.Base64Error,
-            self.parser.fingerprints_from_base64,
-            "\test"
-        )
+        with self.assertRaises(sample_parser.Base64Error):
+            self.parser.fingerprints_from_base64("\test")
 
     def test_is_archive(self):
         """Test is_archive functions."""
@@ -106,7 +104,8 @@ class TestSampleParser(unittest.TestCase):
         with open(sample_txt, 'rb') as f:
             data_txt_base64 = f.read().encode('base64')
 
-        result = self.parser.parse_sample(data, "test.zip")
+        self.parser.parse_sample(data, "test.zip")
+        result = self.parser.result
 
         md5_file = "d41d8cd98f00b204e9800998ecf8427e"
         size_file = 0
@@ -121,6 +120,41 @@ class TestSampleParser(unittest.TestCase):
         self.assertEqual(result['files'][0]['md5'], md5_file)
         self.assertEqual(result['files'][0]['filename'], "test.txt")
         self.assertEqual(result['files'][0]['payload'], data_txt_base64)
+
+    def test_tika(self):
+        parser = sample_parser.SampleParser(tika_enabled=True)
+
+        with open(sample_zip_1, 'rb') as f:
+            data = f.read()
+
+        parser.parse_sample(data, "test1.zip")
+        result = parser.result
+
+        self.assertIn('tika', result)
+        self.assertIsInstance(result['tika'], dict)
+        self.assertIn('content', result['tika'])
+
+        for i in result['files']:
+            self.assertIn('tika', i)
+            self.assertIsInstance(i['tika'], dict)
+            self.assertIn('content', i['tika'])
+            self.assertIn('google', i['tika']['content'])
+
+        with open(sample_zip_1, 'rb') as f:
+            data = f.read().encode('base64')
+
+        parser.parse_sample_from_base64(data, "test2.zip")
+        result = parser.result
+
+        self.assertIn('tika', result)
+        self.assertIsInstance(result['tika'], dict)
+        self.assertIn('content', result['tika'])
+
+        for i in result['files']:
+            self.assertIn('tika', i)
+            self.assertIsInstance(i['tika'], dict)
+            self.assertIn('content', i['tika'])
+            self.assertIn('google', i['tika']['content'])
 
 
 if __name__ == '__main__':
