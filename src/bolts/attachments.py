@@ -32,6 +32,8 @@ class Attachments(AbstractBolt):
         self._sample_parser = SampleParser(
             tika_enabled=self.conf["tika"]["enabled"],
             tika_server_endpoint=self.conf["tika"]["server_endpoint"],
+            virustotal_enabled=self.conf["virustotal"]["enabled"],
+            virustotal_api_key=self.conf["virustotal"]["api_key"],
         )
 
     def process(self, tup):

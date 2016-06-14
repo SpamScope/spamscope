@@ -5,8 +5,18 @@ phishing-bolt:
 
 # Attachments bolt configuration
 attachments-bolt:
+    tika:
+        enabled: True
+        server_endpoint: http://localhost:9998
+
+    virustotal:
+        enabled: True
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Urls handler body
+urls_handler_body-bolt:
 
 # Output debug bolt configuration
 output-debug-bolt:
     json.indent: 4
-    output.path: /tmp/mails
+    output.path: /path/to/output
