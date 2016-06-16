@@ -38,6 +38,8 @@ class FilesMailSpout(AbstractSpout):
         self.queue_tail = set()
         self.count = 1
         self.load_mails()
+        self._tuple_sleep = float(self.conf["tuple.sleep"])
+        self._waiting_sleep = float(self.conf["waiting.sleep"])
 
     def load_mails(self):
         """This function load mails in a priority queue. """
@@ -55,7 +57,7 @@ class FilesMailSpout(AbstractSpout):
                 glob.glob(
                     os.path.join(
                         v['path_mails'],
-                        '*{}*'.format(v['file_key']),
+                        '{}'.format(v['files_pattern']),
                     )
                 )
             )
@@ -90,6 +92,8 @@ class FilesMailSpout(AbstractSpout):
                     ],
                     tup_id=mail.filename,
                 )
+                time.sleep(self._tuple_sleep)
+
             # put new mails in priority queue
             else:
                 self.load_mails()
@@ -97,7 +101,7 @@ class FilesMailSpout(AbstractSpout):
         else:
             # Wait for new mails
             self.log("Queue mails is empty")
-            time.sleep(1)
+            time.sleep(self._waiting_sleep)
             self.load_mails()
 
     def ack(self, tup_id):
