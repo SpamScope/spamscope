@@ -64,6 +64,20 @@ class MissingBitMap(bitmap.BitMap):
         }
 
 
+class PhishingBitMap(bitmap.BitMap):
+    _map_name = "phishing_bitmap"
+
+    def define_bitmap(self):
+        self._bitmap = {
+            "mail_body": 0,
+            "urls_body": 1,
+            "text_attachments": 2,
+            "urls_attachments": 3,
+            "mail_from": 4,
+            "mail_subject": 5,
+        }
+
+
 class TestBitMap(unittest.TestCase):
     bm = ValidBitMap()
 
@@ -177,6 +191,19 @@ class TestBitMap(unittest.TestCase):
 
         score = self.bm.get_score_sum(2, 1, 0)
         self.assertEqual(score, 7)
+
+    def test_phishing_bitmap(self):
+        phishing_bitmap = PhishingBitMap()
+
+        max_score = phishing_bitmap.calculate_score(
+            "mail_body",
+            "urls_body",
+            "text_attachments",
+            "urls_attachments",
+            "mail_from",
+            "mail_subject",
+        )
+        self.assertEqual(max_score, 63)
 
 
 if __name__ == '__main__':

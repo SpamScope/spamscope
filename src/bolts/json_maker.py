@@ -43,6 +43,7 @@ class JsonMaker(Bolt):
 
         # Phishing
         mail['with_phishing'] = greedy_data['phishing-bolt'][1]
+        mail['phishing_score'] = greedy_data['phishing-bolt'][2]
 
         # Forms
         mail['with_forms'] = greedy_data['forms-bolt'][1]
@@ -76,7 +77,9 @@ class JsonMaker(Bolt):
 
             diff = self.input_bolts - set(self.mails[sha256_random].keys())
             if not diff:
-                output_json = self._compose_output(self.mails[sha256_random])
+                output_json = self._compose_output(
+                    self.mails.pop(sha256_random)
+                )
                 self.log(
                     "New JSON for mail '{}'".format(sha256_random),
                     level="debug"
