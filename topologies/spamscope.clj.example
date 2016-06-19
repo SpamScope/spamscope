@@ -23,16 +23,6 @@
           ["sha256_random", "mail"]
           :p 2
           )
-    "phishing-bolt" (python-bolt-spec
-          options
-          {"tokenizer-bolt" ["sha256_random"]}
-          "bolts.phishing.Phishing"
-          ["sha256_random", "phishing"]
-          :p 1
-          :conf {
-                 "bolts.conf", "/etc/spamscope/bolts.yml",
-                 }
-          )
     "attachments-bolt" (python-bolt-spec
           options
           {"tokenizer-bolt" ["sha256_random"]}
@@ -48,6 +38,20 @@
           {"tokenizer-bolt" ["sha256_random"]}
           "bolts.urls_handler_body.UrlsHandlerBody"
           ["sha256_random", "with_urls_body", "urls"]
+          :p 1
+          :conf {
+                 "bolts.conf", "/etc/spamscope/bolts.yml",
+                 }
+          )
+    "phishing-bolt" (python-bolt-spec
+          options
+          {
+           "tokenizer-bolt" ["sha256_random"]
+           "attachments-bolt" ["sha256_random"]
+           "urls_handler_body-bolt" ["sha256_random"]
+           }
+          "bolts.phishing.Phishing"
+          ["sha256_random", "with_phishing", "score"]
           :p 1
           :conf {
                  "bolts.conf", "/etc/spamscope/bolts.yml",
