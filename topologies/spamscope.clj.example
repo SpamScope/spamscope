@@ -51,7 +51,7 @@
            "urls_handler_body-bolt" ["sha256_random"]
            }
           "bolts.phishing.Phishing"
-          ["sha256_random", "with_phishing", "score"]
+          ["sha256_random", "with_phishing", "score", "targets"]
           :p 1
           :conf {
                  "bolts.conf", "/etc/spamscope/bolts.yml",

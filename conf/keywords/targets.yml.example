@@ -1,0 +1,10 @@
+# For every target insert name and list of keywords with dash -
+
+Google:
+    - google
+    - gmail
+    - gdrive
+    - google drive
+
+Amazon:
+    - amazon
