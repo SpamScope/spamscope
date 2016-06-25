@@ -58,21 +58,21 @@ class Phishing(AbstractBolt):
 
         # Load subjects keywords
         self._subjects_keywords = set()
-        for l in load_config(self.conf["lists"]["subjects"]):
-            keywords = load_config(l)
+        for k, v in self.conf["lists"]["subjects"].iteritems():
+            keywords = load_config(v)
             if not isinstance(keywords, list):
                 raise ImproperlyConfigured(
-                    "Keywords subjects list '{}' not valid".format(l)
+                    "Keywords subjects list '{}' not valid".format(v)
                 )
             self._subjects_keywords |= set(keywords)
 
         # Load targets keywords
         self._targets_keywords = {}
-        for l in load_config(self.conf["lists"]["targets"]):
-            keywords = load_config(l)
+        for k, v in self.conf["lists"]["targets"].iteritems():
+            keywords = load_config(v)
             if not isinstance(keywords, dict):
                 raise ImproperlyConfigured(
-                    "Keywords targets list '{}' not valid".format(l)
+                    "Keywords targets list '{}' not valid".format(v)
                 )
             self._targets_keywords.update(keywords)
 
@@ -108,7 +108,7 @@ class Phishing(AbstractBolt):
         # Check subject
         if search_words_in_text(
             subject,
-            self._subjects_keywords(),
+            self._subjects_keywords,
         ):
             subject_match = True
 
@@ -159,6 +159,11 @@ class Phishing(AbstractBolt):
                 )
                 if score:
                     with_phishing = True
+
+                targets = json.dumps(
+                    list(targets),
+                    ensure_ascii=False,
+                )
 
                 self.emit([sha256_random, with_phishing, score, targets])
 

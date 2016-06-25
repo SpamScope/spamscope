@@ -54,7 +54,7 @@ class JsonMaker(Bolt):
         if phishing_score:
             self._phishing_bitmap.score = phishing_score
 
-            mail['targets'] = greedy_data['phishing-bolt'][3]
+            mail['targets'] = json.loads(greedy_data['phishing-bolt'][3])
             mail['phishing_score_expanded'] = \
                 self._phishing_bitmap.score_properties
 
