@@ -23,6 +23,10 @@ except ImportError:
     import json
 
 from modules.phishing_bitmap import PhishingBitMap
+from modules.errors import ImproperlyConfigured
+from modules.utils import \
+    search_words_in_text, \
+    load_config
 
 
 class Phishing(AbstractBolt):
@@ -42,22 +46,42 @@ class Phishing(AbstractBolt):
         # All mails
         self.mails = {}
 
-        # Load key words
-        self._load_generic_keywords()
-        self._load_subject_keywords()
+        # Load keywords
+        self._load_lists()
 
         # Phishing bitmap
         self._phishing_bitmap = PhishingBitMap()
 
-    def _load_generic_keywords(self):
-        pass
+    def _load_lists(self):
 
-    def _load_subject_keywords(self):
-        pass
+        self.log("Reloading phishing keywords")
+
+        # Load subjects keywords
+        self._subjects_keywords = set()
+        for l in load_config(self.conf["lists"]["subjects"]):
+            keywords = load_config(l)
+            if not isinstance(keywords, list):
+                raise ImproperlyConfigured(
+                    "Keywords subjects list '{}' not valid".format(l)
+                )
+            self._subjects_keywords |= set(keywords)
+
+        # Load targets keywords
+        self._targets_keywords = {}
+        for l in load_config(self.conf["lists"]["targets"]):
+            keywords = load_config(l)
+            if not isinstance(keywords, dict):
+                raise ImproperlyConfigured(
+                    "Keywords targets list '{}' not valid".format(l)
+                )
+            self._targets_keywords.update(keywords)
 
     def _search_phishing(self, greedy_data):
         # Reset phishing bitmap
         self._phishing_bitmap.reset_score()
+
+        # Outputs
+        targets = set()
 
         # Tokenizer
         mail = json.loads(greedy_data['tokenizer-bolt'][1])
@@ -65,17 +89,28 @@ class Phishing(AbstractBolt):
         subject = mail.get('subject')
         from_ = mail.get('from')
 
-        # Check body
-        if body:
-            pass
+        body_match = False
+        from_match = False
+        subject_match = False
+
+        # Check body and from
+        for k, v in self._targets_keywords.iteritems():
+            if body:
+                if search_words_in_text(body, v):
+                    targets.add(k)
+                    body_match = True
+
+            if from_:
+                if search_words_in_text(from_, v):
+                    targets.add(k)
+                    from_match = True
 
         # Check subject
-        if subject:
-            pass
-
-        # Check from mail
-        if from_:
-            pass
+        if search_words_in_text(
+            subject,
+            self._subjects_keywords(),
+        ):
+            subject_match = True
 
         # Attachments
         with_attachments = greedy_data['attachments-bolt'][1]
@@ -88,13 +123,22 @@ class Phishing(AbstractBolt):
         if with_urls_body:
             pass
 
-        return self._phishing_bitmap.score
+        # Setting score
+        if body_match:
+            self._phishing_bitmap.set_property_score("mail_body")
+
+        if from_match:
+            self._phishing_bitmap.set_property_score("mail_from")
+
+        if subject_match:
+            self._phishing_bitmap.set_property_score("mail_subject")
+
+        return self._phishing_bitmap.score, targets
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
 
-        self._load_generic_keywords()
-        self._load_subject_keywords()
+        self._load_lists()
 
     def process(self, tup):
         try:
@@ -110,13 +154,13 @@ class Phishing(AbstractBolt):
             diff = self.input_bolts - set(self.mails[sha256_random].keys())
             if not diff:
                 with_phishing = False
-                score = self._search_phishing(
+                score, targets = self._search_phishing(
                     self.mails.pop(sha256_random)
                 )
                 if score:
                     with_phishing = True
 
-                self.emit([sha256_random, with_phishing, score])
+                self.emit([sha256_random, with_phishing, score, targets])
 
         except Exception as e:
             self.log(
