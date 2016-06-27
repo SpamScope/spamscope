@@ -9,7 +9,7 @@ files-mails-spout:
     # Tuples sleep seconds, CPU issue
     tuple.sleep: 0.02
 
-    # Waiting new mails sleep
+    # Waiting new mails, sleep seconds
     waiting.sleep: 1
 
     # Post processing 
