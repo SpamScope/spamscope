@@ -26,6 +26,7 @@ root = os.path.join(base_path, '..')
 sys.path.append(root)
 
 import src.modules.bitmap as bitmap
+from src.modules.phishing_bitmap import PhishingBitMap
 
 
 class ValidBitMap(bitmap.BitMap):
@@ -61,20 +62,6 @@ class MissingBitMap(bitmap.BitMap):
             "property_0": 0,
             "property_1": 1,
             "property_2": 2,
-        }
-
-
-class PhishingBitMap(bitmap.BitMap):
-    _map_name = "phishing_bitmap"
-
-    def define_bitmap(self):
-        self._bitmap = {
-            "mail_body": 0,
-            "urls_body": 1,
-            "text_attachments": 2,
-            "urls_attachments": 3,
-            "mail_from": 4,
-            "mail_subject": 5,
         }
 
 
@@ -200,10 +187,11 @@ class TestBitMap(unittest.TestCase):
             "urls_body",
             "text_attachments",
             "urls_attachments",
+            "filename_attachments",
             "mail_from",
             "mail_subject",
         )
-        self.assertEqual(max_score, 63)
+        self.assertEqual(max_score, 127)
 
 
 if __name__ == '__main__':

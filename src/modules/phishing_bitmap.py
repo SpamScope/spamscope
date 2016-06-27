@@ -19,7 +19,7 @@ from bitmap import BitMap
 
 class PhishingBitMap(BitMap):
     """This map assigns a phishing score to the mail.
-    Range from 0 (no phishing) to 63 (high probability).
+    Range from 0 (no phishing) to 127 (high probability).
     """
 
     _map_name = "phishing_bitmap"
@@ -30,6 +30,7 @@ class PhishingBitMap(BitMap):
             "urls_body": 1,
             "text_attachments": 2,
             "urls_attachments": 3,
-            "mail_from": 4,
-            "mail_subject": 5,
+            "filename_attachments": 4,
+            "mail_from": 5,
+            "mail_subject": 6,
         }
