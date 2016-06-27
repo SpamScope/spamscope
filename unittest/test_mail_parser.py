@@ -27,6 +27,7 @@ root = os.path.join(base_path, '..')
 mail_test1 = os.path.join(root, 'unittest', 'mails', 'mail_test1')
 mail_test2 = os.path.join(root, 'unittest', 'mails', 'mail_test2')
 mail_test3 = os.path.join(root, 'unittest', 'mails', 'mail_test3')
+mail_test4 = os.path.join(root, 'unittest', 'mails', 'mail_test4')
 mail_malformed = os.path.join(root, 'unittest', 'mails', 'mail_malformed')
 sys.path.append(root)
 import src.modules.mail_parser as mail_parser
@@ -93,6 +94,8 @@ class TestMailParser(unittest.TestCase):
 
         result = self.parser.parsed_mail_obj
         self.assertIsInstance(result, dict)
+        self.assertNotIn("defects", result)
+        self.assertNotIn("anomalies", result)
 
         result = self.parser.parsed_mail_json
         self.assertIsInstance(result, unicode)
@@ -109,9 +112,14 @@ class TestMailParser(unittest.TestCase):
         result = self.parser.from_
         self.assertIsInstance(result, unicode)
 
-    def test_defects(self):
+    def test_defects_anomalies(self):
         self.parser.parse_from_file(mail_malformed)
         self.assertEqual(True, self.parser.has_defects)
+        self.assertIn("defects", self.parser.parsed_mail_obj)
+
+        self.parser.parse_from_file(mail_test4)
+        self.assertEqual(True, self.parser.has_defects)
+        self.assertIn("anomalies", self.parser.parsed_mail_obj)
 
 if __name__ == '__main__':
     unittest.main()

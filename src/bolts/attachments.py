@@ -16,6 +16,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
+from modules.sample_parser import SampleParser
 
 try:
     import simplejson as json
@@ -28,6 +29,13 @@ class Attachments(AbstractBolt):
     def initialize(self, stormconf, context):
         super(Attachments, self).initialize(stormconf, context)
 
+        self._sample_parser = SampleParser(
+            tika_enabled=self.conf["tika"]["enabled"],
+            tika_server_endpoint=self.conf["tika"]["server_endpoint"],
+            virustotal_enabled=self.conf["virustotal"]["enabled"],
+            virustotal_api_key=self.conf["virustotal"]["api_key"],
+        )
+
     def process(self, tup):
         sha256_mail_random = tup.values[0]
         with_attachments = False
@@ -38,21 +46,19 @@ class Attachments(AbstractBolt):
             attachments = mail.get('attachments', [])
 
             if attachments:
-                from modules.sample_parser import SampleParser
-                new_attachments = list()
-                with_attachments = True
-
                 self.log(
                     "Attachments for mail '{}'".format(sha256_mail_random)
                 )
 
+                new_attachments = list()
+                with_attachments = True
+
                 for a in attachments:
-                    new_attachments.append(
-                        SampleParser().parse_sample_from_base64(
-                            data=a['payload'],
-                            filename=a['filename'],
-                        )
+                    self._sample_parser.parse_sample_from_base64(
+                        data=a['payload'],
+                        filename=a['filename'],
                     )
+                    new_attachments.append(self._sample_parser.result)
 
                 attachments_json = json.dumps(
                     new_attachments,

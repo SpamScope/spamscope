@@ -1,0 +1,30 @@
+# Bolts configurations
+
+# Phishing bolt configuration
+phishing-bolt:
+    lists:
+        subjects: 
+            generic: /path/to/generic_subjects
+            custom: /path/to/custom_subjects
+        
+        targets:
+            generic: /path/to/generic_targets
+            custom: /path/to/custom_targets
+
+# Attachments bolt configuration
+attachments-bolt:
+    tika:
+        enabled: True
+        server_endpoint: http://localhost:9998
+
+    virustotal:
+        enabled: True
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Urls handler body
+urls_handler_body-bolt:
+
+# Output debug bolt configuration
+output-debug-bolt:
+    json.indent: 4
+    output.path: /path/to/output
