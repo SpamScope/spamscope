@@ -25,6 +25,7 @@ import shutil
 import ssdeep
 import tempfile
 import tika
+import urllib
 from tika import parser as tika_parser
 from virus_total_apis import PublicApi as VirusTotalPublicApi
 
@@ -43,6 +44,10 @@ class VirusTotalApiKeyInvalid(ValueError):
     pass
 
 
+class TikaServerOffline(Exception):
+    pass
+
+
 class SampleParser(object):
 
     def __init__(
@@ -57,6 +62,15 @@ class SampleParser(object):
         Default server point to localhost port 9998.
         Use tika_server_endpoint to change it.
         """
+
+        # Check Tika server status
+        if tika_enabled:
+            try:
+                urllib.urlopen(tika_server_endpoint)
+            except:
+                raise TikaServerOffline(
+                    "Tika server on '{}' offline".format(tika_server_endpoint)
+                )
 
         # Init Tika
         self._tika_enabled = tika_enabled

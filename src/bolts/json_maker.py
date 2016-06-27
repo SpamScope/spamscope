@@ -22,6 +22,8 @@ try:
 except ImportError:
     import json
 
+from modules.phishing_bitmap import PhishingBitMap
+
 
 class JsonMaker(Bolt):
 
@@ -37,12 +39,24 @@ class JsonMaker(Bolt):
             ]
         )
 
+        # Phishing bitmap
+        self._phishing_bitmap = PhishingBitMap()
+
     def _compose_output(self, greedy_data):
         # Tokenizer
         mail = json.loads(greedy_data['tokenizer-bolt'][1])
 
         # Phishing
+        phishing_score = greedy_data['phishing-bolt'][2]
         mail['with_phishing'] = greedy_data['phishing-bolt'][1]
+        mail['phishing_score'] = phishing_score
+
+        if phishing_score:
+            self._phishing_bitmap.score = phishing_score
+
+            mail['targets'] = json.loads(greedy_data['phishing-bolt'][3])
+            mail['phishing_score_expanded'] = \
+                self._phishing_bitmap.score_properties
 
         # Forms
         mail['with_forms'] = greedy_data['forms-bolt'][1]
@@ -76,7 +90,9 @@ class JsonMaker(Bolt):
 
             diff = self.input_bolts - set(self.mails[sha256_random].keys())
             if not diff:
-                output_json = self._compose_output(self.mails[sha256_random])
+                output_json = self._compose_output(
+                    self.mails.pop(sha256_random)
+                )
                 self.log(
                     "New JSON for mail '{}'".format(sha256_random),
                     level="debug"

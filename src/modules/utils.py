@@ -18,7 +18,6 @@ limitations under the License.
 """
 
 from __future__ import unicode_literals
-from pyparsing import CaselessLiteral
 import hashlib
 import logging
 import os
@@ -27,6 +26,34 @@ import yaml
 from errors import ImproperlyConfigured
 
 log = logging.getLogger(__name__)
+
+
+class MailItem(object):
+    def __init__(
+        self,
+        filename,
+        mail_server='localhost',
+        mailbox='localhost',
+        priority=None
+    ):
+        self.filename = filename
+        self.mail_server = mail_server
+        self.mailbox = mailbox
+        self.priority = priority
+        self.timestamp = os.path.getctime(filename)
+
+    def __cmp__(self, other):
+        if self.priority > other.priority:
+            return 1
+        if self.priority < other.priority:
+            return -1
+
+        if self.timestamp > other.timestamp:
+            return 1
+        if self.timestamp < other.timestamp:
+            return -1
+
+        return 0
 
 
 def fingerprints(data):
@@ -56,53 +83,32 @@ def fingerprints(data):
     return md5, sha1, sha256, sha512, ssdeep_
 
 
-def search_words(to_search, words_list):
-    """
-    Search list of words in the text.
-    Examples:
-        to_search = ["home water"]
-        return True if in the text there are both words.
+def search_words_in_text(text, keywords):
+    """Given a list of words return True if one or more
+    lines are in text, else False.
+    keywords format:
+        keywords = [
+            "word1 word2",
+            "word3",
+            "word4",
+        ]
+    (word1 AND word2) OR word3 OR word4
     """
 
-    for key in to_search:
+    text = text.lower()
+
+    for line in keywords:
         count = 0
-        words = key.split()
+        words = line.lower().split()
 
-        for word in words:
-            if CaselessLiteral(word).searchString(words_list):
+        for w in words:
+            if w in text:
                 count += 1
+
         if count == len(words):
             return True
 
     return False
-
-
-class MailItem(object):
-    def __init__(
-        self,
-        filename,
-        mail_server='localhost',
-        mailbox='localhost',
-        priority=None
-    ):
-        self.filename = filename
-        self.mail_server = mail_server
-        self.mailbox = mailbox
-        self.priority = priority
-        self.timestamp = os.path.getctime(filename)
-
-    def __cmp__(self, other):
-        if self.priority > other.priority:
-            return 1
-        if self.priority < other.priority:
-            return -1
-
-        if self.timestamp > other.timestamp:
-            return 1
-        if self.timestamp < other.timestamp:
-            return -1
-
-        return 0
 
 
 def load_config(config_file):
