@@ -80,12 +80,6 @@ class Tokenizer(Bolt):
             # to identify mail
             mail['message_id'] = self.random_message_id()
 
-        # Attach anomalies
-        mail['anomalies'] = self.p.anomalies
-
-        # Attach charset
-        mail['charset'] = self.p.charset
-
         # Mail JSON
         mail_json = json.dumps(
             mail,

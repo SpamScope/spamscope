@@ -34,12 +34,12 @@ class Rabbit:
         except:
             log.exception(
                 "Failed rabbit connection to server {}".format(
-                    self._rabbit_server
+                    server,
                 )
             )
             raise RabbitConnectionFailed(
                 "Failed rabbit connection to server {}".format(
-                    self._rabbit_server
+                    server,
                 )
             )
 
