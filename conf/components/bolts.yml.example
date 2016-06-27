@@ -5,9 +5,11 @@ phishing-bolt:
     lists:
         subjects: 
             generic: /path/to/generic_subjects
+            custom: /path/to/custom_subjects
         
         targets:
             generic: /path/to/generic_targets
+            custom: /path/to/custom_targets
 
 # Attachments bolt configuration
 attachments-bolt:
