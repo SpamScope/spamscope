@@ -15,8 +15,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
-from modules.urls_extractor import UrlsExtractor
+from bolts.abstracts import AbstractUrlsHandlerBolt
 
 try:
     import simplejson as json
@@ -24,27 +23,20 @@ except ImportError:
     import json
 
 
-class UrlsHandlerBody(AbstractBolt):
+class UrlsHandlerBody(AbstractUrlsHandlerBolt):
 
     def initialize(self, stormconf, context):
         super(UrlsHandlerBody, self).initialize(stormconf, context)
-        self.extractor = UrlsExtractor()
 
     def process(self, tup):
         sha256_mail_random = tup.values[0]
-        with_urls_body = False
+        with_urls = False
         urls_json = None
 
         try:
             mail = json.loads(tup.values[1])
             body = mail.get('body', None)
-
-            if body:
-                self.extractor.extract(body)
-                urls_json = self.extractor.urls_json
-
-                if urls_json:
-                    with_urls_body = True
+            with_urls, urls_json = self._extract_urls(body)
 
         except Exception as e:
             self.log(
@@ -56,4 +48,4 @@ class UrlsHandlerBody(AbstractBolt):
             self.raise_exception(e, tup)
 
         finally:
-            self.emit([sha256_mail_random, with_urls_body, urls_json])
+            self.emit([sha256_mail_random, with_urls, urls_json])

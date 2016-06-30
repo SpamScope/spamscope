@@ -16,5 +16,8 @@ conf/components/*
 conf/keywords/*
 !conf/keywords/*.example
 
+conf/whitelists/*
+!conf/whitelists/*.example
+
 topologies/*
 !topologies/*.clj.example
