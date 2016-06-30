@@ -11,6 +11,7 @@ phishing-bolt:
             generic: /path/to/generic_targets
             custom: /path/to/custom_targets
 
+
 # Attachments bolt configuration
 attachments-bolt:
     tika:
@@ -21,8 +22,19 @@ attachments-bolt:
         enabled: True
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+
 # Urls handler body
 urls_handler_body-bolt:
+    whitelists:
+        alexa:
+            path: /path/to/alexa
+            expiry: 2016-06-28T12:33:00.000Z # date ISO 8601 only UTC
+        test1:
+            path: /path/to/alexa
+            expiry:
+        test2:
+            path: /path/to/alexa
+
 
 # Output debug bolt configuration
 output-debug-bolt:
