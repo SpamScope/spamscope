@@ -93,7 +93,7 @@ class Phishing(AbstractBolt):
                 filename_match = True
 
             # Check attachment content
-            if i.get("tika"):
+            if i.get("tika") and i["tika"].get("content"):
                 if not text_match and swt(i["tika"]["content"], keywords):
                     text_match = True
 
@@ -109,7 +109,7 @@ class Phishing(AbstractBolt):
                         filename_match = True
 
                     # Check attachment content
-                    if j.get("tika"):
+                    if j.get("tika") and j["tika"].get("content"):
                         if not text_match and swt(
                             j["tika"]["content"],
                             keywords
