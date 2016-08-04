@@ -64,6 +64,9 @@ class Redis:
 
     reconnect_interval:
     Interval for reconnecting to failed Redis connections.
+
+    max_retry:
+    number of connect retries
     """
 
     def __init__(

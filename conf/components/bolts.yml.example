@@ -40,3 +40,17 @@ urls_handler_body-bolt:
 output-debug-bolt:
     json.indent: 4
     output.path: /path/to/output
+
+
+# Output debug bolt configuration
+output-redis-bolt:
+    servers:
+        hosts: ["localhost:6379", "locahost:6380"]
+        shuffle_hosts: True
+        port: 6379
+        db: 0
+        password:
+        reconnect_interval: 1
+        max_retry: 60
+        flush_size: 50
+        queue_name: spamscope
