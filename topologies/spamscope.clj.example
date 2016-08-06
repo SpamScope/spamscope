@@ -87,6 +87,16 @@
                  "bolts.conf", "/etc/spamscope/bolts.yml",
                  }
           )
+    "output-redis-bolt" (python-bolt-spec
+          options
+          {"json-bolt" :shuffle}
+          "bolts.output_redis.OutputRedis"
+          []
+          :p 1
+          :conf {
+                 "bolts.conf", "/etc/spamscope/bolts.yml",
+                 }
+          )
     }
   ]
 )
