@@ -39,7 +39,7 @@ class Redis:
     The RPUSH command is supported in Redis v0.0.7+.
     For more information, see http://redis.io/[the Redis homepage]
 
-    host:
+    hosts:
     The hostname(s) of your Redis server(s). Ports may be specified on any
     hostname, which will override the global port config.
     If the hosts list is an array, it will pick one random host to connect to,
@@ -157,10 +157,10 @@ class Redis:
             hosts = self.hosts
         else:
             hosts = self.hosts[self._host_idx]
+            n_host_idx = self._host_idx + 1
+            self._host_idx = n_host_idx if n_host_idx < len(self.hosts) else 0
 
         self._currenthost, currentport = self._get_host_port(hosts)
-        n_host_idx = self._host_idx + 1
-        self._host_idx = n_host_idx if n_host_idx < len(self.hosts) else 0
 
         if currentport:
             self._port = currentport

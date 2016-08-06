@@ -43,9 +43,48 @@ output-debug-bolt:
 
 
 # Output debug bolt configuration
+
+#hosts:
+#The hostname(s) of your Redis server(s). Ports may be specified on any
+#hostname, which will override the global port config.
+#If the hosts list is an array, it will pick one random host to connect to,
+#if that host is disconnected it will then pick another.
+
+#For example:
+    #"127.0.0.1"
+    #["127.0.0.1", "127.0.0.2"]
+    #["127.0.0.1:6380", "127.0.0.1"]
+
+#shuffle_hosts:
+#Shuffle the host list during connection.
+
+#port:
+#The default port to connect on. Can be overridden on any host.
+
+#db:
+#The Redis database number.
+
+#password:
+#Password to authenticate with.  There is no authentication by default.
+
+#reconnect_interval:
+#Interval for reconnecting to failed Redis connections.
+
+#max_retry:
+#number of connect retries
+
+#flush_size:
+#max number of json to send in a bulk
+
+#queue_name:
+#name of Redis server list
+
+
 output-redis-bolt:
     servers:
-        hosts: ["localhost:6379", "locahost:6380"]
+        hosts:
+            - "localhost:6379"
+            - "localhost:6380"
         shuffle_hosts: True
         port: 6379
         db: 0

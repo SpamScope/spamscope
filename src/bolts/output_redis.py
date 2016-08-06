@@ -27,10 +27,10 @@ class OutputRedis(AbstractBolt):
 
         # Redis parameters
         servers = self.conf['servers']
-        self._flush_size = self.conf['flush_size']
-        self._queue_name = self.conf['queue_name']
+        self._flush_size = servers['flush_size']
+        self._queue_name = servers['queue_name']
         self._mails = []
-        self._count = 0
+        self._count = 1
 
         # Redis class
         self._redis_client = Redis(
@@ -49,7 +49,7 @@ class OutputRedis(AbstractBolt):
             messages=self._mails,
         )
         self._mails = []
-        self._count = 0
+        self._count = 1
 
     def process(self, tup):
         try:
