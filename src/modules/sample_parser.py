@@ -27,6 +27,7 @@ import tempfile
 import tika
 import urllib
 from tika import parser as tika_parser
+from tika import detector as tika_detector
 from virus_total_apis import PublicApi as VirusTotalPublicApi
 
 log = logging.getLogger(__name__)
@@ -54,6 +55,8 @@ class SampleParser(object):
         self,
         tika_enabled=False,
         tika_server_endpoint="http://localhost:9998",
+        tika_content_type=[],
+        blacklist_content_type=[],
         virustotal_enabled=False,
         virustotal_api_key=None,
     ):
@@ -75,6 +78,7 @@ class SampleParser(object):
         # Init Tika
         self._tika_enabled = tika_enabled
         self._tika_server_endpoint = tika_server_endpoint
+        self._tika_content_type = tika_content_type
 
         if tika_enabled:
             tika.TikaClientOnly = True
@@ -83,6 +87,9 @@ class SampleParser(object):
         # Init VirusTotal
         self._virustotal_enabled = virustotal_enabled
         self._virustotal_api_key = virustotal_api_key
+
+        # blacklist content type
+        self._blacklist_content_type = blacklist_content_type
 
     @property
     def tika_enabled(self):
@@ -93,12 +100,24 @@ class SampleParser(object):
         return self._tika_server_endpoint
 
     @property
+    def tika_content_type(self):
+        return self._tika_content_type
+
+    @property
+    def blacklist_content_type(self):
+        return self._blacklist_content_type
+
+    @property
     def virustotal_enabled(self):
         return self._virustotal_enabled
 
     @property
     def virustotal_api_key(self):
         return self._virustotal_api_key
+
+    @property
+    def result(self):
+        return self._result
 
     def fingerprints_from_base64(self, data):
         """This function return the fingerprints of data from base64:
@@ -191,38 +210,16 @@ class SampleParser(object):
                 os.remove(temp)
                 return is_archive
 
-    def parse_sample_from_base64(self, data, filename):
-        """Analyze sample and add metadata.
-        If it's a archive, extract it and put files in a list of dictionaries.
-        Data is in base64.
-        """
+    def _create_sample_result(self, data, filename):
+        """ Create dict result with basic informations."""
 
-        try:
-            data = data.decode('base64')
-        except:
-            raise Base64Error("Data '{}' is NOT correct".format(data))
-
-        return self.parse_sample(data, filename)
-
-    def parse_sample(self, data, filename):
-        """Analyze sample and add metadata.
-        If it's an archive, extract it and put files in a list of dictionaries.
-        """
-
-        # Sample
         is_archive, file_ = self.is_archive(data, write_sample=True)
         size = os.path.getsize(file_)
-        md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(data)
 
         self._result = {
             'filename': filename,
             'payload': data.encode('base64'),
             'size': size,
-            'md5': md5,
-            'sha1': sha1,
-            'sha256': sha256,
-            'sha512': sha512,
-            'ssdeep': ssdeep_,
             'is_archive': is_archive,
         }
 
@@ -239,20 +236,12 @@ class SampleParser(object):
                         i_data = f.read()
                         i_filename = os.path.basename(i)
                         i_size = os.path.getsize(i)
-                        md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
-                            i_data
-                        )
 
                         self._result['files'].append(
                             {
                                 'filename': i_filename,
                                 'payload': i_data.encode('base64'),
                                 'size': i_size,
-                                'md5': md5,
-                                'sha1': sha1,
-                                'sha256': sha256,
-                                'sha512': sha512,
-                                'ssdeep': ssdeep_,
                             }
                         )
             # Remove temp dir for archived files
@@ -263,22 +252,59 @@ class SampleParser(object):
         if os.path.exists(file_):
             os.remove(file_)
 
-        # Add tika output
-        if self.tika_enabled:
-            self._add_tika_output()
+    def _add_fingerprints(self):
+        """ Add fingerprints."""
 
-        # Add virustotal output
-        if self.virustotal_enabled:
-            self._add_virustotal_output()
-
-    def _add_tika_output(self):
-        payload = self._result['payload'].decode('base64')
-        self._result['tika'] = tika_parser.from_buffer(payload)
+        md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
+            self._result['payload'].decode('base64')
+        )
+        self._result['md5'] = md5
+        self._result['sha1'] = sha1
+        self._result['sha256'] = sha256
+        self._result['sha512'] = sha512
+        self._result['ssdeep'] = ssdeep_
 
         if self._result['is_archive']:
             for i in self._result['files']:
-                i_payload = i['payload'].decode('base64')
-                i['tika'] = tika_parser.from_buffer(i_payload)
+                md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
+                    i['payload'].decode('base64')
+                )
+                i['md5'] = md5
+                i['sha1'] = sha1
+                i['sha256'] = sha256
+                i['sha512'] = sha512
+                i['ssdeep'] = ssdeep_
+
+    def _add_content_type(self):
+        content_type = tika_detector.from_buffer(
+            self._result['payload'].decode('base64')
+        )
+        self._result['tika'] = {'metadata': {'Content-Type': content_type}}
+
+        if self._result['is_archive']:
+            for i in self._result['files']:
+                content_type = tika_detector.from_buffer(
+                    i['payload'].decode('base64')
+                )
+                i['tika'] = {'metadata': {'Content-Type': content_type}}
+
+    def _add_tika_meta_data(self):
+        content_type = self._result['tika']['metadata']['Content-Type']
+        if content_type in self.tika_content_type:
+            self._result['tika'] = tika_parser.from_buffer(
+                self._result['payload'].decode('base64')
+            )
+
+        if self._result['is_archive']:
+            for i in self._result['files']:
+                content_type = i['tika']['metadata']['Content-Type']
+                if content_type in self.tika_content_type:
+                    i['tika'] = tika_parser.from_buffer(
+                        i['payload'].decode('base64')
+                    )
+
+    def _remove_content_type(self):
+        pass
 
     def _add_virustotal_output(self):
         if not self.virustotal_api_key:
@@ -298,6 +324,42 @@ class SampleParser(object):
                 if i_result:
                     i['virustotal'] = i_result
 
-    @property
-    def result(self):
-        return self._result
+    def parse_sample(self, data, filename):
+        """Analyze sample and add metadata.
+        If it's an archive, extract it and put files in a list of dictionaries.
+        """
+
+        # Basic informations without fingerprints
+        self._create_sample_result(data, filename)
+
+        if self.tika_enabled:
+            # It's possible add content type only if Tika is enabled
+
+            # Add content type
+            self._add_content_type()
+
+            # Blacklist content type
+            self._remove_content_type()
+
+            # Add tika meta data only for tika_content_type
+            self._add_tika_meta_data()
+
+        # Add fingerprints
+        self._add_fingerprints()
+
+        # Add virustotal output
+        if self.virustotal_enabled:
+            self._add_virustotal_output()
+
+    def parse_sample_from_base64(self, data, filename):
+        """Analyze sample and add metadata.
+        If it's a archive, extract it and put files in a list of dictionaries.
+        Data is in base64.
+        """
+
+        try:
+            data = data.decode('base64')
+        except:
+            raise Base64Error("Data '{}' is NOT correct".format(data))
+
+        return self.parse_sample(data, filename)
