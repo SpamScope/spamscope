@@ -13,10 +13,10 @@ pycparser==2.14
 pycrypto==2.6.1
 pyparsing==2.1.1
 PyYAML==3.11
-requests==2.10.0
+requests==2.11.0
 simplejson==3.8.2
 six==1.10.0
 ssdeep==3.1.1
 streamparse==2.1.4
-tika==1.13
+tika==1.13.1
 virustotal-api==1.1.2
