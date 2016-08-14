@@ -55,8 +55,8 @@ class SampleParser(object):
         self,
         tika_enabled=False,
         tika_server_endpoint="http://localhost:9998",
-        tika_content_type=[],
-        blacklist_content_type=[],
+        tika_content_type=None,
+        blacklist_content_type=None,
         virustotal_enabled=False,
         virustotal_api_key=None,
     ):
@@ -304,7 +304,18 @@ class SampleParser(object):
                     )
 
     def _remove_content_type(self):
-        pass
+        if self.blacklist_content_type:
+            content_type = self._result['tika']['metadata']['Content-Type']
+            if content_type in self.blacklist_content_type:
+                self._result = None
+
+            if self._result and self._result['is_archive']:
+                self._result['files'] = [
+                    i
+                    for i in self._result['files']
+                    if i['tika']['metadata']['Content-Type'] not in
+                    self.blacklist_content_type
+                ]
 
     def _add_virustotal_output(self):
         if not self.virustotal_api_key:
@@ -334,22 +345,26 @@ class SampleParser(object):
 
         if self.tika_enabled:
             # It's possible add content type only if Tika is enabled
+            # It's possible remove attachments only if Tika is enabled
 
             # Add content type
             self._add_content_type()
 
             # Blacklist content type
+            # If content type in blacklist_content_type result = None
             self._remove_content_type()
 
             # Add tika meta data only for tika_content_type
-            self._add_tika_meta_data()
+            if self._result:
+                self._add_tika_meta_data()
 
-        # Add fingerprints
-        self._add_fingerprints()
+        if self._result:
+            # Add fingerprints
+            self._add_fingerprints()
 
-        # Add virustotal output
-        if self.virustotal_enabled:
-            self._add_virustotal_output()
+            # Add virustotal output
+            if self.virustotal_enabled:
+                self._add_virustotal_output()
 
     def parse_sample_from_base64(self, data, filename):
         """Analyze sample and add metadata.
