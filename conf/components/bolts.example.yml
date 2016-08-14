@@ -25,16 +25,14 @@ attachments-bolt:
         # All content types to extract details
         # Example in content_types/tika/generic.example.yml
         content_types_details:
-            generic:
-                path: /path/to/generic_content_types
-                path: /path/to/custom_content_types
+            generic: /path/to/generic_content_types
+            custom: /path/to/custom_content_types
 
-    content_types:
+    content_types_blacklist:
         # All content types to remove from results
         # Example in content_types/blacklist/generic.example.yml
-        blacklist:
-            path: /path/to/generic_content_types
-            path: /path/to/custom_content_types
+        generic: /path/to/generic_content_types
+        custom: /path/to/custom_content_types
 
     virustotal:
         enabled: True

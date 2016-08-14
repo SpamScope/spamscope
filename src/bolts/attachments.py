@@ -16,7 +16,9 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
+from modules.errors import ImproperlyConfigured
 from modules.sample_parser import SampleParser
+from modules.utils import load_config
 
 try:
     import simplejson as json
@@ -28,13 +30,55 @@ class Attachments(AbstractBolt):
 
     def initialize(self, stormconf, context):
         super(Attachments, self).initialize(stormconf, context)
+        self._load_settings()
 
+    def _load_settings(self):
+        # Loading configuration
+        self._load_lists()
+
+        # Attachments handler
         self._sample_parser = SampleParser(
             tika_enabled=self.conf["tika"]["enabled"],
             tika_server_endpoint=self.conf["tika"]["server_endpoint"],
+            tika_content_type=self._cont_type_details,
+            blacklist_content_type=self._cont_type_bl,
             virustotal_enabled=self.conf["virustotal"]["enabled"],
             virustotal_api_key=self.conf["virustotal"]["api_key"],
         )
+
+    def _load_lists(self):
+
+        self.log("Reloading content types list for details")
+
+        # Load content types for details
+        self._cont_type_details = set()
+        for k, v in self.conf["tika"]["content_types_details"].iteritems():
+            keywords = load_config(v)
+            if not isinstance(keywords, list):
+                raise ImproperlyConfigured(
+                    "Keywords content types details \
+                    list '{}' not valid".format(k)
+                )
+            keywords = [i.lower() for i in keywords]
+            self._cont_type_details |= set(keywords)
+
+        self.log("Reloading content types list blacklist")
+
+        # Load content types for details
+        self._cont_type_bl = set()
+        for k, v in self.conf["content_types_blacklist"].iteritems():
+            keywords = load_config(v)
+            if not isinstance(keywords, list):
+                raise ImproperlyConfigured(
+                    "Keywords content types blacklist \
+                    list '{}' not valid".format(k)
+                )
+            keywords = [i.lower() for i in keywords]
+            self._cont_type_bl |= set(keywords)
+
+    def process_tick(self, freq):
+        """Every freq seconds you reload the keywords. """
+        self._load_settings()
 
     def process(self, tup):
         sha256_mail_random = tup.values[0]
@@ -58,7 +102,8 @@ class Attachments(AbstractBolt):
                         data=a['payload'],
                         filename=a['filename'],
                     )
-                    new_attachments.append(self._sample_parser.result)
+                    if self._sample_parser.result:
+                        new_attachments.append(self._sample_parser.result)
 
                 attachments_json = json.dumps(
                     new_attachments,
