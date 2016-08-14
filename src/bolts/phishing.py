@@ -63,7 +63,7 @@ class Phishing(AbstractBolt):
             keywords = load_config(v)
             if not isinstance(keywords, list):
                 raise ImproperlyConfigured(
-                    "Keywords subjects list '{}' not valid".format(v)
+                    "Keywords subjects list '{}' not valid".format(k)
                 )
             self._s_keys |= set(keywords)
 
@@ -73,7 +73,7 @@ class Phishing(AbstractBolt):
             keywords = load_config(v)
             if not isinstance(keywords, dict):
                 raise ImproperlyConfigured(
-                    "Keywords targets list '{}' not valid".format(v)
+                    "Keywords targets list '{}' not valid".format(k)
                 )
             self._t_keys.update(keywords)
 
@@ -201,7 +201,6 @@ class Phishing(AbstractBolt):
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
-
         self._load_lists()
 
     def process(self, tup):
