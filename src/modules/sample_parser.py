@@ -24,7 +24,6 @@ import patoolib
 import shutil
 import ssdeep
 import tempfile
-import tika
 import urllib
 from tika import parser as tika_parser
 from tika import detector as tika_detector
@@ -70,6 +69,7 @@ class SampleParser(object):
         if tika_enabled:
             try:
                 urllib.urlopen(tika_server_endpoint)
+                tika_detector.ServerEndpoint = tika_server_endpoint
             except:
                 raise TikaServerOffline(
                     "Tika server on '{}' offline".format(tika_server_endpoint)
@@ -79,10 +79,6 @@ class SampleParser(object):
         self._tika_enabled = tika_enabled
         self._tika_server_endpoint = tika_server_endpoint
         self._tika_content_type = tika_content_type
-
-        if tika_enabled:
-            tika.TikaClientOnly = True
-            tika.TIKA_SERVER_ENDPOINT = tika_server_endpoint
 
         # Init VirusTotal
         self._virustotal_enabled = virustotal_enabled
@@ -277,14 +273,14 @@ class SampleParser(object):
 
     def _add_content_type(self):
         content_type = tika_detector.from_buffer(
-            self._result['payload'].decode('base64')
+            self._result['payload'].decode('base64'),
         )
         self._result['tika'] = {'metadata': {'Content-Type': content_type}}
 
         if self._result['is_archive']:
             for i in self._result['files']:
                 content_type = tika_detector.from_buffer(
-                    i['payload'].decode('base64')
+                    i['payload'].decode('base64'),
                 )
                 i['tika'] = {'metadata': {'Content-Type': content_type}}
 
@@ -292,7 +288,8 @@ class SampleParser(object):
         content_type = self._result['tika']['metadata']['Content-Type']
         if content_type in self.tika_content_type:
             self._result['tika'] = tika_parser.from_buffer(
-                self._result['payload'].decode('base64')
+                self._result['payload'].decode('base64'),
+                self.tika_server_endpoint,
             )
 
         if self._result['is_archive']:
@@ -300,7 +297,8 @@ class SampleParser(object):
                 content_type = i['tika']['metadata']['Content-Type']
                 if content_type in self.tika_content_type:
                     i['tika'] = tika_parser.from_buffer(
-                        i['payload'].decode('base64')
+                        i['payload'].decode('base64'),
+                        self.tika_server_endpoint,
                     )
 
     def _remove_content_type(self):
