@@ -20,6 +20,7 @@ limitations under the License.
 import os
 import sys
 import unittest
+from tika_app import tika_app as tika
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
@@ -31,14 +32,11 @@ import src.modules.sample_parser as sample_parser
 
 
 class TestSampleParser(unittest.TestCase):
-    parser = sample_parser.SampleParser()
-
-    def test_errors(self):
-        with self.assertRaises(sample_parser.Base64Error):
-            self.parser.fingerprints_from_base64("\test")
 
     def test_is_archive(self):
         """Test is_archive functions."""
+
+        parser = sample_parser.SampleParser()
 
         with open(sample_zip, 'rb') as f:
             data = f.read()
@@ -47,26 +45,26 @@ class TestSampleParser(unittest.TestCase):
         sha1_archive = "8760ff1422cf2922b649b796cfb58bfb0ccf7801"
 
         # Test is_archive with write_sample=False
-        result1 = self.parser.is_archive(data)
+        result1 = parser.is_archive(data)
         self.assertEqual(True, result1)
 
-        result2 = self.parser.is_archive_from_base64(data_base64)
+        result2 = parser.is_archive_from_base64(data_base64)
         self.assertEqual(True, result2)
 
         self.assertEqual(result1, result2)
 
         # Test is_archive with write_sample=True
-        result = self.parser.is_archive(data, write_sample=True)
+        result = parser.is_archive(data, write_sample=True)
         self.assertEqual(os.path.exists(result[1]), True)
 
         # Sample on disk
         with open(result[1], 'rb') as f:
             data_new = f.read()
 
-        result = self.parser.fingerprints(data_new)
+        result = parser.fingerprints(data_new)
         self.assertEqual(sha1_archive, result[1])
 
-        result = self.parser.is_archive_from_base64(
+        result = parser.is_archive_from_base64(
             data_base64,
             write_sample=True
         )
@@ -74,11 +72,13 @@ class TestSampleParser(unittest.TestCase):
         self.assertEqual(os.path.exists(result[1]), True)
 
         # Test is_archive with write_sample=True
-        result = self.parser.is_archive(data, write_sample=True)
+        result = parser.is_archive(data, write_sample=True)
         self.assertIsInstance(result, tuple)
 
     def test_fingerprints(self):
         """Test fingerprints functions."""
+
+        parser = sample_parser.SampleParser()
 
         with open(sample_zip, 'rb') as f:
             data = f.read()
@@ -87,10 +87,10 @@ class TestSampleParser(unittest.TestCase):
         sha1_archive = "8760ff1422cf2922b649b796cfb58bfb0ccf7801"
 
         # Test fingerprints
-        result1 = self.parser.fingerprints(data)[1]
+        result1 = parser.fingerprints(data)[1]
         self.assertEqual(sha1_archive, result1)
 
-        result2 = self.parser.fingerprints_from_base64(data_base64)[1]
+        result2 = parser.fingerprints_from_base64(data_base64)[1]
         self.assertEqual(sha1_archive, result2)
 
         self.assertEqual(result1, result2)
@@ -98,14 +98,16 @@ class TestSampleParser(unittest.TestCase):
     def test_parser_sample(self):
         """Test for parse_sample."""
 
+        parser = sample_parser.SampleParser()
+
         with open(sample_zip, 'rb') as f:
             data = f.read()
 
         with open(sample_txt, 'rb') as f:
             data_txt_base64 = f.read().encode('base64')
 
-        self.parser.parse_sample(data, "test.zip")
-        result = self.parser.result
+        parser.parse_sample(data, "test.zip")
+        result = parser.result
 
         md5_file = "d41d8cd98f00b204e9800998ecf8427e"
         size_file = 0
@@ -122,39 +124,66 @@ class TestSampleParser(unittest.TestCase):
         self.assertEqual(result['files'][0]['payload'], data_txt_base64)
 
     def test_tika(self):
-        parser = sample_parser.SampleParser(tika_enabled=True)
+
+        with self.assertRaises(tika.InvalidTikaAppJar):
+            sample_parser.SampleParser(
+                tika_enabled=True
+            )
+
+        # Only content type
+        parser = sample_parser.SampleParser(
+            tika_enabled=True,
+            tika_jar="/opt/tika/tika-app-1.12.jar",
+            tika_content_types=[],
+            blacklist_content_types=[],
+        )
 
         with open(sample_zip_1, 'rb') as f:
             data = f.read()
 
+        sha1_sample_zip_1 = "8c1b27ef89963a935730d97de1b06dff9aa0f354"
+        sha1_sample_txt_1 = "3e43e0eae28e9ca457098291621957e14ad7477a"
+
         parser.parse_sample(data, "test1.zip")
         result = parser.result
 
+        self.assertEqual(sha1_sample_zip_1, result['sha1'])
+        self.assertEqual(sha1_sample_txt_1, result['files'][0]['sha1'])
         self.assertIn('tika', result)
-        self.assertIsInstance(result['tika'], dict)
-        self.assertIn('content', result['tika'])
+        self.assertIsInstance(result['tika'], list)
+        self.assertEqual(len(result['tika']), 2)
+        self.assertEqual(result['tika'][0]['Content-Type'], "application/zip")
+        self.assertEqual(result['tika'][1]['Content-Type'], "text/plain")
 
-        for i in result['files']:
-            self.assertIn('tika', i)
-            self.assertIsInstance(i['tika'], dict)
-            self.assertIn('content', i['tika'])
-            self.assertIn('google', i['tika']['content'])
+        # Tika process for application/zip
+        parser = sample_parser.SampleParser(
+            tika_enabled=True,
+            tika_jar="/opt/tika/tika-app-1.12.jar",
+            tika_content_types=["application/zip"],
+            blacklist_content_types=[],
+        )
 
-        with open(sample_zip_1, 'rb') as f:
-            data = f.read().encode('base64')
-
-        parser.parse_sample_from_base64(data, "test2.zip")
+        parser.parse_sample(data, "test1.zip")
         result = parser.result
 
-        self.assertIn('tika', result)
-        self.assertIsInstance(result['tika'], dict)
-        self.assertIn('content', result['tika'])
+        for i in result['tika']:
+            self.assertIn('X-TIKA:content', i)
+            self.assertIsInstance(i, dict)
 
-        for i in result['files']:
-            self.assertIn('tika', i)
-            self.assertIsInstance(i['tika'], dict)
-            self.assertIn('content', i['tika'])
-            self.assertIn('google', i['tika']['content'])
+        self.assertIn('test1.txt', result['tika'][0]['X-TIKA:content'])
+        self.assertIn('google', result['tika'][1]['X-TIKA:content'])
+
+        # Blacklist for application/zip
+        parser = sample_parser.SampleParser(
+            tika_enabled=True,
+            tika_jar="/opt/tika/tika-app-1.12.jar",
+            tika_content_types=[],
+            blacklist_content_types=["application/zip"],
+        )
+
+        parser.parse_sample(data, "test1.zip")
+        result = parser.result
+        self.assertEqual(result, None)
 
 
 if __name__ == '__main__':
