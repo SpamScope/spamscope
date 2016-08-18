@@ -30,7 +30,6 @@ from modules.utils import \
 
 
 class Phishing(AbstractBolt):
-    # TODO: urls_attachments_match
 
     def initialize(self, stormconf, context):
         super(Phishing, self).initialize(stormconf, context)
@@ -41,6 +40,7 @@ class Phishing(AbstractBolt):
                 "tokenizer-bolt",
                 "attachments-bolt",
                 "urls_handler_body-bolt",
+                "urls_handler_attachments-bolt",
             ]
         )
 
@@ -73,7 +73,7 @@ class Phishing(AbstractBolt):
             keywords = load_config(v)
             if not isinstance(keywords, dict):
                 raise ImproperlyConfigured(
-                    "Keywords targets list '{}' not valid".format(k)
+                    "Keywords targets dict '{}' not valid".format(k)
                 )
             self._t_keys.update(keywords)
 
@@ -88,36 +88,33 @@ class Phishing(AbstractBolt):
         text_match = False
 
         for i in attachments:
+
             # Check filename
             if not filename_match and swt(i["filename"], keywords):
                 filename_match = True
 
-            # Check attachment content
-            if i.get("tika") and i["tika"].get("content"):
-                if not text_match and swt(i["tika"]["content"], keywords):
-                    text_match = True
+            # Check attachment content for all files, also archived
+            if not text_match and i.get("tika"):
+                for j in i["tika"]:
+                    if j.get("X-TIKA:content") and \
+                            swt(j["X-TIKA:content"], keywords):
+                        text_match = True
+                        break
 
+            # Return if both are True
             if filename_match and text_match:
                 return filename_match, text_match
 
-            # Check files in archive
-            if i.get("is_archive"):
+            # Check files in archive, but only in filename
+            if not filename_match and i.get("is_archive"):
                 for j in i.get("files"):
-
-                    # Check filename
-                    if not filename_match and swt(j["filename"], keywords):
+                    if swt(j["filename"], keywords):
                         filename_match = True
+                        break
 
-                    # Check attachment content
-                    if j.get("tika") and j["tika"].get("content"):
-                        if not text_match and swt(
-                            j["tika"]["content"],
-                            keywords
-                        ):
-                            text_match = True
-
-                    if filename_match and text_match:
-                        return filename_match, text_match
+            # Return if both are True
+            if filename_match and text_match:
+                return filename_match, text_match
 
         return filename_match, text_match
 
@@ -143,6 +140,14 @@ class Phishing(AbstractBolt):
                 greedy_data['urls_handler_body-bolt'][2]
             )
 
+        # Urls attachments
+        with_urls_attachments = greedy_data['urls_handler_attachments-bolt'][1]
+        urls_attachments = None
+        if with_urls_attachments:
+            urls_attachments = json.loads(
+                greedy_data['urls_handler_attachments-bolt'][2]
+            )
+
         # Attachments
         with_attachments = greedy_data['attachments-bolt'][1]
         attachments = None
@@ -162,6 +167,7 @@ class Phishing(AbstractBolt):
                         self._pb.set_property_score("mail_body")
 
                 # Check urls body
+                # Target not added because urls come from body
                 if with_urls_body and urls:
                     if 'urls_body' not in self._pb.score_properties:
                         if self._check_urls(urls, v):
@@ -175,22 +181,28 @@ class Phishing(AbstractBolt):
 
             # Check attachments
             if with_attachments:
+
+                # Check filename and text match
                 filename_match, text_match = self._check_attachments(
                     attachments,
                     v
                 )
-
                 if filename_match or text_match:
                     targets.add(k)
-
                 if (filename_match and
                         'filename_attachments' not in
                         self._pb.score_properties):
                     self._pb.set_property_score("filename_attachments")
-
                 if (text_match and
                         'text_attachments' not in self._pb.score_properties):
                     self._pb.set_property_score("text_attachments")
+
+                # Check urls attachments
+                # Target not added because urls come from attachments content
+                if with_urls_attachments and urls_attachments:
+                    if 'urls_attachments' not in self._pb.score_properties:
+                        if self._check_urls(urls_attachments, v):
+                            self._pb.set_property_score("urls_attachments")
 
         # Check subject
         if swt(subject, self._s_keys):
