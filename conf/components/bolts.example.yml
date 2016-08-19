@@ -20,7 +20,10 @@ phishing-bolt:
 attachments-bolt:
     tika:
         enabled: True
-        server_endpoint: http://localhost:9998
+        path_jar: /path/to/tika_jar
+
+        # Like parameter -Xmx of java application
+        memory_allocation:
 
         # All content types to extract details
         # Example in content_types/tika/generic.example.yml

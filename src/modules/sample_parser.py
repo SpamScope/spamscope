@@ -24,9 +24,7 @@ import patoolib
 import shutil
 import ssdeep
 import tempfile
-import urllib
-from tika import parser as tika_parser
-from tika import detector as tika_detector
+from tika_app.tika_app import TikaApp
 from virus_total_apis import PublicApi as VirusTotalPublicApi
 
 log = logging.getLogger(__name__)
@@ -53,9 +51,10 @@ class SampleParser(object):
     def __init__(
         self,
         tika_enabled=False,
-        tika_server_endpoint="http://localhost:9998",
-        tika_content_type=None,
-        blacklist_content_type=None,
+        tika_jar=None,
+        tika_memory_allocation=None,
+        tika_content_types=set(),
+        blacklist_content_types=set(),
         virustotal_enabled=False,
         virustotal_api_key=None,
     ):
@@ -65,43 +64,45 @@ class SampleParser(object):
         Use tika_server_endpoint to change it.
         """
 
-        # Check Tika server status
+        # If tika is enabled set a tika_client
         if tika_enabled:
-            try:
-                urllib.urlopen(tika_server_endpoint)
-                tika_detector.ServerEndpoint = tika_server_endpoint
-            except:
-                raise TikaServerOffline(
-                    "Tika server on '{}' offline".format(tika_server_endpoint)
-                )
+            self._tika_client = TikaApp(
+                file_jar=tika_jar,
+                memory_allocation=tika_memory_allocation,
+            )
 
         # Init Tika
         self._tika_enabled = tika_enabled
-        self._tika_server_endpoint = tika_server_endpoint
-        self._tika_content_type = tika_content_type
+        self._tika_jar = tika_jar
+        self._tika_memory_allocation = tika_memory_allocation
+        self._tika_content_types = tika_content_types
 
         # Init VirusTotal
         self._virustotal_enabled = virustotal_enabled
         self._virustotal_api_key = virustotal_api_key
 
         # blacklist content type
-        self._blacklist_content_type = blacklist_content_type
+        self._blacklist_content_types = blacklist_content_types
 
     @property
     def tika_enabled(self):
         return self._tika_enabled
 
     @property
-    def tika_server_endpoint(self):
-        return self._tika_server_endpoint
+    def tika_jar(self):
+        return self._tika_jar
 
     @property
-    def tika_content_type(self):
-        return self._tika_content_type
+    def tika_memory_allocation(self):
+        return self._tika_memory_allocation
 
     @property
-    def blacklist_content_type(self):
-        return self._blacklist_content_type
+    def tika_content_types(self):
+        return self._tika_content_types
+
+    @property
+    def blacklist_content_types(self):
+        return self._blacklist_content_types
 
     @property
     def virustotal_enabled(self):
@@ -272,47 +273,46 @@ class SampleParser(object):
                 i['ssdeep'] = ssdeep_
 
     def _add_content_type(self):
-        content_type = tika_detector.from_buffer(
-            self._result['payload'].decode('base64'),
+        content_type = self._tika_client.detect_content_type(
+            payload=self._result['payload'],
         )
-        self._result['tika'] = {'metadata': {'Content-Type': content_type}}
+        self._result['tika'] = [{'Content-Type': content_type}]
 
         if self._result['is_archive']:
             for i in self._result['files']:
-                content_type = tika_detector.from_buffer(
-                    i['payload'].decode('base64'),
+                content_type = self._tika_client.detect_content_type(
+                    payload=i['payload'],
                 )
-                i['tika'] = {'metadata': {'Content-Type': content_type}}
+                self._result['tika'].append({'Content-Type': content_type})
+
+                # To manage blacklist content types add Content-Type to the
+                # files in archive
+                i['Content-Type'] = content_type
 
     def _add_tika_meta_data(self):
-        content_type = self._result['tika']['metadata']['Content-Type']
-        if content_type in self.tika_content_type:
-            self._result['tika'] = tika_parser.from_buffer(
-                self._result['payload'].decode('base64'),
-                self.tika_server_endpoint,
+        content_type = self._result['tika'][0]['Content-Type']
+
+        # The Apache Tika output of archive contains the contents and metadata
+        # of all archived files.
+        if content_type in self.tika_content_types:
+            self._result['tika'] = self._tika_client.extract_all_content(
+                payload=self._result['payload'],
+                convert_to_obj=True,
             )
 
-        if self._result['is_archive']:
-            for i in self._result['files']:
-                content_type = i['tika']['metadata']['Content-Type']
-                if content_type in self.tika_content_type:
-                    i['tika'] = tika_parser.from_buffer(
-                        i['payload'].decode('base64'),
-                        self.tika_server_endpoint,
-                    )
-
     def _remove_content_type(self):
-        if self.blacklist_content_type:
-            content_type = self._result['tika']['metadata']['Content-Type']
-            if content_type in self.blacklist_content_type:
+        """Remove from results the samples with content type in blacklist."""
+
+        if self.blacklist_content_types:
+            content_type = self._result['tika'][0]['Content-Type']
+            if content_type in self.blacklist_content_types:
                 self._result = None
 
             if self._result and self._result['is_archive']:
                 self._result['files'] = [
                     i
                     for i in self._result['files']
-                    if i['tika']['metadata']['Content-Type'] not in
-                    self.blacklist_content_type
+                    if i['Content-Type'] not in self.blacklist_content_types
                 ]
 
     def _add_virustotal_output(self):
@@ -349,7 +349,7 @@ class SampleParser(object):
             self._add_content_type()
 
             # Blacklist content type
-            # If content type in blacklist_content_type result = None
+            # If content type in blacklist_content_types result = None
             self._remove_content_type()
 
             # Add tika meta data only for tika_content_type
