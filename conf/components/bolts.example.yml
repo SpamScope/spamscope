@@ -57,6 +57,21 @@ urls_handler_body-bolt:
             path: /path/to/test2
 
 
+# Urls handler attachments
+urls_handler_attachments-bolt:
+    whitelists:
+        # Only second level domains to whitelisting
+        # Example in conf/whitelists/generic.example.yml
+        alexa:
+            path: /path/to/alexa
+            expiry: 2016-06-28T12:33:00.000Z # date ISO 8601 only UTC
+        test1:
+            path: /path/to/test1
+            expiry:
+        test2:
+            path: /path/to/test2
+
+
 # Output debug bolt configuration
 output-debug-bolt:
     json.indent: 4
