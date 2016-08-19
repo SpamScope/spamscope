@@ -97,7 +97,7 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
         """Every freq seconds you reload the whitelist. """
         self._load_whitelist()
 
-    def _extract_urls(self, text):
+    def _extract_urls(self, text, conv_to_str=True):
         with_urls = False
         urls = dict()
 
@@ -114,9 +114,10 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
         if urls:
             with_urls = True
 
-        urls = json.dumps(
-            urls,
-            ensure_ascii=False
-        )
+        if conv_to_str:
+            urls = json.dumps(
+                urls,
+                ensure_ascii=False
+            )
 
         return with_urls, urls
