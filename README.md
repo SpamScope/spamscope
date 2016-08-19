@@ -36,6 +36,23 @@ Clone repository
 git clone https://github.com/fedelemantuano/spamscope.git
 ```
 
+Install requirements in file `requirements.txt` with `python-pip`:
+
+```
+pip install -r requirements.txt
+```
+
+There are two other requirements [Faup](https://github.com/stricaud/faup) and [tika-app-python](https://github.com/fedelemantuano/tika-app-python). For these use:
+
+```
+python setup.py install
+```
+
+## Docker image
+
+It's possible to use a docker image on ...
+
+
 ## Usage
 
 If you want try it, you should copy `topologies/spamscope.example.clj` and add your functionalities (you can start with example), then you should change `spouts.conf` and `bolts.conf` parameters. The last variables point to two configuration files in YAML, like in `conf/components/`.

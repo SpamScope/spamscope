@@ -84,6 +84,24 @@ class Phishing(AbstractBolt):
                     return True
 
     def _check_attachments(self, attachments, keywords):
+        all_filenames = ""
+        all_contents = ""
+
+        for i in attachments:
+            all_filenames += i["filename"] + "\n"
+
+            if i.get("tika"):
+                for j in i["tika"]:
+                    if j.get("X-TIKA:content"):
+                        all_contents += j["X-TIKA:content"] + "\n"
+
+            if i.get("is_archive"):
+                for j in i.get("files"):
+                    all_filenames += j["filename"] + "\n"
+
+        return swt(all_filenames, keywords), swt(all_contents, keywords)
+
+    def _check_attachments_old_version(self, attachments, keywords):
         filename_match = False
         text_match = False
 
@@ -126,13 +144,13 @@ class Phishing(AbstractBolt):
         # Outputs
         targets = set()
 
-        # Tokenizer
+        # Get Tokenizer
         mail = json.loads(greedy_data['tokenizer-bolt'][1])
         body = mail.get('body')
         subject = mail.get('subject')
         from_ = mail.get('from')
 
-        # Urls in body
+        # Get Urls in body
         with_urls_body = greedy_data['urls_handler_body-bolt'][1]
         urls = None
         if with_urls_body:
@@ -140,7 +158,7 @@ class Phishing(AbstractBolt):
                 greedy_data['urls_handler_body-bolt'][2]
             )
 
-        # Urls attachments
+        # Get Urls attachments
         with_urls_attachments = greedy_data['urls_handler_attachments-bolt'][1]
         urls_attachments = None
         if with_urls_attachments:
@@ -148,7 +166,7 @@ class Phishing(AbstractBolt):
                 greedy_data['urls_handler_attachments-bolt'][2]
             )
 
-        # Attachments
+        # Get Attachments
         with_attachments = greedy_data['attachments-bolt'][1]
         attachments = None
         if with_attachments:
@@ -156,53 +174,55 @@ class Phishing(AbstractBolt):
                 greedy_data['attachments-bolt'][2]
             )
 
-        # Check targets keywords
-        for k, v in self._t_keys.iteritems():
-
-            if body:
-                # Check body
+        # Check body
+        if body:
+            for k, v in self._t_keys.iteritems():
                 if swt(body, v):
                     targets.add(k)
                     if 'mail_body' not in self._pb.score_properties:
                         self._pb.set_property_score("mail_body")
 
-                # Check urls body
-                # Target not added because urls come from body
-                if with_urls_body and urls:
-                    if 'urls_body' not in self._pb.score_properties:
-                        if self._check_urls(urls, v):
-                            self._pb.set_property_score("urls_body")
+        # Check urls body
+        # Target not added because urls come from body
+        if urls:
+            for k, v in self._t_keys.iteritems():
+                if 'urls_body' not in self._pb.score_properties:
+                    if self._check_urls(urls, v):
+                        self._pb.set_property_score("urls_body")
 
-            # Check from
-            if from_ and swt(from_, v):
-                targets.add(k)
-                if 'mail_from' not in self._pb.score_properties:
-                    self._pb.set_property_score("mail_from")
+        # Check from
+        if from_:
+            for k, v in self._t_keys.iteritems():
+                if swt(from_, v):
+                    targets.add(k)
+                    if 'mail_from' not in self._pb.score_properties:
+                        self._pb.set_property_score("mail_from")
 
-            # Check attachments
-            if with_attachments:
+        # Check attachments filename and text match
+        if with_attachments:
+            for k, v in self._t_keys.iteritems():
+                filename_match, text_match = \
+                    self._check_attachments(attachments, v)
 
-                # Check filename and text match
-                filename_match, text_match = self._check_attachments(
-                    attachments,
-                    v
-                )
                 if filename_match or text_match:
                     targets.add(k)
+
                 if (filename_match and
                         'filename_attachments' not in
                         self._pb.score_properties):
                     self._pb.set_property_score("filename_attachments")
+
                 if (text_match and
                         'text_attachments' not in self._pb.score_properties):
                     self._pb.set_property_score("text_attachments")
 
-                # Check urls attachments
-                # Target not added because urls come from attachments content
-                if with_urls_attachments and urls_attachments:
-                    if 'urls_attachments' not in self._pb.score_properties:
-                        if self._check_urls(urls_attachments, v):
-                            self._pb.set_property_score("urls_attachments")
+        # Check urls attachments
+        # Target not added because urls come from attachments content
+        if urls_attachments:
+            for k, v in self._t_keys.iteritems():
+                if 'urls_attachments' not in self._pb.score_properties:
+                    if self._check_urls(urls_attachments, v):
+                        self._pb.set_property_score("urls_attachments")
 
         # Check subject
         if swt(subject, self._s_keys):
