@@ -39,9 +39,10 @@ class Attachments(AbstractBolt):
         # Attachments handler
         self._sample_parser = SampleParser(
             tika_enabled=self.conf["tika"]["enabled"],
-            tika_server_endpoint=self.conf["tika"]["server_endpoint"],
-            tika_content_type=self._cont_type_details,
-            blacklist_content_type=self._cont_type_bl,
+            tika_jar=self.conf["tika"]["path_jar"],
+            tika_memory_allocation=self.conf["tika"]["memory_allocation"],
+            tika_content_types=self._cont_type_details,
+            blacklist_content_types=self._cont_type_bl,
             virustotal_enabled=self.conf["virustotal"]["enabled"],
             virustotal_api_key=self.conf["virustotal"]["api_key"],
         )
