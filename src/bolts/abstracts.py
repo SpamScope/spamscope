@@ -89,9 +89,9 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
                     raise ImproperlyConfigured(
                         "Whitelist {} not loaded".format(k)
                     )
-
-                self.log("Whitelist {} loaded".format(k))
+                domains = [i.lower() for i in domains]
                 self._whitelist |= set(domains)
+                self.log("Whitelist {} loaded".format(k))
 
     def process_tick(self, freq):
         """Every freq seconds you reload the whitelist. """
@@ -108,7 +108,7 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
             if self._whitelist:
                 for d in domains:
-                    if d in self._whitelist:
+                    if d.lower() in self._whitelist:
                         urls.pop(d)
 
         if urls:

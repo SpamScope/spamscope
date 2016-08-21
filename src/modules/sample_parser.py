@@ -19,6 +19,7 @@ limitations under the License.
 
 import hashlib
 import logging
+import magic
 import os
 import patoolib
 import shutil
@@ -273,24 +274,23 @@ class SampleParser(object):
                 i['ssdeep'] = ssdeep_
 
     def _add_content_type(self):
-        content_type = self._tika_client.detect_content_type(
-            payload=self._result['payload'],
+        mime = magic.Magic(mime=True)
+        content_type = mime.from_buffer(
+            self._result['payload'].decode('base64')
         )
-        self._result['tika'] = [{'Content-Type': content_type}]
+        self._result['Content-Type'] = content_type
 
         if self._result['is_archive']:
             for i in self._result['files']:
-                content_type = self._tika_client.detect_content_type(
-                    payload=i['payload'],
+                content_type = mime.from_buffer(
+                    i['payload'].decode('base64'),
                 )
-                self._result['tika'].append({'Content-Type': content_type})
-
                 # To manage blacklist content types add Content-Type to the
                 # files in archive
                 i['Content-Type'] = content_type
 
     def _add_tika_meta_data(self):
-        content_type = self._result['tika'][0]['Content-Type']
+        content_type = self._result['Content-Type']
 
         # The Apache Tika output of archive contains the contents and metadata
         # of all archived files.
@@ -304,11 +304,12 @@ class SampleParser(object):
         """Remove from results the samples with content type in blacklist."""
 
         if self.blacklist_content_types:
-            content_type = self._result['tika'][0]['Content-Type']
+            content_type = self._result['Content-Type']
             if content_type in self.blacklist_content_types:
                 self._result = None
+                return
 
-            if self._result and self._result['is_archive']:
+            if self._result['is_archive']:
                 self._result['files'] = [
                     i
                     for i in self._result['files']
@@ -341,24 +342,21 @@ class SampleParser(object):
         # Basic informations without fingerprints
         self._create_sample_result(data, filename)
 
-        if self.tika_enabled:
-            # It's possible add content type only if Tika is enabled
-            # It's possible remove attachments only if Tika is enabled
+        # Add content type
+        self._add_content_type()
 
-            # Add content type
-            self._add_content_type()
-
-            # Blacklist content type
-            # If content type in blacklist_content_types result = None
-            self._remove_content_type()
-
-            # Add tika meta data only for tika_content_type
-            if self._result:
-                self._add_tika_meta_data()
+        # Blacklist content type
+        # If content type in blacklist_content_types result = None
+        self._remove_content_type()
 
         if self._result:
+
             # Add fingerprints
             self._add_fingerprints()
+
+            # Add tika meta data only for tika_content_type
+            if self.tika_enabled:
+                self._add_tika_meta_data()
 
             # Add virustotal output
             if self.virustotal_enabled:

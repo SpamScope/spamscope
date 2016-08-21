@@ -123,7 +123,52 @@ class TestSampleParser(unittest.TestCase):
         self.assertEqual(result['files'][0]['filename'], "test.txt")
         self.assertEqual(result['files'][0]['payload'], data_txt_base64)
 
-    def test_tika(self):
+    def test_blacklist_content_types(self):
+        with open(sample_zip_1, 'rb') as f:
+            data = f.read()
+
+        # Blacklist for application/zip
+        parser = sample_parser.SampleParser(
+            tika_enabled=True,
+            tika_jar="/opt/tika/tika-app-1.12.jar",
+            tika_content_types=[],
+            blacklist_content_types=["application/zip"],
+        )
+
+        parser.parse_sample(data, "test1.zip")
+        result = parser.result
+        self.assertEqual(result, None)
+
+    def test_payload_content_filename(self):
+        with open(sample_zip_1, 'rb') as f:
+            data = f.read()
+
+        # Blacklist for application/zip
+        parser = sample_parser.SampleParser(
+            tika_enabled=True,
+            tika_jar="/opt/tika/tika-app-1.12.jar",
+            tika_content_types=[],
+            blacklist_content_types=[],
+        )
+
+        parser.parse_sample(data, "test1.zip")
+        result = parser.result
+
+        self.assertIn("is_archive", result)
+        all_contents = ""
+        all_filenames = ""
+
+        all_contents += result["files"][0]["payload"].decode("base64")
+        self.assertIn("google", all_contents)
+        self.assertIn("test1", all_contents)
+        self.assertIn("http", all_contents)
+
+        all_filenames += result["filename"] + "\n"
+        all_filenames += result["files"][0]["filename"] + "\n"
+        self.assertIn("test1.zip", all_filenames)
+        self.assertIn("test1.txt", all_filenames)
+
+    def test_add_tika(self):
 
         with self.assertRaises(tika.InvalidTikaAppJar):
             sample_parser.SampleParser(
@@ -149,11 +194,9 @@ class TestSampleParser(unittest.TestCase):
 
         self.assertEqual(sha1_sample_zip_1, result['sha1'])
         self.assertEqual(sha1_sample_txt_1, result['files'][0]['sha1'])
-        self.assertIn('tika', result)
-        self.assertIsInstance(result['tika'], list)
-        self.assertEqual(len(result['tika']), 2)
-        self.assertEqual(result['tika'][0]['Content-Type'], "application/zip")
-        self.assertEqual(result['tika'][1]['Content-Type'], "text/plain")
+        self.assertNotIn('tika', result)
+        self.assertEqual(result['Content-Type'], "application/zip")
+        self.assertEqual(result['files'][0]['Content-Type'], "text/plain")
 
         # Tika process for application/zip
         parser = sample_parser.SampleParser(
@@ -172,18 +215,6 @@ class TestSampleParser(unittest.TestCase):
 
         self.assertIn('test1.txt', result['tika'][0]['X-TIKA:content'])
         self.assertIn('google', result['tika'][1]['X-TIKA:content'])
-
-        # Blacklist for application/zip
-        parser = sample_parser.SampleParser(
-            tika_enabled=True,
-            tika_jar="/opt/tika/tika-app-1.12.jar",
-            tika_content_types=[],
-            blacklist_content_types=["application/zip"],
-        )
-
-        parser.parse_sample(data, "test1.zip")
-        result = parser.result
-        self.assertEqual(result, None)
 
 
 if __name__ == '__main__':
