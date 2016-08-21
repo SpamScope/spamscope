@@ -90,51 +90,14 @@ class Phishing(AbstractBolt):
         for i in attachments:
             all_filenames += i["filename"] + "\n"
 
-            if i.get("tika"):
-                for j in i["tika"]:
-                    if j.get("X-TIKA:content"):
-                        all_contents += j["X-TIKA:content"] + "\n"
-
             if i.get("is_archive"):
                 for j in i.get("files"):
                     all_filenames += j["filename"] + "\n"
+                    all_contents += j["payload"].decode('base64') + "\n"
+            else:
+                all_contents += i["payload"].decode('base64') + "\n"
 
         return swt(all_filenames, keywords), swt(all_contents, keywords)
-
-    def _check_attachments_old_version(self, attachments, keywords):
-        filename_match = False
-        text_match = False
-
-        for i in attachments:
-
-            # Check filename
-            if not filename_match and swt(i["filename"], keywords):
-                filename_match = True
-
-            # Check attachment content for all files, also archived
-            if not text_match and i.get("tika"):
-                for j in i["tika"]:
-                    if j.get("X-TIKA:content") and \
-                            swt(j["X-TIKA:content"], keywords):
-                        text_match = True
-                        break
-
-            # Return if both are True
-            if filename_match and text_match:
-                return filename_match, text_match
-
-            # Check files in archive, but only in filename
-            if not filename_match and i.get("is_archive"):
-                for j in i.get("files"):
-                    if swt(j["filename"], keywords):
-                        filename_match = True
-                        break
-
-            # Return if both are True
-            if filename_match and text_match:
-                return filename_match, text_match
-
-        return filename_match, text_match
 
     def _search_phishing(self, greedy_data):
 

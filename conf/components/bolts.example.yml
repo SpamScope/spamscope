@@ -19,7 +19,9 @@ phishing-bolt:
 # Attachments bolt configuration
 attachments-bolt:
     tika:
-        enabled: True
+        # Enable Tika is dangerous because is very slow:
+        # https://github.com/fedelemantuano/tika-app-python#performance-tests
+        enabled: False
         path_jar: /path/to/tika_jar
 
         # Like parameter -Xmx of java application
@@ -38,7 +40,7 @@ attachments-bolt:
         custom: /path/to/custom_content_types
 
     virustotal:
-        enabled: True
+        enabled: False
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 

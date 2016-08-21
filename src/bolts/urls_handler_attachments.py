@@ -43,10 +43,12 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
 
                 # Get all contents for all attachments and files archived
                 for i in attachments:
-                    if i.get("tika"):
-                        for j in i["tika"]:
-                            if j.get("X-TIKA:content"):
-                                all_contents += j["X-TIKA:content"] + "\n"
+                    if i.get("is_archive"):
+                        for j in i.get("files"):
+                            all_contents += \
+                                j["payload"].decode('base64') + "\n"
+                    else:
+                        all_contents += i["payload"].decode('base64')
 
                 with_urls, urls_json = self._extract_urls(all_contents)
 
