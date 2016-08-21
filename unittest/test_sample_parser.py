@@ -155,16 +155,16 @@ class TestSampleParser(unittest.TestCase):
         result = parser.result
 
         self.assertIn("is_archive", result)
-        all_contents = ""
-        all_filenames = ""
+        all_contents = u""
+        all_filenames = u""
 
         all_contents += result["files"][0]["payload"].decode("base64")
         self.assertIn("google", all_contents)
         self.assertIn("test1", all_contents)
         self.assertIn("http", all_contents)
 
-        all_filenames += result["filename"] + "\n"
-        all_filenames += result["files"][0]["filename"] + "\n"
+        all_filenames += result["filename"] + u"\n"
+        all_filenames += result["files"][0]["filename"] + u"\n"
         self.assertIn("test1.zip", all_filenames)
         self.assertIn("test1.txt", all_filenames)
 
