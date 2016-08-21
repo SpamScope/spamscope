@@ -84,18 +84,22 @@ class Phishing(AbstractBolt):
                     return True
 
     def _check_attachments(self, attachments, keywords):
-        all_filenames = ""
-        all_contents = ""
+        all_filenames = u""
+        all_contents = u""
 
         for i in attachments:
-            all_filenames += i["filename"] + "\n"
+            try:
+                all_filenames += i["filename"] + u"\n"
 
-            if i.get("is_archive"):
-                for j in i.get("files"):
-                    all_filenames += j["filename"] + "\n"
-                    all_contents += j["payload"].decode('base64') + "\n"
-            else:
-                all_contents += i["payload"].decode('base64') + "\n"
+                if i.get("is_archive"):
+                    for j in i.get("files"):
+                        all_filenames += j["filename"] + u"\n"
+                        all_contents += j["payload"].decode('base64') + u"\n"
+                else:
+                    all_contents += i["payload"].decode('base64') + u"\n"
+
+            except UnicodeDecodeError:
+                pass
 
         return swt(all_filenames, keywords), swt(all_contents, keywords)
 

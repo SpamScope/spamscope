@@ -32,7 +32,7 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
         sha256_mail_random = tup.values[0]
         with_urls = False
         urls_json = None
-        all_contents = ""
+        all_contents = u""
 
         try:
             with_attachments = tup.values[1]
@@ -43,12 +43,17 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
 
                 # Get all contents for all attachments and files archived
                 for i in attachments:
-                    if i.get("is_archive"):
-                        for j in i.get("files"):
+                    try:
+                        if i.get("is_archive"):
+                            for j in i.get("files"):
+                                all_contents += \
+                                    j["payload"].decode('base64') + u"\n"
+                        else:
                             all_contents += \
-                                j["payload"].decode('base64') + "\n"
-                    else:
-                        all_contents += i["payload"].decode('base64')
+                                i["payload"].decode('base64') + u"\n"
+
+                    except UnicodeDecodeError:
+                        pass
 
                 with_urls, urls_json = self._extract_urls(all_contents)
 
