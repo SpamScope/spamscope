@@ -55,9 +55,8 @@ class Phishing(AbstractBolt):
 
     def _load_lists(self):
 
-        self.log("Reloading phishing keywords")
-
         # Load subjects keywords
+        self.log("Reloading phishing subjects keywords")
         self._s_keys = set()
         for k, v in self.conf["lists"]["subjects"].iteritems():
             keywords = load_config(v)
@@ -68,6 +67,7 @@ class Phishing(AbstractBolt):
             self._s_keys |= set(keywords)
 
         # Load targets keywords
+        self.log("Reloading phishing targets keywords")
         self._t_keys = {}
         for k, v in self.conf["lists"]["targets"].iteritems():
             keywords = load_config(v)
@@ -200,6 +200,7 @@ class Phishing(AbstractBolt):
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
+        super(Phishing, self)._conf_loader()
         self._load_lists()
 
     def process(self, tup):
