@@ -44,6 +44,9 @@ class FilesMailSpout(AbstractSpout):
     def load_mails(self):
         """This function load mails in a priority queue. """
 
+        self.log("Loanding new mails for spout \
+                 '{}'".format(self.component_name))
+
         mailboxes = self.conf['mailboxes']
 
         for k, v in mailboxes.iteritems():
@@ -96,6 +99,10 @@ class FilesMailSpout(AbstractSpout):
 
             # put new mails in priority queue
             else:
+                # Reload general spout conf
+                self._conf_loader()
+
+                # Reload new mails
                 self.load_mails()
                 self.count = 1
         else:

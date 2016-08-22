@@ -70,6 +70,6 @@ class OutputRedis(AbstractBolt):
 
     def process_tick(self, freq):
         """Every freq seconds flush messages. """
-
+        super(OutputRedis, self)._conf_loader()
         if self._mails:
             self.flush()

@@ -44,8 +44,14 @@ class AbstractBolt(Bolt):
                     self.component_name
                 )
             )
+        self.log("Reloading configuration for bolt \
+                 '{}'".format(self.component_name))
         self._bolts_conf = load_config(self.conf_file)
         self._conf = self.bolts_conf[self.component_name]
+
+    def process_tick(self, freq):
+        """Every freq seconds you reload configuration """
+        self._conf_loader()
 
     @property
     def conf_file(self):
@@ -74,7 +80,8 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
     def _load_whitelist(self):
 
-        self.log("Reloading whitelists domains")
+        self.log("Reloading whitelists domains for bolt \
+                 '{}'".format(self.component_name))
 
         self._whitelist = set()
         for k, v in self.conf['whitelists'].iteritems():
@@ -91,10 +98,12 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
                     )
                 domains = [i.lower() for i in domains]
                 self._whitelist |= set(domains)
-                self.log("Whitelist {} loaded".format(k))
+                self.log("Whitelist '{}' loaded for bolt \
+                         '{}'".format(k, self.component_name))
 
     def process_tick(self, freq):
-        """Every freq seconds you reload the whitelist. """
+        """Every freq seconds you reload the whitelist """
+        super(AbstractUrlsHandlerBolt, self)._conf_loader()
         self._load_whitelist()
 
     def _extract_urls(self, text, conv_to_str=True):

@@ -37,6 +37,8 @@ class AbstractSpout(Spout):
                     self.component_name
                 )
             )
+        self.log("Reloading configuration for spout \
+                 '{}'".format(self.component_name))
         self._spouts_conf = load_config(self.conf_file)
         self._conf = self.spouts_conf[self.component_name]
 
