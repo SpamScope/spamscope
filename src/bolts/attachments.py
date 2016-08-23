@@ -50,9 +50,9 @@ class Attachments(AbstractBolt):
     def _load_lists(self):
 
         # Load content types for details
-        self.log("Reloading content types list for Tika details")
         self._cont_type_details = set()
         if self.conf["tika"]["enabled"]:
+            self.log("Reloading content types list for Tika details")
             for k, v in self.conf["tika"]["content_types_details"].iteritems():
                 keywords = load_config(v)
                 if not isinstance(keywords, list):
@@ -62,6 +62,7 @@ class Attachments(AbstractBolt):
                     )
                 keywords = [i.lower() for i in keywords]
                 self._cont_type_details |= set(keywords)
+                self.log("Content types Tika '{}' loaded".format(k))
 
         # Load content types for blacklist
         self.log("Reloading content types list blacklist")
@@ -75,6 +76,7 @@ class Attachments(AbstractBolt):
                 )
             keywords = [i.lower() for i in keywords]
             self._cont_type_bl |= set(keywords)
+            self.log("Content types blacklist '{}' loaded".format(k))
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
