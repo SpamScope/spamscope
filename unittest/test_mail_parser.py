@@ -28,6 +28,7 @@ mail_test1 = os.path.join(root, 'unittest', 'mails', 'mail_test1')
 mail_test2 = os.path.join(root, 'unittest', 'mails', 'mail_test2')
 mail_test3 = os.path.join(root, 'unittest', 'mails', 'mail_test3')
 mail_test4 = os.path.join(root, 'unittest', 'mails', 'mail_test4')
+mail_test5 = os.path.join(root, 'unittest', 'mails', 'mail_test5')
 mail_malformed = os.path.join(root, 'unittest', 'mails', 'mail_malformed')
 sys.path.append(root)
 import src.modules.mail_parser as mail_parser
@@ -118,8 +119,29 @@ class TestMailParser(unittest.TestCase):
         self.assertIn("defects", self.parser.parsed_mail_obj)
 
         self.parser.parse_from_file(mail_test4)
-        self.assertEqual(True, self.parser.has_defects)
+        self.assertEqual(True, self.parser.has_anomalies)
         self.assertIn("anomalies", self.parser.parsed_mail_obj)
+
+    def test_add_content_type(self):
+        self.parser.parse_from_file(mail_test5)
+        result = self.parser.parsed_mail_obj
+
+        self.assertEqual(
+            len(result["attachments"]),
+            1
+        )
+        self.assertIsInstance(
+            result["attachments"][0]["mail_content_type"],
+            unicode
+        )
+        self.assertIsInstance(
+            result["attachments"][0]["payload"],
+            unicode
+        )
+        self.assertEqual(
+            result["attachments"][0]["content_transfer_encoding"],
+            "quoted-printable",
+        )
 
 if __name__ == '__main__':
     unittest.main()

@@ -104,6 +104,8 @@ class Attachments(AbstractBolt):
                     self._sample_parser.parse_sample_from_base64(
                         data=a['payload'],
                         filename=a['filename'],
+                        mail_content_type=a['mail_content_type'],
+                        transfer_encoding=a['content_transfer_encoding'],
                     )
                     if self._sample_parser.result:
                         new_attachments.append(self._sample_parser.result)
