@@ -132,10 +132,25 @@ class MailParser(object):
                 f = p.get_filename()
                 if f:
                     filename = self._decode_header_part(f)
+                    mail_content_type = self._decode_header_part(
+                        p.get_content_type(),
+                    )
+                    transfer_encoding = \
+                        unicode(p.get('content-transfer-encoding', '')).lower()
+
+                    if transfer_encoding == "base64":
+                        payload = p.get_payload(decode=False)
+                    else:
+                        payload = self._force_unicode(
+                            p.get_payload(decode=True),
+                        )
+
                     self._attachments.append(
                         {
                             "filename": filename,
-                            "payload": p.get_payload(decode=False)
+                            "payload": payload,
+                            "mail_content_type": mail_content_type,
+                            "content_transfer_encoding": transfer_encoding,
                         }
                     )
                 else:

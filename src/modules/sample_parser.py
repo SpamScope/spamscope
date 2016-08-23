@@ -208,7 +208,13 @@ class SampleParser(object):
                 os.remove(temp)
                 return is_archive
 
-    def _create_sample_result(self, data, filename):
+    def _create_sample_result(
+        self,
+        data,
+        filename,
+        mail_content_type,
+        transfer_encoding,
+    ):
         """ Create dict result with basic informations."""
 
         is_archive, file_ = self.is_archive(data, write_sample=True)
@@ -217,6 +223,8 @@ class SampleParser(object):
         self._result = {
             'filename': filename,
             'payload': data.encode('base64'),
+            'mail_content_type': mail_content_type,
+            'content_transfer_encoding': transfer_encoding,
             'size': size,
             'is_archive': is_archive,
         }
@@ -334,13 +342,24 @@ class SampleParser(object):
                 if i_result:
                     i['virustotal'] = i_result
 
-    def parse_sample(self, data, filename):
+    def parse_sample(
+        self,
+        data,
+        filename,
+        mail_content_type,
+        transfer_encoding,
+    ):
         """Analyze sample and add metadata.
         If it's an archive, extract it and put files in a list of dictionaries.
         """
 
         # Basic informations without fingerprints
-        self._create_sample_result(data, filename)
+        self._create_sample_result(
+            data,
+            filename,
+            mail_content_type,
+            transfer_encoding,
+        )
 
         # Add content type
         self._add_content_type()
@@ -362,15 +381,27 @@ class SampleParser(object):
             if self.virustotal_enabled:
                 self._add_virustotal_output()
 
-    def parse_sample_from_base64(self, data, filename):
+    def parse_sample_from_base64(
+        self,
+        data,
+        filename,
+        mail_content_type,
+        transfer_encoding,
+    ):
         """Analyze sample and add metadata.
         If it's a archive, extract it and put files in a list of dictionaries.
         Data is in base64.
         """
 
         try:
-            data = data.decode('base64')
+            if transfer_encoding == 'base64':
+                data = data.decode('base64')
         except:
             raise Base64Error("Data '{}' is NOT correct".format(data))
 
-        return self.parse_sample(data, filename)
+        return self.parse_sample(
+            data,
+            filename,
+            mail_content_type,
+            transfer_encoding,
+        )
