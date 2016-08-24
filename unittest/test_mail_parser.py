@@ -22,6 +22,11 @@ import os
 import sys
 import unittest
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 mail_test1 = os.path.join(root, 'unittest', 'mails', 'mail_test1')
@@ -29,9 +34,11 @@ mail_test2 = os.path.join(root, 'unittest', 'mails', 'mail_test2')
 mail_test3 = os.path.join(root, 'unittest', 'mails', 'mail_test3')
 mail_test4 = os.path.join(root, 'unittest', 'mails', 'mail_test4')
 mail_test5 = os.path.join(root, 'unittest', 'mails', 'mail_test5')
+mail_test6 = os.path.join(root, 'unittest', 'mails', 'mail_test6')
 mail_malformed = os.path.join(root, 'unittest', 'mails', 'mail_malformed')
 sys.path.append(root)
 import src.modules.mail_parser as mail_parser
+import src.modules.sample_parser as sample_parser
 
 
 class TestMailParser(unittest.TestCase):
@@ -142,6 +149,49 @@ class TestMailParser(unittest.TestCase):
             result["attachments"][0]["content_transfer_encoding"],
             "quoted-printable",
         )
+
+    def test_unicode_error(self):
+        """ Issue commit b066c0b6fb065cfe3c94d4b64682dd99aa81f17a.
+        Tested with same mail but without UnicodeDecodeError
+        """
+
+        sample = sample_parser.SampleParser(
+            tika_enabled=False,
+            tika_jar=None,
+            tika_memory_allocation=None,
+            tika_content_types=[],
+            blacklist_content_types=[],
+            virustotal_enabled=False,
+            virustotal_api_key=None,
+        )
+
+        self.parser.parse_from_file(mail_test6)
+        result = json.dumps(
+            self.parser.attachments_list,
+            ensure_ascii=False,
+        )
+        self.assertIsInstance(
+            result,
+            unicode,
+        )
+
+        for a in self.parser.attachments_list:
+            sample.parse_sample_from_base64(
+                data=a['payload'],
+                filename=a['filename'],
+                mail_content_type=a['mail_content_type'],
+                transfer_encoding=a['content_transfer_encoding'],
+            )
+            attachments_json = json.dumps(
+                sample.result,
+                ensure_ascii=False,
+            )
+
+        self.assertIsInstance(
+            attachments_json,
+            unicode,
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
