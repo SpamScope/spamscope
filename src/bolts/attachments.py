@@ -98,7 +98,6 @@ class Attachments(AbstractBolt):
                 )
 
                 new_attachments = list()
-                with_attachments = True
 
                 for a in attachments:
                     self._sample_parser.parse_sample_from_base64(
@@ -107,14 +106,18 @@ class Attachments(AbstractBolt):
                         mail_content_type=a['mail_content_type'],
                         transfer_encoding=a['content_transfer_encoding'],
                     )
+
                     if self._sample_parser.result:
                         new_attachments.append(self._sample_parser.result)
 
                 try:
-                    attachments_json = json.dumps(
-                        new_attachments,
-                        ensure_ascii=False,
-                    )
+                    if new_attachments:
+                        attachments_json = json.dumps(
+                            new_attachments,
+                            ensure_ascii=False,
+                        )
+                        with_attachments = True
+
                 except UnicodeDecodeError:
                     self.log(
                         "UnicodeDecodeError for mail '{}'".format(
