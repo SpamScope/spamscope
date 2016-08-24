@@ -148,3 +148,11 @@ class FilesMailSpout(AbstractSpout):
                 shutil.move(tup_id, where)
             except shutil.Error as e:
                 self.raise_exception(e)
+
+    def fail(self, tup_id):
+        # If tuple fail the mail remains on disk, self.queue is empty but
+        # self.queue_tail contains all failed tuples
+
+        # Returns in queue
+        self.queue_tail.remove(tup_id)
+        self.log("Tuple '{}' failed. Now in queue".format(tup_id), "warning")
