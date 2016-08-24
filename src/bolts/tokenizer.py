@@ -48,7 +48,7 @@ class Tokenizer(Bolt):
         random_s = ''.join(random.choice(string.lowercase) for i in range(20))
         return "<" + random_s + "@nothing-message-id>"
 
-    def tokenizer(self, mail_server, mailbox, priority):
+    def tokenizer(self, mail_server, mailbox, priority, mail_data, kind_data):
 
         # Mail object
         mail = self.p.parsed_mail_obj
@@ -79,6 +79,9 @@ class Tokenizer(Bolt):
         if not mail.get('message_id'):
             # to identify mail
             mail['message_id'] = self.random_message_id()
+
+        if kind_data == MAIL_PATH:
+            mail['path_mail'] = mail_data
 
         # Mail JSON
         mail_json = json.dumps(
@@ -121,7 +124,9 @@ class Tokenizer(Bolt):
 
             # Tokenizer and emit
             self.emit(
-                self.tokenizer(mail_server, mailbox, priority)
+                self.tokenizer(
+                    mail_server, mailbox, priority, mail_data, kind_data
+                )
             )
 
         except Exception as e:
