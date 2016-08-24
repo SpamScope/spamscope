@@ -110,10 +110,18 @@ class Attachments(AbstractBolt):
                     if self._sample_parser.result:
                         new_attachments.append(self._sample_parser.result)
 
-                attachments_json = json.dumps(
-                    new_attachments,
-                    ensure_ascii=False,
-                )
+                try:
+                    attachments_json = json.dumps(
+                        new_attachments,
+                        ensure_ascii=False,
+                    )
+                except UnicodeDecodeError:
+                    self.log(
+                        "UnicodeDecodeError for mail '{}'".format(
+                            sha256_mail_random
+                        ),
+                        level="error"
+                    )
 
         except Exception as e:
             self.log(
