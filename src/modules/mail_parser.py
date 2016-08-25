@@ -41,10 +41,6 @@ class NotUnicodeError(ValueError):
     pass
 
 
-class FailedParsingDateMail(ValueError):
-    pass
-
-
 class MailParser(object):
 
     """Class to parse mail. """
@@ -247,9 +243,7 @@ class MailParser(object):
             t = time.mktime(d)
             return datetime.datetime.utcfromtimestamp(t)
         except:
-            raise FailedParsingDateMail(
-                'Failed parsing mail date: {}'.format(date_)
-            )
+            return None
 
     @property
     def parsed_mail_obj(self):
