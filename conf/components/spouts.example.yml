@@ -12,6 +12,9 @@ files-mails-spout:
     # Waiting new mails, sleep seconds
     waiting.sleep: 1
 
+    # Max retry failed tuple
+    max.retry: 3
+
     # Post processing 
     post_processing:
 
@@ -20,6 +23,9 @@ files-mails-spout:
             
         # if move where
         where: /mnt/testing/spamscope/mails/moved
+
+        # if failed move in where.failed
+        where.failed: /mnt/testing/spamscope/mails/failed
 
     # Mailboxes
     mailboxes: 
