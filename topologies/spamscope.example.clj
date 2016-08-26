@@ -21,14 +21,14 @@
           {"files-mails-spout" :shuffle}
           "bolts.tokenizer.Tokenizer"
           ["sha256_random", "mail"]
-          :p 1
+          :p 2
           )
     "attachments-bolt" (python-bolt-spec
           options
           {"tokenizer-bolt" ["sha256_random"]}
           "bolts.attachments.Attachments"
           ["sha256_random", "with_attachments", "attachments_json"]
-          :p 4
+          :p 2
           :conf {
                  "bolts.conf", "/etc/spamscope/bolts.yml",
                  }
@@ -63,7 +63,7 @@
            }
           "bolts.phishing.Phishing"
           ["sha256_random", "with_phishing", "score", "targets"]
-          :p 1
+          :p 2
           :conf {
                  "bolts.conf", "/etc/spamscope/bolts.yml",
                  }
@@ -87,7 +87,7 @@
            }
           "bolts.json_maker.JsonMaker"
           ["sha256_random", "mail"]
-          :p 1
+          :p 2
           )
     "output-debug-bolt" (python-bolt-spec
           options

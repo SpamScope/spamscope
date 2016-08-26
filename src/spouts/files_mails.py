@@ -71,6 +71,8 @@ class FilesMailSpout(AbstractSpout):
                 )
 
     def next_tuple(self):
+
+        # If queue is empty
         if not self.queue.empty():
 
             # After reload.mails mails put new items in priority queue
@@ -97,10 +99,19 @@ class FilesMailSpout(AbstractSpout):
                 # Reload new mails
                 self.load_mails()
                 self.count = 1
+
+        # If queue is not empty
         else:
-            # Wait for new mails
-            self.log("Queue mails is empty")
-            time.sleep(self.waiting_sleep)
+            # Check if there are failed mails
+            if self.queue_fail:
+                self.queue_tail -= set(self.queue_fail)
+                self.log("Processing {} failed mails".format(
+                    len(set(self.queue_fail))))
+            # No failed mails
+            else:
+                self.log("Queue mails is empty")
+                time.sleep(self.waiting_sleep)
+
             self.load_mails()
 
     def ack(self, tup_id):
@@ -113,10 +124,11 @@ class FilesMailSpout(AbstractSpout):
             # Remove from tail analyzed mail
             self.queue_tail.remove(tup_id)
 
-            # Remove from queue_tail
-            if tup_id in self.queue_fail:
+            # Mark as failed
+            if self.queue_fail.count(tup_id) >= self.max_retry:
                 failed_tup = True
 
+            # Remove from failed queue
             self.queue_fail = [i for i in self.queue_fail if i != tup_id]
 
             self.log("Mails to process: {}".format(len(self.queue_tail)))
@@ -161,12 +173,13 @@ class FilesMailSpout(AbstractSpout):
         if self.queue_fail.count(tup_id) < self.max_retry:
 
             # Returns in queue
-            self.queue_tail.remove(tup_id)
+            # self.queue_tail.remove(tup_id)
 
             # Add in fail queue
             self.queue_fail.append(tup_id)
             self.log(
-                "Tuple '{}' failed. Now in queue".format(tup_id), "warning"
+                "Tuple '{}' failed. Now in fail queue".format(tup_id),
+                "warning"
             )
         else:
             self.log(

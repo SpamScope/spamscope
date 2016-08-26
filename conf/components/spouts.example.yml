@@ -7,7 +7,8 @@ files-mails-spout:
     reload.mails: 100
 
     # Tuples sleep seconds, CPU issue
-    tuple.sleep: 0.02
+    # If too low possible fail tuples
+    tuple.sleep: 0.05
 
     # Waiting new mails, sleep seconds
     waiting.sleep: 1
