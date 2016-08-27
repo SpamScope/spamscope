@@ -82,7 +82,7 @@ For SpamScope I tested these values to avoid failed tuples:
 ```
 topology.tick.tuple.freq.secs: 60
 topology.max.spout.pending: 100
-topology.sleep.spout.wait.strategy.time.ms**: 10
+topology.sleep.spout.wait.strategy.time.ms: 10
 ```
 
 For submit these options:
