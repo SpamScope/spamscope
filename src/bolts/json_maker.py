@@ -36,6 +36,7 @@ class JsonMaker(Bolt):
                 "attachments-bolt",
                 "forms-bolt",
                 "urls_handler_body-bolt",
+                "urls_handler_attachments-bolt",
             ]
         )
 
@@ -73,6 +74,14 @@ class JsonMaker(Bolt):
         if mail['with_urls_body']:
             mail['urls_body'] = json.loads(
                 greedy_data['urls_handler_body-bolt'][2]
+            )
+
+        # Urls in attachments
+        mail['with_urls_attachments'] = \
+            greedy_data['urls_handler_attachments-bolt'][1]
+        if mail['with_urls_attachments']:
+            mail['urls_attachments'] = json.loads(
+                greedy_data['urls_handler_attachments-bolt'][2]
             )
 
         return json.dumps(mail, ensure_ascii=False)

@@ -4,10 +4,14 @@
 phishing-bolt:
     lists:
         subjects: 
+            # Suspect subjects
+            # Example in conf/keywords/subjects.example.yml
             generic: /path/to/generic_subjects
             custom: /path/to/custom_subjects
         
         targets:
+            # Keyword for every targets
+            # Example in conf/keywords/targets.example.yml
             generic: /path/to/generic_targets
             custom: /path/to/custom_targets
 
@@ -15,25 +19,59 @@ phishing-bolt:
 # Attachments bolt configuration
 attachments-bolt:
     tika:
-        enabled: True
-        server_endpoint: http://localhost:9998
+        # Enable Tika but it's very slow:
+        # https://github.com/fedelemantuano/tika-app-python#performance-tests
+        enabled: False
+        path_jar: /path/to/tika_jar
+
+        # Like parameter -Xmx of java application
+        memory_allocation:
+
+        # All content types to extract details
+        # Example in content_types/tika/generic.example.yml
+        content_types_details:
+            generic: /path/to/generic_content_types
+            custom: /path/to/custom_content_types
+
+    content_types_blacklist:
+        # All content types to remove from results
+        # Example in content_types/blacklist/generic.example.yml
+        generic: /path/to/generic_content_types
+        custom: /path/to/custom_content_types
 
     virustotal:
-        enabled: True
+        enabled: False
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
 # Urls handler body
 urls_handler_body-bolt:
     whitelists:
+        # Only second level domains to whitelisting
+        # Example in conf/whitelists/generic.example.yml
         alexa:
             path: /path/to/alexa
             expiry: 2016-06-28T12:33:00.000Z # date ISO 8601 only UTC
         test1:
-            path: /path/to/alexa
+            path: /path/to/test1
             expiry:
         test2:
+            path: /path/to/test2
+
+
+# Urls handler attachments
+urls_handler_attachments-bolt:
+    whitelists:
+        # Only second level domains to whitelisting
+        # Example in conf/whitelists/generic.example.yml
+        alexa:
             path: /path/to/alexa
+            expiry: 2016-06-28T12:33:00.000Z # date ISO 8601 only UTC
+        test1:
+            path: /path/to/test1
+            expiry:
+        test2:
+            path: /path/to/test2
 
 
 # Output debug bolt configuration
@@ -78,7 +116,6 @@ output-debug-bolt:
 
 #queue_name:
 #name of Redis server list
-
 
 output-redis-bolt:
     servers:

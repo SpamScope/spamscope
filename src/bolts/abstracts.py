@@ -44,8 +44,13 @@ class AbstractBolt(Bolt):
                     self.component_name
                 )
             )
+        self.log("Reloading configuration for bolt")
         self._bolts_conf = load_config(self.conf_file)
         self._conf = self.bolts_conf[self.component_name]
+
+    def process_tick(self, freq):
+        """Every freq seconds you reload configuration """
+        self._conf_loader()
 
     @property
     def conf_file(self):
@@ -74,8 +79,7 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
     def _load_whitelist(self):
 
-        self.log("Reloading whitelists domains")
-
+        self.log("Reloading whitelists domains for bolt")
         self._whitelist = set()
         for k, v in self.conf['whitelists'].iteritems():
             expiry = v.get('expiry')
@@ -89,15 +93,16 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
                     raise ImproperlyConfigured(
                         "Whitelist {} not loaded".format(k)
                     )
-
-                self.log("Whitelist {} loaded".format(k))
+                domains = [i.lower() for i in domains]
                 self._whitelist |= set(domains)
+                self.log("Whitelist '{}' loaded".format(k))
 
     def process_tick(self, freq):
-        """Every freq seconds you reload the whitelist. """
+        """Every freq seconds you reload the whitelist """
+        super(AbstractUrlsHandlerBolt, self)._conf_loader()
         self._load_whitelist()
 
-    def _extract_urls(self, text):
+    def _extract_urls(self, text, conv_to_str=True):
         with_urls = False
         urls = dict()
 
@@ -108,15 +113,16 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
             if self._whitelist:
                 for d in domains:
-                    if d in self._whitelist:
+                    if d.lower() in self._whitelist:
                         urls.pop(d)
 
         if urls:
             with_urls = True
 
-        urls = json.dumps(
-            urls,
-            ensure_ascii=False
-        )
+        if conv_to_str:
+            urls = json.dumps(
+                urls,
+                ensure_ascii=False
+            )
 
         return with_urls, urls

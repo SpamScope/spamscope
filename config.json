@@ -2,14 +2,17 @@
     "library": "",
     "topology_specs": "topologies/",
     "virtualenv_specs": "virtualenvs/",
+    "use_virtualenv": "false",
     "envs": {
         "prod": {
-            "user": "",
-            "nimbus": "",
-            "workers": [],
+            "user": "root",
+            "nimbus": "localhost",
+            "workers": [
+                "localhost"
+            ],
             "log": {
-                "path": "",
-                "max_bytes": 1000000,
+                "path": "/var/log/spamscope",
+                "max_bytes": 5000000,
                 "backup_count": 10,
                 "level": "info"
             },
