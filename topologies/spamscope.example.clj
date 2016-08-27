@@ -28,7 +28,7 @@
           {"tokenizer-bolt" ["sha256_random"]}
           "bolts.attachments.Attachments"
           ["sha256_random", "with_attachments", "attachments_json"]
-          :p 1
+          :p 2
           :conf {
                  "bolts.conf", "/etc/spamscope/bolts.yml",
                  }
@@ -43,16 +43,27 @@
                  "bolts.conf", "/etc/spamscope/bolts.yml",
                  }
           )
+    "urls_handler_attachments-bolt" (python-bolt-spec
+          options
+          {"attachments-bolt" ["sha256_random"]}
+          "bolts.urls_handler_attachments.UrlsHandlerAttachments"
+          ["sha256_random", "with_urls_attachments", "urls"]
+          :p 1
+          :conf {
+                 "bolts.conf", "/etc/spamscope/bolts.yml",
+                 }
+          )
     "phishing-bolt" (python-bolt-spec
           options
           {
            "tokenizer-bolt" ["sha256_random"]
            "attachments-bolt" ["sha256_random"]
            "urls_handler_body-bolt" ["sha256_random"]
+           "urls_handler_attachments-bolt" ["sha256_random"]
            }
           "bolts.phishing.Phishing"
           ["sha256_random", "with_phishing", "score", "targets"]
-          :p 1
+          :p 2
           :conf {
                  "bolts.conf", "/etc/spamscope/bolts.yml",
                  }
@@ -72,10 +83,11 @@
            "attachments-bolt" ["sha256_random"]
            "forms-bolt" ["sha256_random"]
            "urls_handler_body-bolt" ["sha256_random"]
+           "urls_handler_attachments-bolt" ["sha256_random"]
            }
           "bolts.json_maker.JsonMaker"
           ["sha256_random", "mail"]
-          :p 1
+          :p 2
           )
     "output-debug-bolt" (python-bolt-spec
           options

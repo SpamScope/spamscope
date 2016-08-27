@@ -41,10 +41,6 @@ class NotUnicodeError(ValueError):
     pass
 
 
-class FailedParsingDateMail(ValueError):
-    pass
-
-
 class MailParser(object):
 
     """Class to parse mail. """
@@ -132,10 +128,25 @@ class MailParser(object):
                 f = p.get_filename()
                 if f:
                     filename = self._decode_header_part(f)
+                    mail_content_type = self._decode_header_part(
+                        p.get_content_type(),
+                    )
+                    transfer_encoding = \
+                        unicode(p.get('content-transfer-encoding', '')).lower()
+
+                    if transfer_encoding == "base64":
+                        payload = p.get_payload(decode=False)
+                    else:
+                        payload = self._force_unicode(
+                            p.get_payload(decode=True),
+                        )
+
                     self._attachments.append(
                         {
                             "filename": filename,
-                            "payload": p.get_payload(decode=False)
+                            "payload": payload,
+                            "mail_content_type": mail_content_type,
+                            "content_transfer_encoding": transfer_encoding,
                         }
                     )
                 else:
@@ -232,9 +243,7 @@ class MailParser(object):
             t = time.mktime(d)
             return datetime.datetime.utcfromtimestamp(t)
         except:
-            raise FailedParsingDateMail(
-                'Failed parsing mail date: {}'.format(date_)
-            )
+            return None
 
     @property
     def parsed_mail_obj(self):
