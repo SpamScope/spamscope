@@ -42,7 +42,7 @@ Install requirements in file `requirements.txt` with `python-pip`:
 pip install -r requirements.txt
 ```
 
-There are two other requirements [Faup](https://github.com/stricaud/faup) and [tika-app-python](https://github.com/fedelemantuano/tika-app-python). For these use:
+There is another requirement [Faup](https://github.com/stricaud/faup). Install `faup` tool and then python library:
 
 ```
 python setup.py install
@@ -50,17 +50,46 @@ python setup.py install
 
 ## Docker image
 
-It's possible to use a docker image on ...
+It's possible to use a complete docker image with Apache Storm and SpamScope. Take it [here](https://hub.docker.com/r/fmantuano/spamscope-dockerfile/).
 
 
 ## Usage
 
-If you want try it, you should copy `topologies/spamscope.example.clj` and add your functionalities (you can start with example), then you should change `spouts.conf` and `bolts.conf` parameters. The last variables point to two configuration files in YAML, like in `conf/components/`.
+If you want try it, you should copy `topologies/spamscope.example.clj` and add your functionalities (you can start with example), then you should change `spouts.conf` and `bolts.conf` options. The last variables point to two configuration files in YAML, like in `conf/components/`.
 
-To run topology:
+To run topology for debug:
 
 ```
 sparse run --name topology
 ```
+
+If you want submit topology to Apache Storm:
+
+```
+sparse submit -f --name topology
+```
+
+### Apache Storm settings
+
+It's possible change the default setting for all Apache Storm options. I suggest for SpamScope these options:
+
+ - **topology.tick.tuple.freq.secs**: reload configuration of all bolts
+ - **topology.max.spout.pending**: Apache Storm framework will then throttle your spout as needed to meet the `topology.max.spout.pending` requirement
+ - **topology.sleep.spout.wait.strategy.time.ms**: max sleep for emit new tuple (mail)
+
+For SpamScope I tested these values to avoid failed tuples:
+
+```
+topology.tick.tuple.freq.secs: 60
+topology.max.spout.pending: 100
+topology.sleep.spout.wait.strategy.time.ms**: 10
+```
+
+For submit these options:
+
+```
+sparse submit -f --name topology -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10"
+```
+
 
 For more details you can refer [here](http://streamparse.readthedocs.io/en/stable/quickstart.html).
