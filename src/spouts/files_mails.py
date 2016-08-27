@@ -39,7 +39,6 @@ class FilesMailSpout(AbstractSpout):
         self.queue_fail = list()
         self.count = 1
         self.load_mails()
-        self.tuple_sleep = float(self.conf["tuple.sleep"])
         self.waiting_sleep = float(self.conf["waiting.sleep"])
         self.max_retry = int(self.conf["max.retry"])
 
@@ -89,7 +88,6 @@ class FilesMailSpout(AbstractSpout):
                     ],
                     tup_id=mail.filename,
                 )
-                time.sleep(self.tuple_sleep)
 
             # put new mails in priority queue
             else:
