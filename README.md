@@ -39,7 +39,7 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
 Clone repository
 
 ```
-git clone https://github.com/fedelemantuano/spamscope.git
+git clone https://github.com/SpamScope/spamscope.git
 ```
 
 Install requirements in file `requirements.txt` with `python-pip`:
@@ -87,7 +87,7 @@ topology.max.spout.pending: 100
 topology.sleep.spout.wait.strategy.time.ms: 10
 ```
 
-If Apache Tika is enable:
+If Apache Tika is enabled:
 
 ```
 topology.max.spout.pending: 10
