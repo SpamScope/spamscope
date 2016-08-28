@@ -71,7 +71,7 @@ class FilesMailSpout(AbstractSpout):
 
     def next_tuple(self):
 
-        # If queue is empty
+        # If queue is not empty
         if not self.queue.empty():
 
             # After reload.mails mails put new items in priority queue
@@ -98,18 +98,10 @@ class FilesMailSpout(AbstractSpout):
                 self.load_mails()
                 self.count = 1
 
-        # If queue is not empty
+        # If queue is empty
         else:
-            # Check if there are failed mails
-            if self.queue_fail:
-                self.queue_tail -= set(self.queue_fail)
-                self.log("Processing {} failed mails".format(
-                    len(set(self.queue_fail))))
-            # No failed mails
-            else:
-                self.log("Queue mails is empty")
-                time.sleep(self.waiting_sleep)
-
+            self.log("Queue mails is empty")
+            time.sleep(self.waiting_sleep)
             self.load_mails()
 
     def ack(self, tup_id):
@@ -124,12 +116,16 @@ class FilesMailSpout(AbstractSpout):
 
             # Mark as failed
             if self.queue_fail.count(tup_id) >= self.max_retry:
+                self.log("Tuple failed '{}' acked".format(tup_id))
                 failed_tup = True
 
             # Remove from failed queue
             self.queue_fail = [i for i in self.queue_fail if i != tup_id]
 
             self.log("Mails to process: {}".format(len(self.queue_tail)))
+            self.log("Mails in failed queue: {}".format(
+                len(set(self.queue_fail))))
+
         except KeyError:
             pass
 
@@ -141,7 +137,7 @@ class FilesMailSpout(AbstractSpout):
             if os.path.exists(tup_id):
                 os.remove(tup_id)
 
-        else:
+        elif what == "move" or (what == "remove" and failed_tup):
             if failed_tup:
                 where = self.conf["post_processing"]["where.failed"]
             else:
@@ -150,9 +146,7 @@ class FilesMailSpout(AbstractSpout):
             if not where:
                 raise ImproperlyConfigured(
                     "where or where.failed in '{}' is NOT configurated".format(
-                        self.spouts_conf
-                    )
-                )
+                        self.spouts_conf))
 
             # if path does not exist, do it
             if not os.path.exists(where):
@@ -164,24 +158,27 @@ class FilesMailSpout(AbstractSpout):
             except shutil.Error as e:
                 self.raise_exception(e)
 
+        else:
+            self.error("Error in spout conf. 'what' can be move or remove")
+
     def fail(self, tup_id):
         # If tuple fail the mail remains on disk, self.queue is empty but
         # self.queue_tail contains all failed tuples
 
-        if self.queue_fail.count(tup_id) < self.max_retry:
+        nr_fail = self.queue_fail.count(tup_id)
+
+        if nr_fail < self.max_retry:
 
             # Returns in queue
-            # self.queue_tail.remove(tup_id)
+            self.queue_tail.remove(tup_id)
 
             # Add in fail queue
             self.queue_fail.append(tup_id)
-            self.log(
-                "Tuple '{}' failed. Now in fail queue".format(tup_id),
-                "warning"
-            )
+            self.log("Tuple '{}' fail for {} times".format(
+                tup_id, nr_fail + 1), "warning")
         else:
-            self.log(
-                "Tuple {} failed for {} times".format(tup_id, self.max_retry)
-            )
+            self.log("Tuple '{}' failed for {} times".format(
+                tup_id, self.max_retry))
+
             # Remove from topology
             self.ack(tup_id)
