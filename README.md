@@ -35,6 +35,7 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
 
 
 ## Installation
+For more details please visit [wiki page](https://github.com/SpamScope/spamscope/wiki/Installation).
 
 Clone repository
 
