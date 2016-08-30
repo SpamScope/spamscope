@@ -43,10 +43,6 @@ class VirusTotalApiKeyInvalid(ValueError):
     pass
 
 
-class TikaServerOffline(Exception):
-    pass
-
-
 class SampleParser(object):
 
     def __init__(
