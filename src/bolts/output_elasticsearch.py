@@ -34,9 +34,9 @@ class OutputElasticsearch(AbstractBolt):
 
         # Elasticsearch parameters
         servers = self.conf['servers']
-        self._index_prefix = self.conf['index.prefix']
-        self._doc_type = self.conf['doc.type']
-        self._flush_size = self.conf['flush_size']
+        self._index_prefix = servers['index.prefix']
+        self._doc_type = servers['doc.type']
+        self._flush_size = servers['flush_size']
 
         # Elasticsearch object
         self._es = Elasticsearch(

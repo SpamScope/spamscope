@@ -72,17 +72,32 @@ class JsonMaker(Bolt):
         # Urls in body
         mail['with_urls_body'] = greedy_data['urls_handler_body-bolt'][1]
         if mail['with_urls_body']:
-            mail['urls_body'] = json.loads(
-                greedy_data['urls_handler_body-bolt'][2]
-            )
+
+            # Change urls format to fix Elasticsearch issue with dot '.'
+            reformat_urls = []
+            urls = json.loads(
+                greedy_data['urls_handler_body-bolt'][2])
+
+            for v in urls.values():
+                reformat_urls.extend(v)
+
+            mail['urls_body'] = reformat_urls
 
         # Urls in attachments
         mail['with_urls_attachments'] = \
             greedy_data['urls_handler_attachments-bolt'][1]
         if mail['with_urls_attachments']:
-            mail['urls_attachments'] = json.loads(
+
+            # Change urls format to fix Elasticsearch issue with dot '.'
+            reformat_urls = []
+            urls = json.loads(
                 greedy_data['urls_handler_attachments-bolt'][2]
             )
+
+            for v in urls.values():
+                reformat_urls.extend(v)
+
+            mail['urls_attachments'] = reformat_urls
 
         return json.dumps(mail, ensure_ascii=False)
 

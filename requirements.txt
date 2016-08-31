@@ -13,6 +13,7 @@ prettytable==0.7.2
 pycparser==2.14
 pycrypto==2.6.1
 pyparsing==2.1.1
+PySocks==1.5.7
 python-magic==0.4.12
 PyYAML==3.11
 requests==2.11.1
