@@ -113,7 +113,7 @@ It's possible add to results (for mail attachments) Virustotal report. Maybe you
 
 ## Docker image
 
-It's possible to use a complete Docker image with Apache Storm and SpamScope. Take it [here](https://hub.docker.com/r/fmantuano/spamscope/).
+It's possible to use a complete Docker image with Apache Storm and SpamScope. Take it [here](https://hub.docker.com/r/fmantuano/spamscope/). There are two tags: **latest** and **develop**.
 
 ![Apache Storm](doc/images/Docker00.png?raw=true "Apache Storm")
 
