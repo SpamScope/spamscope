@@ -1,6 +1,7 @@
 cffi==1.7.0
 contextlib2==0.5.3
 ecdsa==0.13
+elasticsearch==2.4.0
 Fabric==1.11.1
 invoke==0.12.2
 Jinja2==2.8
@@ -20,4 +21,5 @@ six==1.10.0
 ssdeep==3.1.1
 streamparse==2.1.4
 tika-app==0.3
+urllib3==1.16
 virustotal-api==1.1.2

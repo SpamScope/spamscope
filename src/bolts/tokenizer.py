@@ -75,6 +75,8 @@ class Tokenizer(Bolt):
         else:
             mail['date'] = datetime.datetime.utcnow().isoformat()
 
+        mail['analisys_date'] = datetime.datetime.utcnow().isoformat()
+
         # Check message-id
         if not mail.get('message_id'):
             # to identify mail
