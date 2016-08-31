@@ -109,6 +109,16 @@
                  "bolts.conf", "/etc/spamscope/bolts.yml",
                  }
           )
+    "output-elasticsearch-bolt" (python-bolt-spec
+          options
+          {"json-bolt" :shuffle}
+          "bolts.output_elasticsearch.OutputElasticsearch"
+          []
+          :p 1
+          :conf {
+                 "bolts.conf", "/etc/spamscope/bolts.yml",
+                 }
+          )
     }
   ]
 )
