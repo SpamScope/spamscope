@@ -18,6 +18,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
+import copy
 import datetime
 
 try:
@@ -35,7 +36,8 @@ class OutputElasticsearch(AbstractBolt):
         # Elasticsearch parameters
         servers = self.conf['servers']
         self._index_prefix = servers['index.prefix']
-        self._doc_type = servers['doc.type']
+        self._doc_type_analysis = servers['doc.type.analysis']
+        self._doc_type_attachments = servers['doc.type.attachments']
         self._flush_size = servers['flush_size']
 
         # Elasticsearch object
@@ -48,11 +50,14 @@ class OutputElasticsearch(AbstractBolt):
 
         # Init
         self._mails = []
+        self._attachments = []
         self._count = 1
 
     def flush(self):
         helpers.bulk(self._es, self._mails)
+        helpers.bulk(self._es, self._attachments)
         self._mails = []
+        self._attachments = []
         self._count = 1
 
     def process(self, tup):
@@ -67,10 +72,33 @@ class OutputElasticsearch(AbstractBolt):
             )
             mail_date = timestamp.strftime("%Y.%m.%d")
 
+            # Get a copy of attachments
+            attachments = []
+            if mail.get("attachments", []):
+                attachments = copy.deepcopy(mail["attachments"])
+
+            # Prepair attachments for bulk
+            for i in attachments:
+                i['@timestamp'] = timestamp
+                i['_index'] = self._index_prefix + mail_date
+                i['_type'] = self._doc_type_attachments
+                self._attachments.append(i)
+
+            # Remove from mail the attachments huge fields like payload
+            # Fetch from Elasticsearch more fast
+            for i in mail.get("attachments", []):
+                i.pop("payload", None)
+                i.pop("tika", None)
+                i.pop("virustotal", None)
+
+                for j in i.get("files", []):
+                    j.pop("payload", None)
+                    j.pop("virustotal", None)
+
             # Prepair mail for bulk
             mail['@timestamp'] = timestamp
             mail['_index'] = self._index_prefix + mail_date
-            mail['_type'] = self._doc_type
+            mail['_type'] = self._doc_type_analysis
 
             # Append mail in own date
             self._mails.append(mail)

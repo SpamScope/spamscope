@@ -144,7 +144,8 @@ output-elasticsearch-bolt:
 
         # Prefix with dash '-'. SpamScope use a index for day
         index.prefix: spamscope-
-        doc.type: analysis
+        doc.type.analysis: analysis
+        doc.type.attachments: attachments
 
         #max number of json to send in a bulk
         flush_size: 50
