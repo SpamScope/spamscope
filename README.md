@@ -35,11 +35,12 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
 
 
 ## Installation
+For more details please visit [wiki page](https://github.com/SpamScope/spamscope/wiki/Installation).
 
 Clone repository
 
 ```
-git clone https://github.com/fedelemantuano/spamscope.git
+git clone https://github.com/SpamScope/spamscope.git
 ```
 
 Install requirements in file `requirements.txt` with `python-pip`:
@@ -87,7 +88,7 @@ topology.max.spout.pending: 100
 topology.sleep.spout.wait.strategy.time.ms: 10
 ```
 
-If Apache Tika is enable:
+If Apache Tika is enabled:
 
 ```
 topology.max.spout.pending: 10
@@ -112,4 +113,11 @@ It's possible add to results (for mail attachments) Virustotal report. Maybe you
 
 ## Docker image
 
-It's possible to use a complete Docker image with Apache Storm and SpamScope. Take it [here](https://hub.docker.com/r/fmantuano/spamscope/).
+It's possible to use a complete Docker image with Apache Storm and SpamScope. Take it [here](https://hub.docker.com/r/fmantuano/spamscope/). There are two tags: **latest** and **develop**.
+
+![Apache Storm](doc/images/Docker00.png?raw=true "Apache Storm")
+
+![SpamScope](doc/images/Docker01.png?raw=true "SpamScope")
+
+![SpamScope Topology](doc/images/Docker02.png?raw=true "SpamScope Topology")
+
