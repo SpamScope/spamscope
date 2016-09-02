@@ -82,6 +82,26 @@ class OutputElasticsearch(AbstractBolt):
                 i['@timestamp'] = timestamp
                 i['_index'] = self._index_prefix + mail_date
                 i['_type'] = self._doc_type_attachments
+                i['type'] = self._doc_type_attachments
+                i['is_archived'] = False
+
+                for j in i.get("files", []):
+
+                    f = copy.deepcopy(j)
+
+                    # Prepair archived files
+                    f['@timestamp'] = timestamp
+                    f['_index'] = self._index_prefix + mail_date
+                    f['_type'] = self._doc_type_attachments
+                    f['type'] = self._doc_type_attachments
+                    f['is_archived'] = True
+                    self._attachments.append(f)
+
+                    # Remove from archived payload and virustotal,
+                    # now in root
+                    j.pop("payload", None)
+                    j.pop("virustotal", None)
+
                 self._attachments.append(i)
 
             # Remove from mail the attachments huge fields like payload
@@ -98,6 +118,7 @@ class OutputElasticsearch(AbstractBolt):
             # Prepair mail for bulk
             mail['@timestamp'] = timestamp
             mail['_index'] = self._index_prefix + mail_date
+            mail['type'] = self._doc_type_analysis
             mail['_type'] = self._doc_type_analysis
 
             # Append mail in own date
