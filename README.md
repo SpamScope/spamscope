@@ -1,4 +1,5 @@
-# SpamScope
+<p align="center"><img src="doc/logo/spamscope.jpg"/></p>
+
 
 ## Overview
 
