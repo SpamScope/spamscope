@@ -20,13 +20,13 @@ limitations under the License.
 import os
 import sys
 import unittest
-from tika_app import tika_app as tika
+import tikapp as tika
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
-sample_zip = os.path.join(root, 'unittest', 'samples', 'test.zip')
-sample_zip_1 = os.path.join(root, 'unittest', 'samples', 'test1.zip')
-sample_txt = os.path.join(root, 'unittest', 'samples', 'test.txt')
+sample_zip = os.path.join(base_path, 'samples', 'test.zip')
+sample_zip_1 = os.path.join(base_path, 'samples', 'test1.zip')
+sample_txt = os.path.join(base_path, 'samples', 'test.txt')
 sys.path.append(root)
 import src.modules.sample_parser as sample_parser
 

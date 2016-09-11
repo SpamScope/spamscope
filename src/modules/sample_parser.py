@@ -25,7 +25,7 @@ import patoolib
 import shutil
 import ssdeep
 import tempfile
-from tika_app.tika_app import TikaApp
+from tikapp import TikaApp
 from virus_total_apis import PublicApi as VirusTotalPublicApi
 
 log = logging.getLogger(__name__)
@@ -342,8 +342,8 @@ class SampleParser(object):
         self,
         data,
         filename,
-        mail_content_type,
-        transfer_encoding,
+        mail_content_type=None,
+        transfer_encoding=None,
     ):
         """Analyze sample and add metadata.
         If it's an archive, extract it and put files in a list of dictionaries.
@@ -381,8 +381,8 @@ class SampleParser(object):
         self,
         data,
         filename,
-        mail_content_type,
-        transfer_encoding,
+        mail_content_type=None,
+        transfer_encoding=None,
     ):
         """Analyze sample and add metadata.
         If it's a archive, extract it and put files in a list of dictionaries.

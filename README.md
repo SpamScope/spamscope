@@ -1,4 +1,4 @@
-<p align="center"><img src="doc/logo/spamscope.jpg"/></p>
+<p align="center"><img src="docs/logo/spamscope.jpg"/></p>
 
 
 ## Overview

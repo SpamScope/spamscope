@@ -27,7 +27,7 @@ sys.path.append(root)
 
 import src.modules.utils as utils
 
-text_files = os.path.join(root, 'profiling', 'lorem_ipsum.txt')
+text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 
 
 class TestSearchText(unittest.TestCase):
