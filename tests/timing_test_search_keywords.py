@@ -135,7 +135,7 @@ for k in keywords:
         t.append(re.compile(r'(\b%s\b)' % i, re.I))
     keywords_re_compiled.append(t)
 
-with open("lorem_ipsum.txt") as f:
+with open("samples/lorem_ipsum.txt") as f:
     text = f.read()
 
 

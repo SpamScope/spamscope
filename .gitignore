@@ -6,6 +6,4 @@
 _build
 _resources
 logs
-unittest/mails/
-unittest/samples/
 virtualenvs
