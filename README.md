@@ -1,4 +1,5 @@
-# SpamScope
+<p align="center"><img src="docs/logo/spamscope.jpg"/></p>
+
 
 ## Overview
 
@@ -115,9 +116,9 @@ It's possible add to results (for mail attachments) Virustotal report. Maybe you
 
 It's possible to use a complete Docker image with Apache Storm and SpamScope. Take it [here](https://hub.docker.com/r/fmantuano/spamscope/). There are two tags: **latest** and **develop**.
 
-![Apache Storm](doc/images/Docker00.png?raw=true "Apache Storm")
+![Apache Storm](docs/images/Docker00.png?raw=true "Apache Storm")
 
-![SpamScope](doc/images/Docker01.png?raw=true "SpamScope")
+![SpamScope](docs/images/Docker01.png?raw=true "SpamScope")
 
-![SpamScope Topology](doc/images/Docker02.png?raw=true "SpamScope Topology")
+![SpamScope Topology](docs/images/Docker02.png?raw=true "SpamScope Topology")
 
