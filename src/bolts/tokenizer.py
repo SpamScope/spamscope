@@ -17,7 +17,7 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
 
-from modules.mail_parser import MailParser
+from mailparser import MailParser
 from modules.utils import fingerprints
 import datetime
 import os
