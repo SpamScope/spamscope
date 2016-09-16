@@ -6,7 +6,7 @@ Fabric==1.11.1
 invoke==0.12.2
 Jinja2==2.8
 lxml==3.6.0
-mail-parser==0.2.1
+mail-parser==0.2.2
 MarkupSafe==0.23
 paramiko==1.17.0
 patool==1.12
