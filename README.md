@@ -7,7 +7,7 @@ SpamScope is an advanced spam analysis tool that use [Apache Storm](http://storm
 
 It's possible to analyze about 5 milions of mails (without Apache Tika analisys) for day with a 4 cores server and 4 GB of RAM. If you enable Apache Tika, you can analyze about 1 milion of mails.
 
-![Schema topology](doc/images/schema_topology.png?raw=true "Schema topology")
+![Schema topology](docs/images/schema_topology.png?raw=true "Schema topology")
 
 ### Distributed
 SpamScope use Apache Storm that allows you to start small and scale horizontally as you grow. Simply add more worker.
