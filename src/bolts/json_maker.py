@@ -26,6 +26,7 @@ from modules.phishing_bitmap import PhishingBitMap
 
 
 class JsonMaker(Bolt):
+    outputs = ['sha256_random', 'json']
 
     def initialize(self, stormconf, context):
         self.mails = {}
