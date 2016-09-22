@@ -30,6 +30,13 @@ MAIL_PATH = "path"
 
 
 class FilesMailSpout(AbstractSpout):
+    outputs = [
+        'mail_path',
+        'mail_server',
+        'mailbox',
+        'priority',
+        'kind_data',
+    ]
 
     def initialize(self, stormconf, context):
         super(FilesMailSpout, self).initialize(stormconf, context)

@@ -1,5 +1,5 @@
 {
-    "library": "",
+    "serializer": "json",
     "topology_specs": "topologies/",
     "virtualenv_specs": "virtualenvs/",
     "use_virtualenv": "false",

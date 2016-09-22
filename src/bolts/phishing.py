@@ -30,6 +30,7 @@ from modules.utils import \
 
 
 class Phishing(AbstractBolt):
+    outputs = ['sha256_random', 'with_phishing', 'score', 'targets']
 
     def initialize(self, stormconf, context):
         super(Phishing, self).initialize(stormconf, context)

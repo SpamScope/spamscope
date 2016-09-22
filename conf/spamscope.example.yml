@@ -1,7 +1,45 @@
-# Bolts configurations
+# Spouts configurations
+# Spout file on file system
+files-mails:
 
+    # Reload new mails after reload.mails analyzed
+    reload.mails: 1000
+
+    # Waiting new mails, sleep seconds
+    waiting.sleep: 1
+
+    # Max retry failed tuple
+    max.retry: 3
+
+    # Post processing 
+    post_processing:
+
+        # move or remove mails?
+        what: remove 
+            
+        # if move where
+        where: /mnt/testing/spamscope/mails/moved
+
+        # if failed move in where.failed
+        where.failed: /mnt/testing/spamscope/mails/failed
+
+    # Mailboxes
+    mailboxes: 
+        test: 
+            mail_server: hostname
+            files_pattern: "*untroubled*"
+            priority: 1
+            path_mails: /path/mails1
+        test1: 
+            mail_server: hostname
+            files_pattern: "*"
+            priority: 2
+            path_mails: /path/mails2
+
+                
+# Bolts configurations
 # Phishing bolt configuration
-phishing-bolt:
+phishing:
     lists:
         subjects: 
             # Suspect subjects
@@ -17,7 +55,7 @@ phishing-bolt:
 
 
 # Attachments bolt configuration
-attachments-bolt:
+attachments:
     tika:
         # Enable Tika but it's very slow:
         # https://github.com/fedelemantuano/tika-app-python#performance-tests
@@ -45,7 +83,7 @@ attachments-bolt:
 
 
 # Urls handler body
-urls_handler_body-bolt:
+urls-handler-body:
     whitelists:
         # Only second level domains to whitelisting
         # Example in conf/whitelists/generic.example.yml
@@ -60,7 +98,7 @@ urls_handler_body-bolt:
 
 
 # Urls handler attachments
-urls_handler_attachments-bolt:
+urls-handler-attachments:
     whitelists:
         # Only second level domains to whitelisting
         # Example in conf/whitelists/generic.example.yml
@@ -75,13 +113,12 @@ urls_handler_attachments-bolt:
 
 
 # Output debug bolt configuration
-output-debug-bolt:
+output-debug:
     json.indent: 4
     output.path: /path/to/output
 
 
-# Output debug bolt configuration
-
+# Output Redis
 #hosts:
 #The hostname(s) of your Redis server(s). Ports may be specified on any
 #hostname, which will override the global port config.
@@ -117,7 +154,7 @@ output-debug-bolt:
 #queue_name:
 #name of Redis server list
 
-output-redis-bolt:
+output-redis:
     servers:
         hosts:
             - "localhost:6379"
@@ -132,7 +169,7 @@ output-redis-bolt:
         queue_name: spamscope
 
 
-output-elasticsearch-bolt:
+output-elasticsearch:
     servers:
         hosts:
             - "node1:9200"
