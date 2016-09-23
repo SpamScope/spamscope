@@ -32,12 +32,12 @@ class JsonMaker(Bolt):
         self.mails = {}
         self.input_bolts = set(
             [
-                "tokenizer-bolt",
-                "phishing-bolt",
-                "attachments-bolt",
-                "forms-bolt",
-                "urls_handler_body-bolt",
-                "urls_handler_attachments-bolt",
+                "tokenizer",
+                "phishing",
+                "attachments",
+                "forms",
+                "urls-handler-body",
+                "urls-handler-attachments",
             ]
         )
 
@@ -46,38 +46,38 @@ class JsonMaker(Bolt):
 
     def _compose_output(self, greedy_data):
         # Tokenizer
-        mail = json.loads(greedy_data['tokenizer-bolt'][1])
+        mail = json.loads(greedy_data['tokenizer'][1])
 
         # Phishing
-        phishing_score = greedy_data['phishing-bolt'][2]
-        mail['with_phishing'] = greedy_data['phishing-bolt'][1]
+        phishing_score = greedy_data['phishing'][2]
+        mail['with_phishing'] = greedy_data['phishing'][1]
         mail['phishing_score'] = phishing_score
 
         if phishing_score:
             self._phishing_bitmap.score = phishing_score
 
-            mail['targets'] = json.loads(greedy_data['phishing-bolt'][3])
+            mail['targets'] = json.loads(greedy_data['phishing'][3])
             mail['phishing_score_expanded'] = \
                 self._phishing_bitmap.score_properties
 
         # Forms
-        mail['with_forms'] = greedy_data['forms-bolt'][1]
+        mail['with_forms'] = greedy_data['forms'][1]
 
         # Attachments
-        mail['with_attachments'] = greedy_data['attachments-bolt'][1]
+        mail['with_attachments'] = greedy_data['attachments'][1]
         if mail['with_attachments']:
             mail['attachments'] = json.loads(
-                greedy_data['attachments-bolt'][2]
+                greedy_data['attachments'][2]
             )
 
         # Urls in body
-        mail['with_urls_body'] = greedy_data['urls_handler_body-bolt'][1]
+        mail['with_urls_body'] = greedy_data['urls-handler-body'][1]
         if mail['with_urls_body']:
 
             # Change urls format to fix Elasticsearch issue with dot '.'
             reformat_urls = []
             urls = json.loads(
-                greedy_data['urls_handler_body-bolt'][2])
+                greedy_data['urls-handler-body'][2])
 
             for v in urls.values():
                 reformat_urls.extend(v)
@@ -86,13 +86,13 @@ class JsonMaker(Bolt):
 
         # Urls in attachments
         mail['with_urls_attachments'] = \
-            greedy_data['urls_handler_attachments-bolt'][1]
+            greedy_data['urls-handler-attachments'][1]
         if mail['with_urls_attachments']:
 
             # Change urls format to fix Elasticsearch issue with dot '.'
             reformat_urls = []
             urls = json.loads(
-                greedy_data['urls_handler_attachments-bolt'][2]
+                greedy_data['urls-handler-attachments'][2]
             )
 
             for v in urls.values():
