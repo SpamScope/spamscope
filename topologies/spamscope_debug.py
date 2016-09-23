@@ -12,7 +12,7 @@ from bolts.phishing import Phishing
 from bolts.tokenizer import Tokenizer
 from bolts.urls_handler_attachments import UrlsHandlerAttachments
 from bolts.urls_handler_body import UrlsHandlerBody
-from spout.files_mails import FilesMailSpout
+from spouts.files_mails import FilesMailSpout
 
 
 class OutputDebugTopology(Topology):
@@ -33,7 +33,7 @@ class OutputDebugTopology(Topology):
         name="urls-handler-body",
         inputs={tokenizer: Grouping.fields('sha256_random')})
 
-    urls_attachments = UrlsHandlerAttachments(
+    urls_attachments = UrlsHandlerAttachments.spec(
         name="urls-handler-attachments",
         inputs={attachments: Grouping.fields('sha256_random')})
 
