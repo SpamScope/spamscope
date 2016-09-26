@@ -1,5 +1,5 @@
 {
-    "library": "",
+    "serializer": "json",
     "topology_specs": "topologies/",
     "virtualenv_specs": "virtualenvs/",
     "use_virtualenv": "false",
@@ -16,6 +16,8 @@
                 "backup_count": 10,
                 "level": "info"
             },
+            "use_virtualenv": false,
+            "use_ssh_for_nimbus": false,
             "virtualenv_root": ""
         }
     }

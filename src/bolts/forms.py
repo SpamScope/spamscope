@@ -26,10 +26,11 @@ except ImportError:
 
 
 class Forms(Bolt):
+    outputs = ['sha256_random', 'with_form']
 
     def process(self, tup):
         sha256_random = tup.values[0]
-        forms = False
+        with_form = False
 
         try:
             mail = json.loads(tup.values[1])
@@ -39,7 +40,7 @@ class Forms(Bolt):
                 tree = html.fromstring(body)
                 results = tree.xpath('//form')
                 if results:
-                    forms = True
+                    with_form = True
                     self.log("Forms for mail '{}'".format(sha256_random))
 
         except Exception as e:
@@ -50,4 +51,4 @@ class Forms(Bolt):
             self.raise_exception(e, tup)
 
         finally:
-            self.emit([sha256_random, forms])
+            self.emit([sha256_random, with_form])
