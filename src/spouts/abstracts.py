@@ -27,7 +27,7 @@ class AbstractSpout(Spout):
     __metaclass__ = ABCMeta
 
     def initialize(self, stormconf, context):
-        self._conf_file = stormconf.get("spouts.conf", None)
+        self._conf_file = stormconf.get("spamscope_conf", None)
         self._conf_loader()
 
     def _conf_loader(self):

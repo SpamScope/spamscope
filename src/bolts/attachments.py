@@ -27,6 +27,7 @@ except ImportError:
 
 
 class Attachments(AbstractBolt):
+    outputs = ['sha256_random', 'with_attachments', 'attachments']
 
     def initialize(self, stormconf, context):
         super(Attachments, self).initialize(stormconf, context)

@@ -24,6 +24,7 @@ except ImportError:
 
 
 class UrlsHandlerBody(AbstractUrlsHandlerBolt):
+    outputs = ['sha256_random', 'with_urls', 'urls']
 
     def initialize(self, stormconf, context):
         super(UrlsHandlerBody, self).initialize(stormconf, context)
