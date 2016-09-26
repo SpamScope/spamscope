@@ -7,7 +7,7 @@ SpamScope is an advanced spam analysis tool that use [Apache Storm](http://storm
 
 It's possible to analyze about 5 milions of mails (without Apache Tika analisys) for day with a 4 cores server and 4 GB of RAM. If you enable Apache Tika, you can analyze about 1 milion of mails.
 
-![Schema topology](doc/images/schema_topology.png?raw=true "Schema topology")
+![Schema topology](docs/images/schema_topology.png?raw=true "Schema topology")
 
 ### Distributed
 SpamScope use Apache Storm that allows you to start small and scale horizontally as you grow. Simply add more worker.
@@ -59,7 +59,12 @@ python setup.py install
 
 ## Usage
 
-If you want try it, you should copy `topologies/spamscope.example.clj` and add your functionalities (you can start with example), then you should change `spouts.conf` and `bolts.conf` options. The last variables point to two configuration files in YAML, like in `conf/components/`.
+SpamScope comes with two topologies:
+   - spamscope_debug
+   - spamscope_elasticsearch
+
+and a general configuration file `spamscope.conf` in `conf/` folder.
+
 
 To run topology for debug:
 
@@ -72,6 +77,11 @@ If you want submit topology to Apache Storm:
 ```
 sparse submit -f --name topology
 ```
+
+### Important
+It's very importart pass configuration file to commands `sparse run` and `sparse submit`. There is an [open bug](https://github.com/Parsely/streamparse/issues/263) in streamparse:
+  - `sparse run --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml"`
+  - `sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml"`
 
 ### Apache Storm settings
 
@@ -98,7 +108,7 @@ topology.max.spout.pending: 10
 For submit these options:
 
 ```
-sparse submit -f --name topology -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10"
+sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10"
 ```
 
 For more details you can refer [here](http://streamparse.readthedocs.io/en/stable/quickstart.html).
