@@ -30,6 +30,7 @@ from modules.utils import \
 
 
 class Phishing(AbstractBolt):
+    outputs = ['sha256_random', 'with_phishing', 'score', 'targets']
 
     def initialize(self, stormconf, context):
         super(Phishing, self).initialize(stormconf, context)
@@ -37,10 +38,10 @@ class Phishing(AbstractBolt):
         # Input bolts for Phishing bolt
         self.input_bolts = set(
             [
-                "tokenizer-bolt",
-                "attachments-bolt",
-                "urls_handler_body-bolt",
-                "urls_handler_attachments-bolt",
+                "tokenizer",
+                "attachments",
+                "urls-handler-body",
+                "urls-handler-attachments",
             ]
         )
 
@@ -112,33 +113,33 @@ class Phishing(AbstractBolt):
         targets = set()
 
         # Get Tokenizer
-        mail = json.loads(greedy_data['tokenizer-bolt'][1])
+        mail = json.loads(greedy_data['tokenizer'][1])
         body = mail.get('body')
         subject = mail.get('subject')
         from_ = mail.get('from')
 
         # Get Urls in body
-        with_urls_body = greedy_data['urls_handler_body-bolt'][1]
+        with_urls_body = greedy_data['urls-handler-body'][1]
         urls = None
         if with_urls_body:
             urls = json.loads(
-                greedy_data['urls_handler_body-bolt'][2]
+                greedy_data['urls-handler-body'][2]
             )
 
         # Get Urls attachments
-        with_urls_attachments = greedy_data['urls_handler_attachments-bolt'][1]
+        with_urls_attachments = greedy_data['urls-handler-attachments'][1]
         urls_attachments = None
         if with_urls_attachments:
             urls_attachments = json.loads(
-                greedy_data['urls_handler_attachments-bolt'][2]
+                greedy_data['urls-handler-attachments'][2]
             )
 
         # Get Attachments
-        with_attachments = greedy_data['attachments-bolt'][1]
+        with_attachments = greedy_data['attachments'][1]
         attachments = None
         if with_attachments:
             attachments = json.loads(
-                greedy_data['attachments-bolt'][2]
+                greedy_data['attachments'][2]
             )
 
         # Check body

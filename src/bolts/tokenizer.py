@@ -41,6 +41,8 @@ class InvalidKindData(ValueError):
 class Tokenizer(Bolt):
     """Split the mail in token parts (body, attachments, etc.). """
 
+    outputs = ['sha256_random', 'mail']
+
     def initialize(self, stormconf, context):
         self.p = MailParser()
 
