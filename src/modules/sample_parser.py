@@ -39,7 +39,7 @@ class TempIOError(Exception):
     pass
 
 
-class InvalidAttachments(ValueError):
+class InvalidAttachment(ValueError):
     pass
 
 
@@ -47,89 +47,97 @@ class VirusTotalApiKeyInvalid(ValueError):
     pass
 
 
+class InvalidContentTypes(ValueError):
+    pass
+
+
 class TikaAnalysis(object):
+
     def __init__(
         self,
-        tika_enabled=False,
-        tika_jar=None,
-        tika_memory_allocation=None,
-        tika_content_types=set(),
+        jar=None,
+        memory_allocation=None,
+        valid_content_types=set()
     ):
-        # If tika is enabled set a tika_client
-        if tika_enabled:
-            self._tika_client = TikaApp(
-                file_jar=tika_jar,
-                memory_allocation=tika_memory_allocation)
 
         # Init Tika
-        self._tika_enabled = tika_enabled
-        self._tika_jar = tika_jar
-        self._tika_memory_allocation = tika_memory_allocation
-        self._tika_content_types = tika_content_types
+        self._tika_client = TikaApp(
+            file_jar=jar,
+            memory_allocation=memory_allocation)
+        self._jar = jar
+        self._memory_allocation = memory_allocation
+        self._valid_content_types = valid_content_types
 
     @property
-    def tika_enabled(self):
-        return self._tika_enabled
+    def jar(self):
+        return self._jar
+
+    @jar.setter
+    def jar(self, value):
+        self._jar = value
 
     @property
-    def tika_jar(self):
-        return self._tika_jar
+    def memory_allocation(self):
+        return self._memory_allocation
+
+    @memory_allocation.setter
+    def memory_allocation(self, value):
+        self._memory_allocation = value
 
     @property
-    def tika_memory_allocation(self):
-        return self._tika_memory_allocation
+    def valid_content_types(self):
+        return self._valid_content_types
 
-    @property
-    def tika_content_types(self):
-        return self._tika_content_types
+    @valid_content_types.setter
+    def valid_content_types(self, value):
+        if not isinstance(value, set):
+            raise InvalidContentTypes("Content types must be a set")
+        self._valid_content_types = value
 
-    def add_meta_data(self, content_type, attachments):
+    def add_meta_data(self, attachment):
+        """If content_type in valid_content_types this method
+        extracts meta data and update attachments input results.
         """
-        If content_type in tika_content_types this method
-        extracts meta data and update attachments input results
-        """
 
-        if not isinstance(attachments, dict):
-            raise InvalidAttachments("Attachments result is not a dict")
+        if not isinstance(attachment, dict):
+            raise InvalidAttachment("Attachment result is not a dict")
 
         # The Apache Tika output of archive contains the contents and metadata
         # of all archived files.
-        if content_type in self.tika_content_types:
-            attachments['tika'] = self._tika_client.extract_all_content(
-                payload=attachments['payload'],
-                convert_to_obj=True,
-            )
+        if attachment['Content-Type'] in self.valid_content_types:
+            attachment['tika'] = self._tika_client.extract_all_content(
+                payload=attachment['payload'],
+                convert_to_obj=True)
 
 
 class VirusTotalAnalysis(object):
-    def __init__(self, virustotal_enabled=False, virustotal_api_key=None):
-        self._virustotal_enabled = virustotal_enabled
-        self._virustotal_api_key = virustotal_api_key
+    def __init__(self, api_key=None):
+        self._api_key = api_key
 
     @property
-    def virustotal_enabled(self):
-        return self._virustotal_enabled
+    def api_key(self):
+        return self._api_key
 
-    @property
-    def virustotal_api_key(self):
-        return self._virustotal_api_key
+    @api_key.setter
+    def api_key(self, value):
+        self._api_key = value
 
-    def add_analysis(self, attachments):
-        if not isinstance(attachments, dict):
-            raise InvalidAttachments("Attachments result is not a dict")
+    def add_analysis(self, attachment):
+        if not isinstance(attachment, dict):
+            raise InvalidAttachment("Attachment result is not a dict")
 
-        if not self.virustotal_api_key:
+        if not self.api_key:
             raise VirusTotalApiKeyInvalid("Please add a VirusTotal API key!")
 
-        vt = VirusTotalPublicApi(self.virustotal_api_key)
+        vt = VirusTotalPublicApi(self.api_key)
 
-        sha1 = attachments['sha1']
+        sha1 = attachment['sha1']
         result = vt.get_file_report(sha1)
         if result:
-            attachments['virustotal'] = result
+            attachment['virustotal'] = result
 
-        if attachments['is_archive']:
-            for i in attachments['files']:
+        if attachment['is_archive']:
+            for i in attachment['files']:
                 i_sha1 = i['sha1']
                 i_result = vt.get_file_report(i_sha1)
                 if i_result:
@@ -201,7 +209,8 @@ class SampleParser(object):
 
         return md5, sha1, sha256, sha512, ssdeep_
 
-    def is_archive_from_base64(self, data, write_sample=False):
+    @staticmethod
+    def is_archive_from_base64(data, write_sample=False):
         """If write_sample=False this function return only a boolean:
             True if data is a archive, else False.
         Else write_sample=True this function return a tuple:
@@ -214,9 +223,10 @@ class SampleParser(object):
         except:
             raise Base64Error("Data '{}' is NOT correct".format(data))
 
-        return self.is_archive(data, write_sample)
+        return SampleParser.is_archive(data, write_sample)
 
-    def is_archive(self, data, write_sample=False):
+    @staticmethod
+    def is_archive(data, write_sample=False):
         """If write_sample=False this function return only a boolean:
             True if data is a archive, else False.
         Else write_sample=True this function return a tuple:
@@ -295,7 +305,7 @@ class SampleParser(object):
     def _add_fingerprints(self):
         """ Add fingerprints."""
 
-        md5, sha1, sha256, sha512, ssdeep_ = SampleParser.fingerprints(
+        md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
             self._result['payload'].decode('base64'))
 
         self._result['md5'] = md5

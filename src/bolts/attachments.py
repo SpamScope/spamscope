@@ -39,31 +39,9 @@ class Attachments(AbstractBolt):
 
         # Attachments handler
         self._sample_parser = SampleParser(
-            tika_enabled=self.conf["tika"]["enabled"],
-            tika_jar=self.conf["tika"]["path_jar"],
-            tika_memory_allocation=self.conf["tika"]["memory_allocation"],
-            tika_content_types=self._cont_type_details,
-            blacklist_content_types=self._cont_type_bl,
-            virustotal_enabled=self.conf["virustotal"]["enabled"],
-            virustotal_api_key=self.conf["virustotal"]["api_key"],
-        )
+            blacklist_content_types=self._cont_type_bl)
 
     def _load_lists(self):
-
-        # Load content types for details
-        self._cont_type_details = set()
-        if self.conf["tika"]["enabled"]:
-            self.log("Reloading content types list for Tika details")
-            for k, v in self.conf["tika"]["content_types_details"].iteritems():
-                keywords = load_config(v)
-                if not isinstance(keywords, list):
-                    raise ImproperlyConfigured(
-                        "Keywords content types details \
-                        list '{}' not valid".format(k)
-                    )
-                keywords = [i.lower() for i in keywords]
-                self._cont_type_details |= set(keywords)
-                self.log("Content types Tika '{}' loaded".format(k))
 
         # Load content types for blacklist
         self.log("Reloading content types list blacklist")
@@ -85,56 +63,41 @@ class Attachments(AbstractBolt):
         self._load_settings()
 
     def process(self, tup):
-        sha256_mail_random = tup.values[0]
-        with_attachments = False
+        sha256_random = tup.values[0]
+        with_attachments = tup.values[2]
+        new_attachments = []
         attachments_json = None
 
         try:
-            mail = json.loads(tup.values[1])
-            attachments = mail.get('attachments', [])
+            attachments = json.loads(tup.values[1]).get('attachments', [])
 
-            if attachments:
-                self.log(
-                    "Attachments for mail '{}'".format(sha256_mail_random)
+            for i in attachments:
+                self._sample_parser.parse_sample_from_base64(
+                    data=i['payload'],
+                    filename=i['filename'],
+                    mail_content_type=i['mail_content_type'],
+                    transfer_encoding=i['content_transfer_encoding'],
                 )
 
-                new_attachments = list()
+                if self._sample_parser.result:
+                    new_attachments.append(self._sample_parser.result)
 
-                for a in attachments:
-                    self._sample_parser.parse_sample_from_base64(
-                        data=a['payload'],
-                        filename=a['filename'],
-                        mail_content_type=a['mail_content_type'],
-                        transfer_encoding=a['content_transfer_encoding'],
+            try:
+                if new_attachments:
+                    attachments_json = json.dumps(
+                        new_attachments,
+                        ensure_ascii=False,
                     )
+                    with_attachments = True
 
-                    if self._sample_parser.result:
-                        new_attachments.append(self._sample_parser.result)
-
-                try:
-                    if new_attachments:
-                        attachments_json = json.dumps(
-                            new_attachments,
-                            ensure_ascii=False,
-                        )
-                        with_attachments = True
-
-                except UnicodeDecodeError:
-                    self.log(
-                        "UnicodeDecodeError for mail '{}'".format(
-                            sha256_mail_random
-                        ),
-                        level="error"
-                    )
+            except UnicodeDecodeError:
+                self.log("UnicodeDecodeError for mail '{}'".format(
+                    sha256_random), "error")
 
         except Exception as e:
-            self.log(
-                "Failed process attachments for mail: {}".format(
-                    sha256_mail_random
-                ),
-                level="error"
-            )
+            self.log("Failed process attachments for mail: {}".format(
+                sha256_random), "error")
             self.raise_exception(e, tup)
 
         finally:
-            self.emit([sha256_mail_random, with_attachments, attachments_json])
+            self.emit([sha256_random, with_attachments, attachments_json])
