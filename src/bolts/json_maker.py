@@ -16,13 +16,8 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 from modules.phishing_bitmap import PhishingBitMap
+# import simplejson as json
 
 
 class JsonMaker(Bolt):
@@ -30,23 +25,20 @@ class JsonMaker(Bolt):
 
     def initialize(self, stormconf, context):
         self.mails = {}
-        self.input_bolts = set(
-            [
-                "tokenizer",
-                "phishing",
-                "attachments",
-                "forms",
-                "urls-handler-body",
-                "urls-handler-attachments",
-            ]
-        )
+        self.input_bolts = set([
+            "tokenizer",
+            "phishing",
+            "attachments",
+            "forms",
+            "urls-handler-body",
+            "urls-handler-attachments"])
 
         # Phishing bitmap
         self._phishing_bitmap = PhishingBitMap()
 
     def _compose_output(self, greedy_data):
         # Tokenizer
-        mail = json.loads(greedy_data['tokenizer'][1])
+        mail = greedy_data['tokenizer'][1]
 
         # Phishing
         phishing_score = greedy_data['phishing'][2]
@@ -56,7 +48,7 @@ class JsonMaker(Bolt):
         if phishing_score:
             self._phishing_bitmap.score = phishing_score
 
-            mail['targets'] = json.loads(greedy_data['phishing'][3])
+            mail['targets'] = greedy_data['phishing'][3]
             mail['phishing_score_expanded'] = \
                 self._phishing_bitmap.score_properties
 
@@ -66,9 +58,7 @@ class JsonMaker(Bolt):
         # Attachments
         mail['with_attachments'] = greedy_data['attachments'][1]
         if mail['with_attachments']:
-            mail['attachments'] = json.loads(
-                greedy_data['attachments'][2]
-            )
+            mail['attachments'] = greedy_data['attachments'][2]
 
         # Urls in body
         mail['with_urls_body'] = greedy_data['urls-handler-body'][1]
@@ -76,8 +66,7 @@ class JsonMaker(Bolt):
 
             # Change urls format to fix Elasticsearch issue with dot '.'
             reformat_urls = []
-            urls = json.loads(
-                greedy_data['urls-handler-body'][2])
+            urls = greedy_data['urls-handler-body'][2]
 
             for v in urls.values():
                 reformat_urls.extend(v)
@@ -91,16 +80,14 @@ class JsonMaker(Bolt):
 
             # Change urls format to fix Elasticsearch issue with dot '.'
             reformat_urls = []
-            urls = json.loads(
-                greedy_data['urls-handler-attachments'][2]
-            )
+            urls = greedy_data['urls-handler-attachments'][2]
 
             for v in urls.values():
                 reformat_urls.extend(v)
 
             mail['urls_attachments'] = reformat_urls
 
-        return json.dumps(mail, ensure_ascii=False)
+        return mail
 
     def process(self, tup):
         try:

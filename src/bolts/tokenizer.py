@@ -15,127 +15,146 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from streamparse.bolt import Bolt
-
+from collections import deque
 from mailparser import MailParser
 from modules.utils import fingerprints
+from streamparse import Stream
+from streamparse.bolt import Bolt
 import datetime
 import os
 import random
-import string
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 
 MAIL_STRING = "string"
 MAIL_PATH = "path"
 
 
-class InvalidKindData(ValueError):
+class InvalidMailFormat(ValueError):
     pass
 
 
 class Tokenizer(Bolt):
     """Split the mail in token parts (body, attachments, etc.). """
 
-    outputs = ['sha256_random', 'mail']
+    outputs = [
+        Stream(fields=['sha256_random', 'mail', 'is_filtered'], name='mail'),
+        Stream(fields=['sha256_random', 'body', 'is_filtered'], name='body'),
+        Stream(fields=['sha256_random', 'attachments'], name='attachments')]
 
     def initialize(self, stormconf, context):
-        self.p = MailParser()
+        self._parser = MailParser()
+        self._mails_analyzed = deque(maxlen=1000)
+        self._attachments_analyzed = deque(maxlen=1000)
 
-    def random_message_id(self):
-        random_s = ''.join(random.choice(string.lowercase) for i in range(20))
-        return "<" + random_s + "@nothing-message-id>"
+    @property
+    def parser(self):
+        return self._parser
 
-    def tokenizer(self, mail_server, mailbox, priority, mail_data, kind_data):
+    def _filter_attachments(self):
+        """
+        Filter the attachments that are in memory, already analyzed
+        """
+        attachments = self.parser.attachments_list
+        new_attachments = []
 
-        # Mail object
-        mail = self.p.parsed_mail_obj
+        for i in attachments:
+            f = fingerprints(i["payload"])
 
-        # Fingerprints of body mail
-        (
-            mail['md5'],
-            mail['sha1'],
-            mail['sha256'],
-            mail['sha512'],
-            mail['ssdeep'],
-        ) = fingerprints(self.p.body.encode('utf-8'))
+            if f[1] in self._attachments_analyzed:
+                new_attachments.append({
+                    "md5": f[0],
+                    "sha1": f[1],
+                    "sha256": f[2],
+                    "sha512": f[3],
+                    "ssdeep": f[4]})
+            else:
+                new_attachments.append(i)
+
+            self._attachments_analyzed.append(f[1])
+
+        return new_attachments
+
+    def _make_mail(self, tup):
+        raw_mail = tup.values[0]
+        mail_format = tup.values[4]
+        rand = '_' + ''.join(random.choice('012345') for i in range(10))
+
+        # Check if kind_data is correct
+        if mail_format != MAIL_STRING and mail_format != MAIL_PATH:
+            raise InvalidMailFormat(
+                "Invalid mail format '{}'. Choose '{}' or '{}'".format(
+                    mail_format, MAIL_STRING, MAIL_PATH))
+
+        # Parsing mail
+        if mail_format == MAIL_PATH:
+            if os.path.exists(raw_mail):
+                self.parser.parse_from_file(raw_mail)
+        else:
+            self.parser.parse_from_string(raw_mail)
+
+        # Getting all parts
+        mail = self.parser.parsed_mail_obj
 
         # Data mail sources
-        mail['mail_server'] = mail_server
-        mail['mailbox'] = mailbox
-        mail['priority'] = priority
+        mail['mail_server'] = tup.values[1]
+        mail['mailbox'] = tup.values[2]
+        mail['priority'] = tup.values[3]
 
-        # Serialize mail
-        mail_date = mail.get('date')
+        # Fingerprints of body mail
+        (mail['md5'], mail['sha1'], mail['sha256'], mail['sha512'],
+            mail['ssdeep']) = fingerprints(self.parser.body.encode('utf-8'))
+        sha256_rand = mail['sha256'] + rand
 
-        if mail_date:
-            mail['date'] = mail_date.isoformat()
+        # Add path to result
+        if mail_format == MAIL_PATH:
+            mail['path_mail'] = raw_mail
+
+        # Dates
+        if mail.get('date'):
+            mail['date'] = mail.get('date').isoformat()
         else:
             mail['date'] = datetime.datetime.utcnow().isoformat()
 
         mail['analisys_date'] = datetime.datetime.utcnow().isoformat()
 
-        # Check message-id
-        if not mail.get('message_id'):
-            # to identify mail
-            mail['message_id'] = self.random_message_id()
+        # Remove attachments
+        mail.pop("attachments", None)
 
-        if kind_data == MAIL_PATH:
-            mail['path_mail'] = mail_data
-
-        # Mail JSON
-        mail_json = json.dumps(
-            mail,
-            ensure_ascii=False,
-        )
-
-        # if two mails have the same sha256
-        random_s = '_' + ''.join(
-            random.choice('0123456789') for i in range(10)
-        )
-
-        return mail['sha256'] + random_s, mail_json
+        return sha256_rand, raw_mail, mail
 
     def process(self, tup):
         try:
-            mail_data = tup.values[0]
-            mail_server = tup.values[1]
-            mailbox = tup.values[2]
-            priority = tup.values[3]
-            kind_data = tup.values[4]
+            sha256_rand, raw_mail, mail = self._make_mail(tup)
+            with_attachments = False
 
-            # Check if kind_data is correct
-            if kind_data != MAIL_STRING and kind_data != MAIL_PATH:
-                raise InvalidKindData(
-                    "Invalid kind of data '{}'. Choose '{}' or '{}'".format(
-                        kind_data,
-                        MAIL_STRING,
-                        MAIL_PATH,
-                    )
-                )
-
-            # Parsing mail
-            if kind_data == MAIL_PATH:
-                if os.path.exists(mail_data):
-                    self.p.parse_from_file(mail_data)
-
+            # If mail is already analyzed
+            if mail["sha1"] in self._mails_analyzed:
+                mail.pop("body", None)
+                body = None
+                is_filtered = True
             else:
-                self.p.parse_from_string(mail_data)
+                body = self.parser.body
+                is_filtered = False
 
-            # Tokenizer and emit
-            self.emit(
-                self.tokenizer(
-                    mail_server, mailbox, priority, mail_data, kind_data
-                )
-            )
+            # Emit mail
+            # mail_json = json.dumps(mail, ensure_ascii=False)
+            self.emit([sha256_rand, mail, is_filtered], stream="mail")
+
+            # Emit body
+            self.emit([sha256_rand, body, is_filtered], stream="body")
+
+            # Update databese mail analyzed
+            self._mails_analyzed.append(mail["sha1"])
+
+            # Emit only attachments
+            if self.parser.attachments_list:
+                attachments = self._filter_attachments()
+                with_attachments = True
+            else:
+                attachments = None
+
+            self.emit([sha256_rand, with_attachments, attachments],
+                      stream="attachments")
 
         except Exception as e:
-            self.log(
-                "Failed parsing mail path: {}".format(mail_data),
-                "error"
-            )
+            self.log("Failed parsing mail path: {}".format(raw_mail), "error")
             self.raise_exception(e, tup)
