@@ -17,11 +17,6 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractUrlsHandlerBolt
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 
 class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
     outputs = ['sha256_random', 'with_urls', 'urls']
@@ -31,19 +26,15 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
 
     def process(self, tup):
         sha256_mail_random = tup.values[0]
+        attachments = tup.values[1]
         with_urls = False
         urls_json = None
         all_contents = u""
 
         try:
-            with_attachments = tup.values[1]
-            if with_attachments:
-                attachments = json.loads(
-                    tup.values[2]
-                )
-
-                # Get all contents for all attachments and files archived
-                for i in attachments:
+            # Get all contents for all attachments and files archived
+            for i in attachments:
+                if i.get("payload"):
                     try:
                         if i.get("is_archive"):
                             for j in i.get("files"):
@@ -52,19 +43,14 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
                         else:
                             all_contents += \
                                 i["payload"].decode('base64') + u"\n"
-
                     except UnicodeDecodeError:
                         pass
 
-                with_urls, urls_json = self._extract_urls(all_contents)
+            with_urls, urls_json = self._extract_urls(all_contents, False)
 
         except Exception as e:
-            self.log(
-                "Failed process urls attachment for mail: {}".format(
-                    sha256_mail_random
-                ),
-                level="error"
-            )
+            self.log("Failed process urls attachment for mail: {}".format(
+                sha256_mail_random), "error")
             self.raise_exception(e, tup)
 
         finally:

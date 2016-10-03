@@ -19,11 +19,7 @@ from bolts.abstracts import AbstractBolt
 from modules.errors import ImproperlyConfigured
 from modules.sample_parser import SampleParser
 from modules.utils import load_config
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+# import simplejson as json
 
 
 class Attachments(AbstractBolt):
@@ -64,13 +60,12 @@ class Attachments(AbstractBolt):
 
     def process(self, tup):
         sha256_random = tup.values[0]
+        attachments = tup.values[1]
         with_attachments = tup.values[2]
         new_attachments = []
-        attachments_json = None
+        # attachments_json = None
 
         try:
-            attachments = json.loads(tup.values[1]).get('attachments', [])
-
             for i in attachments:
                 self._sample_parser.parse_sample_from_base64(
                     data=i['payload'],
@@ -82,17 +77,17 @@ class Attachments(AbstractBolt):
                 if self._sample_parser.result:
                     new_attachments.append(self._sample_parser.result)
 
-            try:
-                if new_attachments:
-                    attachments_json = json.dumps(
-                        new_attachments,
-                        ensure_ascii=False,
-                    )
-                    with_attachments = True
+            # try:
+                # if new_attachments:
+                    # attachments_json = json.dumps(
+                        # new_attachments,
+                        # ensure_ascii=False,
+                    # )
+                    # with_attachments = True
 
-            except UnicodeDecodeError:
-                self.log("UnicodeDecodeError for mail '{}'".format(
-                    sha256_random), "error")
+            # except UnicodeDecodeError:
+                # self.log("UnicodeDecodeError for mail '{}'".format(
+                    # sha256_random), "error")
 
         except Exception as e:
             self.log("Failed process attachments for mail: {}".format(
@@ -100,4 +95,4 @@ class Attachments(AbstractBolt):
             self.raise_exception(e, tup)
 
         finally:
-            self.emit([sha256_random, with_attachments, attachments_json])
+            self.emit([sha256_random, with_attachments, new_attachments])
