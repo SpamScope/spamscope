@@ -25,10 +25,11 @@ class Forms(Bolt):
     def process(self, tup):
         sha256_random = tup.values[0]
         body = tup.values[1]
+        is_filtered = tup.values[2]
         with_form = False
 
         try:
-            if body.strip():
+            if not is_filtered and body.strip():
                 tree = html.fromstring(body)
                 results = tree.xpath('//form')
                 if results:

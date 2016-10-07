@@ -20,14 +20,18 @@ limitations under the License.
 import os
 import sys
 import unittest
+from mailparser import MailParser
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 sample_zip = os.path.join(base_path, 'samples', 'test.zip')
 sample_zip_1 = os.path.join(base_path, 'samples', 'test1.zip')
 sample_txt = os.path.join(base_path, 'samples', 'test.txt')
+mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 sys.path.append(root)
 import src.modules.sample_parser as sp
+
+API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 
 class TestSampleParser(unittest.TestCase):
@@ -149,6 +153,45 @@ class TestSampleParser(unittest.TestCase):
         self.assertEqual(result['files'][0]['filename'], "test.txt")
         self.assertEqual(result['files'][0]['payload'], data_txt_base64)
 
+    def test_tika(self):
+        """Test for tika."""
+
+        parser = sp.SampleParser(
+            tika_enabled=True,
+            tika_jar="/opt/tika/tika-app-1.13.jar",
+            tika_valid_content_types=["application/zip"])
+
+        with open(sample_zip, 'rb') as f:
+            data = f.read()
+
+        parser.parse_sample(data, "test.zip")
+        result = parser.result
+        self.assertIn('tika', result)
+        self.assertIsInstance(result['tika'], list)
+        self.assertIn('test.txt', result['tika'][0]['X-TIKA:content'])
+
+    def test_virustotal(self):
+        # Parsing mail
+        p = MailParser()
+        p.parse_from_file(mail)
+
+        # Init parameters
+        s = sp.SampleParser(
+            virustotal_enabled=True,
+            virustotal_api_key=API_KEY)
+
+        # Parsing sample
+        for i in p.attachments_list:
+            s.parse_sample_from_base64(
+                data=i['payload'],
+                filename=i['filename'],
+                mail_content_type=i['mail_content_type'],
+                transfer_encoding=i['content_transfer_encoding'])
+
+            self.assertIn('virustotal', s.result)
+
+            for j in s.result["files"]:
+                self.assertIn('virustotal', j)
 
 if __name__ == '__main__':
     unittest.main()

@@ -19,31 +19,33 @@ from collections import deque
 from mailparser import MailParser
 from modules.utils import fingerprints
 from streamparse import Stream
-from streamparse.bolt import Bolt
+from bolts.abstracts import AbstractBolt
 import datetime
 import os
 import random
 
-MAIL_STRING = "string"
-MAIL_PATH = "path"
+STRING = "string"
+PATH = "path"
 
 
 class InvalidMailFormat(ValueError):
     pass
 
 
-class Tokenizer(Bolt):
+class Tokenizer(AbstractBolt):
     """Split the mail in token parts (body, attachments, etc.). """
 
     outputs = [
         Stream(fields=['sha256_random', 'mail', 'is_filtered'], name='mail'),
         Stream(fields=['sha256_random', 'body', 'is_filtered'], name='body'),
-        Stream(fields=['sha256_random', 'attachments'], name='attachments')]
+        Stream(fields=['sha256_random', 'with_attachments', 'attachments'],
+               name='attachments')]
 
     def initialize(self, stormconf, context):
         self._parser = MailParser()
-        self._mails_analyzed = deque(maxlen=1000)
-        self._attachments_analyzed = deque(maxlen=1000)
+        self._mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
+        self._attachments_analyzed = deque(
+            maxlen=self.conf["maxlen_attachments"])
 
     @property
     def parser(self):
@@ -79,13 +81,13 @@ class Tokenizer(Bolt):
         rand = '_' + ''.join(random.choice('012345') for i in range(10))
 
         # Check if kind_data is correct
-        if mail_format != MAIL_STRING and mail_format != MAIL_PATH:
+        if mail_format != STRING and mail_format != PATH:
             raise InvalidMailFormat(
                 "Invalid mail format '{}'. Choose '{}' or '{}'".format(
-                    mail_format, MAIL_STRING, MAIL_PATH))
+                    mail_format, STRING, PATH))
 
         # Parsing mail
-        if mail_format == MAIL_PATH:
+        if mail_format == PATH:
             if os.path.exists(raw_mail):
                 self.parser.parse_from_file(raw_mail)
         else:
@@ -105,7 +107,7 @@ class Tokenizer(Bolt):
         sha256_rand = mail['sha256'] + rand
 
         # Add path to result
-        if mail_format == MAIL_PATH:
+        if mail_format == PATH:
             mail['path_mail'] = raw_mail
 
         # Dates
@@ -125,11 +127,12 @@ class Tokenizer(Bolt):
         try:
             sha256_rand, raw_mail, mail = self._make_mail(tup)
             with_attachments = False
+            attachments = []
 
             # If mail is already analyzed
             if mail["sha1"] in self._mails_analyzed:
                 mail.pop("body", None)
-                body = None
+                body = ""
                 is_filtered = True
             else:
                 body = self.parser.body
@@ -149,8 +152,6 @@ class Tokenizer(Bolt):
             if self.parser.attachments_list:
                 attachments = self._filter_attachments()
                 with_attachments = True
-            else:
-                attachments = None
 
             self.emit([sha256_rand, with_attachments, attachments],
                       stream="attachments")

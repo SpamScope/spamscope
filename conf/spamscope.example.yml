@@ -54,35 +54,9 @@ phishing:
             custom: /path/to/custom_targets
 
 
-filter:
-    # Max number of attachments hash in memory (sha1)
-    # A sys.getsizeof(sha1) = 77 byte
-    max_attachments = 1000000
-
-
-tika:
-    # Enable Tika but it's very slow:
-    # https://github.com/fedelemantuano/tika-app-python#performance-tests
-    path_jar: /path/to/tika_jar
-
-    # Like parameter -Xmx of java application
-    memory_allocation:
-
-    # All content types to extract details
-    # Example in content_types/tika/generic.example.yml
-    content_types_details:
-        generic: /path/to/generic_content_types
-        custom: /path/to/custom_content_types
-
-
-virustotal:
-    api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-    # All content types to analyze with virustotal
-    # Example in content_types/virustotal/generic.example.yml
-    content_types_details:
-        generic: /path/to/generic_content_types
-        custom: /path/to/custom_content_types
+tokenizer:
+    maxlen_mails: 1000000
+    maxlen_attachments: 1000000
 
 
 # Attachments bolt configuration
@@ -92,6 +66,32 @@ attachments:
         # Example in content_types/blacklist/generic.example.yml
         generic: /path/to/generic_content_types
         custom: /path/to/custom_content_types
+
+    tika:
+        # Enable Tika but it's very slow:
+        enabled: False
+
+        path_jar: /path/to/tika_jar
+
+        # Like parameter -Xmx of java application
+        memory_allocation:
+
+        # All content types to extract details
+        # Example in content_types/tika/generic.example.yml
+        valid_content_types:
+            generic: /path/to/generic_content_types
+            custom: /path/to/custom_content_types
+
+    virustotal:
+        enabled: False
+
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+        # All content types to analyze with virustotal
+        # Example in content_types/virustotal/generic.example.yml
+        content_types_details:
+            generic: /path/to/generic_content_types
+            custom: /path/to/custom_content_types
 
 
 # Urls handler body
