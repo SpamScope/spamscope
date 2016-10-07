@@ -146,12 +146,51 @@ class VirusTotalAnalysis(object):
 
 class SampleParser(object):
 
-    def __init__(self, blacklist_content_types=set()):
+    def __init__(
+        self,
+        blacklist_content_types=set(),
+        virustotal_enabled=False,
+        tika_enabled=False,
+        virustotal_api_key=None,
+        tika_jar=None,
+        tika_memory_allocation=None,
+        tika_valid_content_types=set()
+    ):
+        self._virustotal_enabled = virustotal_enabled
+        self._tika_enabled = tika_enabled
         self._blacklist_content_types = blacklist_content_types
+        self._virustotal_api_key = virustotal_api_key
+        self._tika_jar = tika_jar
+        self._tika_memory_allocation = tika_memory_allocation
+        self._tika_valid_content_types = tika_valid_content_types
+
+    @property
+    def virustotal_enabled(self):
+        return self._virustotal_enabled
+
+    @property
+    def tika_enabled(self):
+        return self._tika_enabled
 
     @property
     def blacklist_content_types(self):
         return self._blacklist_content_types
+
+    @property
+    def virustotal_api_key(self):
+        return self._virustotal_api_key
+
+    @property
+    def tika_jar(self):
+        return self._tika_jar
+
+    @property
+    def tika_memory_allocation(self):
+        return self._tika_memory_allocation
+
+    @property
+    def tika_valid_content_types(self):
+        return self._tika_valid_content_types
 
     @property
     def result(self):
@@ -270,8 +309,7 @@ class SampleParser(object):
             'mail_content_type': mail_content_type,
             'content_transfer_encoding': transfer_encoding,
             'size': size,
-            'is_archive': is_archive,
-        }
+            'is_archive': is_archive}
 
         if is_archive:
             self._result['files'] = list()
@@ -287,13 +325,11 @@ class SampleParser(object):
                         i_filename = os.path.basename(i)
                         i_size = os.path.getsize(i)
 
-                        self._result['files'].append(
-                            {
-                                'filename': i_filename,
-                                'payload': i_data.encode('base64'),
-                                'size': i_size,
-                            }
-                        )
+                        self._result['files'].append({
+                            'filename': i_filename,
+                            'payload': i_data.encode('base64'),
+                            'size': i_size})
+
             # Remove temp dir for archived files
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
@@ -328,8 +364,8 @@ class SampleParser(object):
     def _add_content_type(self):
         mime = magic.Magic(mime=True)
         content_type = mime.from_buffer(
-            self._result['payload'].decode('base64')
-        )
+            self._result['payload'].decode('base64'))
+
         self._result['Content-Type'] = content_type
 
         if self._result['is_archive']:
@@ -382,10 +418,22 @@ class SampleParser(object):
         # If content type in blacklist_content_types result = None
         self._remove_content_type()
 
-        if self._result:
+        if self.result:
 
             # Add fingerprints
             self._add_fingerprints()
+
+            # Add Tika analysis
+            if self.tika_enabled:
+                t = TikaAnalysis(
+                    jar=self.tika_jar,
+                    valid_content_types=self.tika_valid_content_types)
+                t.add_meta_data(self.result)
+
+            # Add VirusTotal analysis
+            if self.virustotal_enabled:
+                v = VirusTotalAnalysis(api_key=self.virustotal_api_key)
+                v.add_analysis(self.result)
 
     def parse_sample_from_base64(
         self,
@@ -409,5 +457,4 @@ class SampleParser(object):
             data,
             filename,
             mail_content_type,
-            transfer_encoding,
-        )
+            transfer_encoding)

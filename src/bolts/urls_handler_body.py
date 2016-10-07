@@ -27,11 +27,13 @@ class UrlsHandlerBody(AbstractUrlsHandlerBolt):
     def process(self, tup):
         sha256_random = tup.values[0]
         body = tup.values[1]
+        is_filtered = tup.values[2]
         with_urls = False
         urls_json = None
 
         try:
-            with_urls, urls_json = self._extract_urls(body, False)
+            if not is_filtered:
+                with_urls, urls_json = self._extract_urls(body, False)
 
         except Exception as e:
             self.log("Failed process urls for mail: {}".format(

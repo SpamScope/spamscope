@@ -26,32 +26,33 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
 
     def process(self, tup):
         sha256_mail_random = tup.values[0]
-        attachments = tup.values[1]
+        attachments = tup.values[2]
         with_urls = False
-        urls_json = None
+        urls = None
         all_contents = u""
 
-        try:
-            # Get all contents for all attachments and files archived
-            for i in attachments:
-                if i.get("payload"):
-                    try:
-                        if i.get("is_archive"):
-                            for j in i.get("files"):
-                                all_contents += \
-                                    j["payload"].decode('base64') + u"\n"
-                        else:
-                            all_contents += \
-                                i["payload"].decode('base64') + u"\n"
-                    except UnicodeDecodeError:
-                        pass
+        # Get all contents for all attachments and files archived
+        for i in attachments:
+            try:
+                if i.get("is_archive"):
+                    for j in i.get("files"):
+                        all_contents += \
+                            j["payload"].decode('base64') + u"\n"
+                else:
+                    all_contents += \
+                        i["payload"].decode('base64') + u"\n"
 
-            with_urls, urls_json = self._extract_urls(all_contents, False)
+            except UnicodeDecodeError:
+                continue
 
-        except Exception as e:
-            self.log("Failed process urls attachment for mail: {}".format(
-                sha256_mail_random), "error")
-            self.raise_exception(e, tup)
+            except KeyError:
+                continue
 
-        finally:
-            self.emit([sha256_mail_random, with_urls, urls_json])
+            except Exception as e:
+                self.log("Failed process urls attachment for mail: {}".format(
+                    sha256_mail_random), "error")
+                self.raise_exception(e, tup)
+
+        with_urls, urls = self._extract_urls(all_contents, False)
+
+        self.emit([sha256_mail_random, with_urls, urls])
