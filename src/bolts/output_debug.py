@@ -45,8 +45,10 @@ class OutputDebug(AbstractBolt):
                 ensure_ascii=False,
                 indent=self._json_indent)
 
-            with open(os.path.join(self._output_path,
-                                   "{}.json".format(sha256_random)), "w") as f:
+            output = os.path.join(self._output_path, "{}.json".format(
+                sha256_random))
+
+            with open(output, "w") as f:
                 f.write(mail.encode('utf-8'))
 
         except Exception as e:
