@@ -45,9 +45,19 @@ class Tokenizer(AbstractBolt):
         super(Tokenizer, self).initialize(stormconf, context)
 
         self._parser = MailParser()
+        self._filter_mails_enabled = self.conf["filter_mails"]
+        self._filter_attachments_enabled = self.conf["filter_attachments"]
         self._mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
         self._attachments_analyzed = deque(
             maxlen=self.conf["maxlen_attachments"])
+
+    @property
+    def filter_mails_enabled(self):
+        return self._filter_mails_enabled
+
+    @property
+    def filter_attachments_enabled(self):
+        return self._filter_attachments_enabled
 
     @property
     def parser(self):
@@ -63,7 +73,8 @@ class Tokenizer(AbstractBolt):
         for i in attachments:
             f = fingerprints(i["payload"])
 
-            if f[1] in self._attachments_analyzed:
+            if self.filter_attachments_enabled and \
+                    f[1] in self._attachments_analyzed:
                 new_attachments.append({
                     "md5": f[0],
                     "sha1": f[1],
@@ -84,7 +95,7 @@ class Tokenizer(AbstractBolt):
     def _make_mail(self, tup):
         raw_mail = tup.values[0]
         mail_format = tup.values[4]
-        rand = '_' + ''.join(random.choice('012345') for i in range(10))
+        rand = '_' + ''.join(random.choice('0123456789') for i in range(10))
 
         # Check if kind_data is correct
         if mail_format != STRING and mail_format != PATH:
@@ -136,7 +147,8 @@ class Tokenizer(AbstractBolt):
             attachments = []
 
             # If mail is already analyzed
-            if mail["sha1"] in self._mails_analyzed:
+            if self.filter_mails_enabled and \
+                    mail["sha1"] in self._mails_analyzed:
                 mail.pop("body", None)
                 body = ""
                 is_filtered = True

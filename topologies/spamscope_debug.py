@@ -22,7 +22,7 @@ class OutputDebugTopology(Topology):
     tokenizer = Tokenizer.spec(
         name="tokenizer",
         inputs=[files_spout],
-        par=1)
+        par=2)
 
     attachments = Attachments.spec(
         name="attachments",

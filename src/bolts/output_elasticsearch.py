@@ -21,11 +21,6 @@ from elasticsearch import helpers
 import copy
 import datetime
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 
 class OutputElasticsearch(AbstractBolt):
     """Output tokenized mails on Elasticsearch. """
@@ -35,18 +30,22 @@ class OutputElasticsearch(AbstractBolt):
 
         # Elasticsearch parameters
         servers = self.conf['servers']
-        self._index_prefix = servers['index.prefix']
-        self._doc_type_analysis = servers['doc.type.analysis']
-        self._doc_type_attachments = servers['doc.type.attachments']
         self._flush_size = servers['flush_size']
+
+        # For mails
+        self._index_mails = servers['index.prefix.mails']
+        self._doc_type_mails = servers['doc.type.mails']
+
+        # For attachments
+        self._index_attachments = servers['index.prefix.attachments']
+        self._doc_type_attachments = servers['doc.type.attachments']
 
         # Elasticsearch object
         self._es = Elasticsearch(
             hosts=servers['hosts'],
             sniff_on_start=True,
             sniff_on_connection_fail=True,
-            sniffer_timeout=int(servers['sniffer.timeout']),
-        )
+            sniffer_timeout=int(servers['sniffer.timeout']))
 
         # Init
         self._mails = []
@@ -63,13 +62,12 @@ class OutputElasticsearch(AbstractBolt):
     def process(self, tup):
         try:
             sha256_random = tup.values[0]
-            mail = json.loads(tup.values[1])
+            mail = tup.values[1]
 
             # Date for daily index
             timestamp = datetime.datetime.strptime(
                 mail['analisys_date'],
-                "%Y-%m-%dT%H:%M:%S.%f",
-            )
+                "%Y-%m-%dT%H:%M:%S.%f")
             mail_date = timestamp.strftime("%Y.%m.%d")
 
             # Get a copy of attachments
@@ -80,7 +78,7 @@ class OutputElasticsearch(AbstractBolt):
             # Prepair attachments for bulk
             for i in attachments:
                 i['@timestamp'] = timestamp
-                i['_index'] = self._index_prefix + mail_date
+                i['_index'] = self._index_attachments + mail_date
                 i['_type'] = self._doc_type_attachments
                 i['type'] = self._doc_type_attachments
                 i['is_archived'] = False
@@ -91,7 +89,7 @@ class OutputElasticsearch(AbstractBolt):
 
                     # Prepair archived files
                     f['@timestamp'] = timestamp
-                    f['_index'] = self._index_prefix + mail_date
+                    f['_index'] = self._index_attachments + mail_date
                     f['_type'] = self._doc_type_attachments
                     f['type'] = self._doc_type_attachments
                     f['is_archived'] = True
@@ -117,9 +115,9 @@ class OutputElasticsearch(AbstractBolt):
 
             # Prepair mail for bulk
             mail['@timestamp'] = timestamp
-            mail['_index'] = self._index_prefix + mail_date
-            mail['type'] = self._doc_type_analysis
-            mail['_type'] = self._doc_type_analysis
+            mail['_index'] = self._index_mails + mail_date
+            mail['type'] = self._doc_type_mails
+            mail['_type'] = self._doc_type_mails
 
             # Append mail in own date
             self._mails.append(mail)
@@ -131,16 +129,14 @@ class OutputElasticsearch(AbstractBolt):
                 self._count += 1
 
         except Exception as e:
-            self.log(
-                "Failed process json for mail: {}".format(sha256_random),
-                "error"
-            )
+            self.log("Failed process json for mail: {}".format(
+                sha256_random), "error")
             self.raise_exception(e, tup)
 
     def process_tick(self, freq):
         """Every freq seconds flush messages. """
         super(OutputElasticsearch, self)._conf_loader()
 
-        if self._mails:
-            self.log("Flush mail in Redis server after tick")
+        if self._mails or self._attachments:
+            self.log("Flush mail in Elasticsearch after tick")
             self.flush()
