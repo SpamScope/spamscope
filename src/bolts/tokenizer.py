@@ -53,7 +53,7 @@ class Tokenizer(AbstractBolt):
     def parser(self):
         return self._parser
 
-    def _filter_attachments(self):
+    def _filter_attachments(self, analisys_date):
         """
         Filter the attachments that are in memory, already analyzed
         """
@@ -69,8 +69,12 @@ class Tokenizer(AbstractBolt):
                     "sha1": f[1],
                     "sha256": f[2],
                     "sha512": f[3],
-                    "ssdeep": f[4]})
+                    "ssdeep": f[4],
+                    "is_filtered": True,
+                    "analisys_date": analisys_date})
             else:
+                i["is_filtered"] = False
+                i["analisys_date"] = analisys_date
                 new_attachments.append(i)
 
             self._attachments_analyzed.append(f[1])
@@ -151,7 +155,7 @@ class Tokenizer(AbstractBolt):
 
             # Emit only attachments
             if self.parser.attachments_list:
-                attachments = self._filter_attachments()
+                attachments = self._filter_attachments(mail['analisys_date'])
                 with_attachments = True
 
             self.emit([sha256_rand, with_attachments, attachments],
