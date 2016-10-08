@@ -55,7 +55,18 @@ phishing:
 
 
 tokenizer:
+    # If True mails with same hash are filtered and not analyzed.
+    # Only the body will not saved
+    filter_mails: True
+
+    # Max number of hashes saved for filter function
     maxlen_mails: 1000000
+
+    # If True attachments with same hash are filtered and not analyzed.
+    # Only hashes will be saved
+    filter_attachments: True
+
+    # Max number of hashes saved for filter function
     maxlen_attachments: 1000000
 
 
@@ -192,9 +203,11 @@ output-elasticsearch:
         sniffer.timeout: 60
 
         # Prefix with dash '-'. SpamScope use a index for day
-        index.prefix: spamscope-
-        doc.type.analysis: analysis
-        doc.type.attachments: attachments
+        index.prefix.mails: spamscope_mails-
+        doc.type.mails: analysis
 
-        #max number of json to send in a bulk
+        index.prefix.attachments: spamscope_attachments-
+        doc.type.attachments: analysis
+
+        # max number of json to send in a bulk
         flush_size: 50
