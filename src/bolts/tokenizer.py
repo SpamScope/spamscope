@@ -42,6 +42,8 @@ class Tokenizer(AbstractBolt):
                name='attachments')]
 
     def initialize(self, stormconf, context):
+        super(Tokenizer, self).initialize(stormconf, context)
+
         self._parser = MailParser()
         self._mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
         self._attachments_analyzed = deque(
@@ -139,7 +141,6 @@ class Tokenizer(AbstractBolt):
                 is_filtered = False
 
             # Emit mail
-            # mail_json = json.dumps(mail, ensure_ascii=False)
             self.emit([sha256_rand, mail, is_filtered], stream="mail")
 
             # Emit body

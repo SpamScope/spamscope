@@ -94,7 +94,7 @@ class Attachments(AbstractBolt):
                     new_attachments.append(self._sample_parser.result)
 
             except KeyError:
-                self.new_attachments.append(i)
+                new_attachments.append(i)
 
             except Exception as e:
                 self.log("Failed process attachments for mail: {}".format(

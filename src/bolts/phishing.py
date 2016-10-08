@@ -80,20 +80,22 @@ class Phishing(AbstractBolt):
         all_contents = u""
 
         for i in attachments:
-            if i.get("payload"):
-                try:
-                    all_filenames += i["filename"] + u"\n"
+            try:
+                all_filenames += i["filename"] + u"\n"
 
-                    if i.get("is_archive"):
-                        for j in i.get("files"):
-                            all_filenames += j["filename"] + u"\n"
-                            all_contents += \
-                                j["payload"].decode('base64') + u"\n"
-                    else:
-                        all_contents += i["payload"].decode('base64') + u"\n"
+                if i.get("is_archive"):
+                    for j in i.get("files"):
+                        all_filenames += j["filename"] + u"\n"
+                        all_contents += \
+                            j["payload"].decode('base64') + u"\n"
+                else:
+                    all_contents += i["payload"].decode('base64') + u"\n"
 
-                except UnicodeDecodeError:
-                    pass
+            except KeyError:
+                continue
+
+            except UnicodeDecodeError:
+                continue
 
         return swt(all_filenames, keywords), swt(all_contents, keywords)
 
@@ -210,11 +212,6 @@ class Phishing(AbstractBolt):
 
                 if score:
                     with_phishing = True
-
-                # targets = json.dumps(
-                    # list(targets),
-                    # ensure_ascii=False,
-                # )
 
                 self.emit([sha256_random, with_phishing, score, list(targets)])
 
