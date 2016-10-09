@@ -22,8 +22,7 @@ from modules.utils import load_config
 
 
 class Attachments(AbstractBolt):
-    outputs = ['sha256_random', 'with_attachments',
-               'attachments', 'is_filtered']
+    outputs = ['sha256_random', 'with_attachments', 'attachments']
 
     def initialize(self, stormconf, context):
         super(Attachments, self).initialize(stormconf, context)
@@ -81,7 +80,6 @@ class Attachments(AbstractBolt):
         sha256_random = tup.values[0]
         with_attachments = tup.values[1]
         attachments = tup.values[2]
-        is_filtered = tup.values[3]
         new_attachments = []
 
         for i in attachments:
@@ -92,8 +90,10 @@ class Attachments(AbstractBolt):
                     mail_content_type=i['mail_content_type'],
                     transfer_encoding=i['content_transfer_encoding'])
 
-                if self._sample_parser.result:
-                    new_attachments.append(self._sample_parser.result)
+                result = self._sample_parser.result
+                if result:
+                    result['is_filtered'] = i.get('is_filtered')
+                    new_attachments.append(result)
 
             except KeyError:
                 new_attachments.append(i)
@@ -103,5 +103,4 @@ class Attachments(AbstractBolt):
                     sha256_random), "error")
                 self.raise_exception(e, tup)
 
-        self.emit([sha256_random, with_attachments,
-                   new_attachments, is_filtered])
+        self.emit([sha256_random, with_attachments, new_attachments])
