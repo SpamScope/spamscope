@@ -65,9 +65,14 @@ class OutputElasticsearch(AbstractBolt):
             mail = tup.values[1]
 
             # Date for daily index
-            timestamp = datetime.datetime.strptime(
-                mail['analisys_date'],
-                "%Y-%m-%dT%H:%M:%S.%f")
+            try:
+                timestamp = datetime.datetime.strptime(
+                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S.%f")
+            except:
+                # Without microseconds
+                timestamp = datetime.datetime.strptime(
+                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S")
+
             mail_date = timestamp.strftime("%Y.%m.%d")
 
             # Get a copy of attachments

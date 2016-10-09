@@ -71,7 +71,10 @@ class Tokenizer(AbstractBolt):
         new_attachments = []
 
         for i in attachments:
-            f = fingerprints(i["payload"].decode('base64'))
+            if i.get("content_transfer_encoding") == "base64":
+                f = fingerprints(i["payload"].decode('base64'))
+            else:
+                f = fingerprints(i["payload"])
 
             if self.filter_attachments_enabled and \
                     f[1] in self._attachments_analyzed:
