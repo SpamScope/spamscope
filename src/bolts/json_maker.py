@@ -16,12 +16,6 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 from modules.phishing_bitmap import PhishingBitMap
 
 
@@ -30,77 +24,73 @@ class JsonMaker(Bolt):
 
     def initialize(self, stormconf, context):
         self.mails = {}
-        self.input_bolts = set(
-            [
-                "tokenizer",
-                "phishing",
-                "attachments",
-                "forms",
-                "urls-handler-body",
-                "urls-handler-attachments",
-            ]
-        )
+        self.input_bolts = set([
+            "tokenizer",
+            "phishing",
+            "attachments",
+            "forms",
+            "urls-handler-body",
+            "urls-handler-attachments"])
 
         # Phishing bitmap
         self._phishing_bitmap = PhishingBitMap()
 
     def _compose_output(self, greedy_data):
         # Tokenizer
-        mail = json.loads(greedy_data['tokenizer'][1])
+        mail = greedy_data['tokenizer'][1]
+        mail['is_filtered'] = greedy_data['tokenizer'][2]
 
-        # Phishing
-        phishing_score = greedy_data['phishing'][2]
-        mail['with_phishing'] = greedy_data['phishing'][1]
-        mail['phishing_score'] = phishing_score
+        # Add intelligence output only if mail is not filtered
+        if not mail['is_filtered']:
 
-        if phishing_score:
-            self._phishing_bitmap.score = phishing_score
+            # Phishing
+            phishing_score = greedy_data['phishing'][2]
+            mail['with_phishing'] = greedy_data['phishing'][1]
+            mail['phishing_score'] = phishing_score
 
-            mail['targets'] = json.loads(greedy_data['phishing'][3])
-            mail['phishing_score_expanded'] = \
-                self._phishing_bitmap.score_properties
+            if phishing_score:
+                self._phishing_bitmap.score = phishing_score
 
-        # Forms
-        mail['with_forms'] = greedy_data['forms'][1]
+                mail['targets'] = greedy_data['phishing'][3]
+                mail['phishing_score_expanded'] = \
+                    self._phishing_bitmap.score_properties
+
+            # Forms
+            mail['with_forms'] = greedy_data['forms'][1]
+
+            # Urls in body
+            mail['with_urls_body'] = greedy_data['urls-handler-body'][1]
+            if mail['with_urls_body']:
+
+                # Change urls format to fix Elasticsearch issue with dot '.'
+                reformat_urls = []
+                urls = greedy_data['urls-handler-body'][2]
+
+                for v in urls.values():
+                    reformat_urls.extend(v)
+
+                mail['urls_body'] = reformat_urls
+
+            # Urls in attachments
+            mail['with_urls_attachments'] = \
+                greedy_data['urls-handler-attachments'][1]
+            if mail['with_urls_attachments']:
+
+                # Change urls format to fix Elasticsearch issue with dot '.'
+                reformat_urls = []
+                urls = greedy_data['urls-handler-attachments'][2]
+
+                for v in urls.values():
+                    reformat_urls.extend(v)
+
+                mail['urls_attachments'] = reformat_urls
 
         # Attachments
         mail['with_attachments'] = greedy_data['attachments'][1]
         if mail['with_attachments']:
-            mail['attachments'] = json.loads(
-                greedy_data['attachments'][2]
-            )
+            mail['attachments'] = greedy_data['attachments'][2]
 
-        # Urls in body
-        mail['with_urls_body'] = greedy_data['urls-handler-body'][1]
-        if mail['with_urls_body']:
-
-            # Change urls format to fix Elasticsearch issue with dot '.'
-            reformat_urls = []
-            urls = json.loads(
-                greedy_data['urls-handler-body'][2])
-
-            for v in urls.values():
-                reformat_urls.extend(v)
-
-            mail['urls_body'] = reformat_urls
-
-        # Urls in attachments
-        mail['with_urls_attachments'] = \
-            greedy_data['urls-handler-attachments'][1]
-        if mail['with_urls_attachments']:
-
-            # Change urls format to fix Elasticsearch issue with dot '.'
-            reformat_urls = []
-            urls = json.loads(
-                greedy_data['urls-handler-attachments'][2]
-            )
-
-            for v in urls.values():
-                reformat_urls.extend(v)
-
-            mail['urls_attachments'] = reformat_urls
-
-        return json.dumps(mail, ensure_ascii=False)
+        return mail
 
     def process(self, tup):
         try:
@@ -116,17 +106,14 @@ class JsonMaker(Bolt):
             diff = self.input_bolts - set(self.mails[sha256_random].keys())
             if not diff:
                 output_json = self._compose_output(
-                    self.mails.pop(sha256_random)
-                )
-                self.log(
-                    "New JSON for mail '{}'".format(sha256_random),
-                    level="debug"
-                )
+                    self.mails.pop(sha256_random))
+
+                self.log("New JSON for mail '{}'".format(
+                    sha256_random), "debug")
+
                 self.emit([sha256_random, output_json])
 
         except Exception as e:
-            self.log(
-                "Failed process json for mail: {}".format(sha256_random),
-                level="error"
-            )
+            self.log("Failed process json for mail: {}".format(
+                sha256_random), "error")
             self.raise_exception(e, tup)

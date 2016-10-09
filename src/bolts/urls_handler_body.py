@@ -17,11 +17,6 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractUrlsHandlerBolt
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 
 class UrlsHandlerBody(AbstractUrlsHandlerBolt):
     outputs = ['sha256_random', 'with_urls', 'urls']
@@ -30,23 +25,20 @@ class UrlsHandlerBody(AbstractUrlsHandlerBolt):
         super(UrlsHandlerBody, self).initialize(stormconf, context)
 
     def process(self, tup):
-        sha256_mail_random = tup.values[0]
+        sha256_random = tup.values[0]
+        body = tup.values[1]
+        is_filtered = tup.values[2]
         with_urls = False
         urls_json = None
 
         try:
-            mail = json.loads(tup.values[1])
-            body = mail.get('body', None)
-            with_urls, urls_json = self._extract_urls(body)
+            if not is_filtered:
+                with_urls, urls_json = self._extract_urls(body, False)
 
         except Exception as e:
-            self.log(
-                "Failed process urls for mail: {}".format(
-                    sha256_mail_random
-                ),
-                level="error"
-            )
+            self.log("Failed process urls for mail: {}".format(
+                sha256_random), "error")
             self.raise_exception(e, tup)
 
         finally:
-            self.emit([sha256_mail_random, with_urls, urls_json])
+            self.emit([sha256_random, with_urls, urls_json])
