@@ -39,51 +39,146 @@ class TempIOError(Exception):
     pass
 
 
+class InvalidAttachment(ValueError):
+    pass
+
+
 class VirusTotalApiKeyInvalid(ValueError):
     pass
+
+
+class InvalidContentTypes(ValueError):
+    pass
+
+
+class TikaAnalysis(object):
+
+    def __init__(
+        self,
+        jar=None,
+        memory_allocation=None,
+        valid_content_types=set()
+    ):
+
+        # Init Tika
+        self._tika_client = TikaApp(
+            file_jar=jar,
+            memory_allocation=memory_allocation)
+        self._jar = jar
+        self._memory_allocation = memory_allocation
+        self._valid_content_types = valid_content_types
+
+    @property
+    def jar(self):
+        return self._jar
+
+    @jar.setter
+    def jar(self, value):
+        self._jar = value
+
+    @property
+    def memory_allocation(self):
+        return self._memory_allocation
+
+    @memory_allocation.setter
+    def memory_allocation(self, value):
+        self._memory_allocation = value
+
+    @property
+    def valid_content_types(self):
+        return self._valid_content_types
+
+    @valid_content_types.setter
+    def valid_content_types(self, value):
+        if not isinstance(value, set):
+            raise InvalidContentTypes("Content types must be a set")
+        self._valid_content_types = value
+
+    def add_meta_data(self, attachment):
+        """If content_type in valid_content_types this method
+        extracts meta data and update attachments input results.
+        """
+
+        if not isinstance(attachment, dict):
+            raise InvalidAttachment("Attachment result is not a dict")
+
+        # The Apache Tika output of archive contains the contents and metadata
+        # of all archived files.
+        if attachment['Content-Type'] in self.valid_content_types:
+            attachment['tika'] = self._tika_client.extract_all_content(
+                payload=attachment['payload'],
+                convert_to_obj=True)
+
+
+class VirusTotalAnalysis(object):
+    def __init__(self, api_key=None):
+        self._api_key = api_key
+
+    @property
+    def api_key(self):
+        return self._api_key
+
+    @api_key.setter
+    def api_key(self, value):
+        self._api_key = value
+
+    def add_analysis(self, attachment):
+        if not isinstance(attachment, dict):
+            raise InvalidAttachment("Attachment result is not a dict")
+
+        if not self.api_key:
+            raise VirusTotalApiKeyInvalid("Please add a VirusTotal API key!")
+
+        vt = VirusTotalPublicApi(self.api_key)
+
+        sha1 = attachment['sha1']
+        result = vt.get_file_report(sha1)
+        if result:
+            attachment['virustotal'] = result
+
+        if attachment['is_archive']:
+            for i in attachment['files']:
+                i_sha1 = i['sha1']
+                i_result = vt.get_file_report(i_sha1)
+                if i_result:
+                    i['virustotal'] = i_result
 
 
 class SampleParser(object):
 
     def __init__(
         self,
-        tika_enabled=False,
-        tika_jar=None,
-        tika_memory_allocation=None,
-        tika_content_types=set(),
         blacklist_content_types=set(),
         virustotal_enabled=False,
+        tika_enabled=False,
         virustotal_api_key=None,
+        tika_jar=None,
+        tika_memory_allocation=None,
+        tika_valid_content_types=set()
     ):
-        """Initialize sample parser.
-        To enable tika parsing: tika_enabled=True.
-        Default server point to localhost port 9998.
-        Use tika_server_endpoint to change it.
-        """
-
-        # If tika is enabled set a tika_client
-        if tika_enabled:
-            self._tika_client = TikaApp(
-                file_jar=tika_jar,
-                memory_allocation=tika_memory_allocation,
-            )
-
-        # Init Tika
+        self._virustotal_enabled = virustotal_enabled
         self._tika_enabled = tika_enabled
+        self._blacklist_content_types = blacklist_content_types
+        self._virustotal_api_key = virustotal_api_key
         self._tika_jar = tika_jar
         self._tika_memory_allocation = tika_memory_allocation
-        self._tika_content_types = tika_content_types
+        self._tika_valid_content_types = tika_valid_content_types
 
-        # Init VirusTotal
-        self._virustotal_enabled = virustotal_enabled
-        self._virustotal_api_key = virustotal_api_key
-
-        # blacklist content type
-        self._blacklist_content_types = blacklist_content_types
+    @property
+    def virustotal_enabled(self):
+        return self._virustotal_enabled
 
     @property
     def tika_enabled(self):
         return self._tika_enabled
+
+    @property
+    def blacklist_content_types(self):
+        return self._blacklist_content_types
+
+    @property
+    def virustotal_api_key(self):
+        return self._virustotal_api_key
 
     @property
     def tika_jar(self):
@@ -94,26 +189,15 @@ class SampleParser(object):
         return self._tika_memory_allocation
 
     @property
-    def tika_content_types(self):
-        return self._tika_content_types
-
-    @property
-    def blacklist_content_types(self):
-        return self._blacklist_content_types
-
-    @property
-    def virustotal_enabled(self):
-        return self._virustotal_enabled
-
-    @property
-    def virustotal_api_key(self):
-        return self._virustotal_api_key
+    def tika_valid_content_types(self):
+        return self._tika_valid_content_types
 
     @property
     def result(self):
         return self._result
 
-    def fingerprints_from_base64(self, data):
+    @staticmethod
+    def fingerprints_from_base64(data):
         """This function return the fingerprints of data from base64:
             - md5
             - sha1
@@ -127,9 +211,10 @@ class SampleParser(object):
         except:
             raise Base64Error("Data '{}' is NOT correct".format(data))
 
-        return self.fingerprints(data)
+        return SampleParser.fingerprints(data)
 
-    def fingerprints(self, data):
+    @staticmethod
+    def fingerprints(data):
         """This function return the fingerprints of data:
             - md5
             - sha1
@@ -163,7 +248,8 @@ class SampleParser(object):
 
         return md5, sha1, sha256, sha512, ssdeep_
 
-    def is_archive_from_base64(self, data, write_sample=False):
+    @staticmethod
+    def is_archive_from_base64(data, write_sample=False):
         """If write_sample=False this function return only a boolean:
             True if data is a archive, else False.
         Else write_sample=True this function return a tuple:
@@ -176,9 +262,10 @@ class SampleParser(object):
         except:
             raise Base64Error("Data '{}' is NOT correct".format(data))
 
-        return self.is_archive(data, write_sample)
+        return SampleParser.is_archive(data, write_sample)
 
-    def is_archive(self, data, write_sample=False):
+    @staticmethod
+    def is_archive(data, write_sample=False):
         """If write_sample=False this function return only a boolean:
             True if data is a archive, else False.
         Else write_sample=True this function return a tuple:
@@ -222,8 +309,7 @@ class SampleParser(object):
             'mail_content_type': mail_content_type,
             'content_transfer_encoding': transfer_encoding,
             'size': size,
-            'is_archive': is_archive,
-        }
+            'is_archive': is_archive}
 
         if is_archive:
             self._result['files'] = list()
@@ -239,13 +325,11 @@ class SampleParser(object):
                         i_filename = os.path.basename(i)
                         i_size = os.path.getsize(i)
 
-                        self._result['files'].append(
-                            {
-                                'filename': i_filename,
-                                'payload': i_data.encode('base64'),
-                                'size': i_size,
-                            }
-                        )
+                        self._result['files'].append({
+                            'filename': i_filename,
+                            'payload': i_data.encode('base64'),
+                            'size': i_size})
+
             # Remove temp dir for archived files
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
@@ -258,8 +342,8 @@ class SampleParser(object):
         """ Add fingerprints."""
 
         md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
-            self._result['payload'].decode('base64')
-        )
+            self._result['payload'].decode('base64'))
+
         self._result['md5'] = md5
         self._result['sha1'] = sha1
         self._result['sha256'] = sha256
@@ -269,8 +353,8 @@ class SampleParser(object):
         if self._result['is_archive']:
             for i in self._result['files']:
                 md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
-                    i['payload'].decode('base64')
-                )
+                    i['payload'].decode('base64'))
+
                 i['md5'] = md5
                 i['sha1'] = sha1
                 i['sha256'] = sha256
@@ -280,29 +364,18 @@ class SampleParser(object):
     def _add_content_type(self):
         mime = magic.Magic(mime=True)
         content_type = mime.from_buffer(
-            self._result['payload'].decode('base64')
-        )
+            self._result['payload'].decode('base64'))
+
         self._result['Content-Type'] = content_type
 
         if self._result['is_archive']:
             for i in self._result['files']:
                 content_type = mime.from_buffer(
-                    i['payload'].decode('base64'),
-                )
+                    i['payload'].decode('base64'))
+
                 # To manage blacklist content types add Content-Type to the
                 # files in archive
                 i['Content-Type'] = content_type
-
-    def _add_tika_meta_data(self):
-        content_type = self._result['Content-Type']
-
-        # The Apache Tika output of archive contains the contents and metadata
-        # of all archived files.
-        if content_type in self.tika_content_types:
-            self._result['tika'] = self._tika_client.extract_all_content(
-                payload=self._result['payload'],
-                convert_to_obj=True,
-            )
 
     def _remove_content_type(self):
         """Remove from results the samples with content type in blacklist."""
@@ -317,26 +390,7 @@ class SampleParser(object):
                 self._result['files'] = [
                     i
                     for i in self._result['files']
-                    if i['Content-Type'] not in self.blacklist_content_types
-                ]
-
-    def _add_virustotal_output(self):
-        if not self.virustotal_api_key:
-            raise VirusTotalApiKeyInvalid("Please add a VirusTotal API key!")
-
-        vt = VirusTotalPublicApi(self.virustotal_api_key)
-
-        sha1 = self._result['sha1']
-        result = vt.get_file_report(sha1)
-        if result:
-            self._result['virustotal'] = result
-
-        if self._result['is_archive']:
-            for i in self._result['files']:
-                i_sha1 = i['sha1']
-                i_result = vt.get_file_report(i_sha1)
-                if i_result:
-                    i['virustotal'] = i_result
+                    if i['Content-Type'] not in self.blacklist_content_types]
 
     def parse_sample(
         self,
@@ -364,18 +418,22 @@ class SampleParser(object):
         # If content type in blacklist_content_types result = None
         self._remove_content_type()
 
-        if self._result:
+        if self.result:
 
             # Add fingerprints
             self._add_fingerprints()
 
-            # Add tika meta data only for tika_content_type
+            # Add Tika analysis
             if self.tika_enabled:
-                self._add_tika_meta_data()
+                t = TikaAnalysis(
+                    jar=self.tika_jar,
+                    valid_content_types=self.tika_valid_content_types)
+                t.add_meta_data(self.result)
 
-            # Add virustotal output
+            # Add VirusTotal analysis
             if self.virustotal_enabled:
-                self._add_virustotal_output()
+                v = VirusTotalAnalysis(api_key=self.virustotal_api_key)
+                v.add_analysis(self.result)
 
     def parse_sample_from_base64(
         self,
@@ -399,5 +457,4 @@ class SampleParser(object):
             data,
             filename,
             mail_content_type,
-            transfer_encoding,
-        )
+            transfer_encoding)

@@ -41,23 +41,17 @@ class OutputDebug(AbstractBolt):
         try:
             sha256_random = tup.values[0]
             mail = json.dumps(
-                json.loads(tup.values[1]),
+                tup.values[1],
                 ensure_ascii=False,
-                indent=self._json_indent,
-            )
+                indent=self._json_indent)
 
-            with open(
-                os.path.join(
-                    self._output_path,
-                    "{}.json".format(sha256_random)
-                ),
-                "w"
-            ) as f:
+            output = os.path.join(self._output_path, "{}.json".format(
+                sha256_random))
+
+            with open(output, "w") as f:
                 f.write(mail.encode('utf-8'))
 
         except Exception as e:
-            self.log(
-                "Failed process json for mail: {}".format(sha256_random),
-                "error"
-            )
+            self.log("Failed process json for mail: {}".format(
+                sha256_random), "error")
             self.raise_exception(e, tup)
