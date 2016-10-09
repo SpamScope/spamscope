@@ -22,16 +22,16 @@ class OutputElasticsearchTopology(Topology):
     tokenizer = Tokenizer.spec(
         name="tokenizer",
         inputs=[files_spout],
-        par=2)
+        par=1)
 
     attachments = Attachments.spec(
         name="attachments",
-        inputs={tokenizer: Grouping.fields('sha256_random')},
-        par=2)
+        inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
+        par=1)
 
     urls_body = UrlsHandlerBody.spec(
         name="urls-handler-body",
-        inputs={tokenizer: Grouping.fields('sha256_random')})
+        inputs={tokenizer['body']: Grouping.fields('sha256_random')})
 
     urls_attachments = UrlsHandlerAttachments.spec(
         name="urls-handler-attachments",
@@ -40,19 +40,19 @@ class OutputElasticsearchTopology(Topology):
     phishing = Phishing.spec(
         name="phishing",
         inputs={
-            tokenizer: Grouping.fields('sha256_random'),
+            tokenizer['mail']: Grouping.fields('sha256_random'),
             attachments: Grouping.fields('sha256_random'),
             urls_body: Grouping.fields('sha256_random'),
             urls_attachments: Grouping.fields('sha256_random')})
 
     forms = Forms.spec(
         name="forms",
-        inputs={tokenizer: Grouping.fields('sha256_random')})
+        inputs={tokenizer['body']: Grouping.fields('sha256_random')})
 
     json = JsonMaker.spec(
         name="json",
         inputs={
-            tokenizer: Grouping.fields('sha256_random'),
+            tokenizer['mail']: Grouping.fields('sha256_random'),
             phishing: Grouping.fields('sha256_random'),
             attachments: Grouping.fields('sha256_random'),
             forms: Grouping.fields('sha256_random'),

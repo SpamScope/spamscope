@@ -17,11 +17,6 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractUrlsHandlerBolt
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 
 class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
     outputs = ['sha256_random', 'with_urls', 'urls']
@@ -31,41 +26,33 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
 
     def process(self, tup):
         sha256_mail_random = tup.values[0]
+        attachments = tup.values[2]
         with_urls = False
-        urls_json = None
+        urls = None
         all_contents = u""
 
-        try:
-            with_attachments = tup.values[1]
-            if with_attachments:
-                attachments = json.loads(
-                    tup.values[2]
-                )
+        # Get all contents for all attachments and files archived
+        for i in attachments:
+            try:
+                if i.get("is_archive"):
+                    for j in i.get("files"):
+                        all_contents += \
+                            j["payload"].decode('base64') + u"\n"
+                else:
+                    all_contents += \
+                        i["payload"].decode('base64') + u"\n"
 
-                # Get all contents for all attachments and files archived
-                for i in attachments:
-                    try:
-                        if i.get("is_archive"):
-                            for j in i.get("files"):
-                                all_contents += \
-                                    j["payload"].decode('base64') + u"\n"
-                        else:
-                            all_contents += \
-                                i["payload"].decode('base64') + u"\n"
+            except UnicodeDecodeError:
+                continue
 
-                    except UnicodeDecodeError:
-                        pass
+            except KeyError:
+                continue
 
-                with_urls, urls_json = self._extract_urls(all_contents)
+            except Exception as e:
+                self.log("Failed process urls attachment for mail: {}".format(
+                    sha256_mail_random), "error")
+                self.raise_exception(e, tup)
 
-        except Exception as e:
-            self.log(
-                "Failed process urls attachment for mail: {}".format(
-                    sha256_mail_random
-                ),
-                level="error"
-            )
-            self.raise_exception(e, tup)
+        with_urls, urls = self._extract_urls(all_contents, False)
 
-        finally:
-            self.emit([sha256_mail_random, with_urls, urls_json])
+        self.emit([sha256_mail_random, with_urls, urls])

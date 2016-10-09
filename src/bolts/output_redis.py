@@ -40,14 +40,12 @@ class OutputRedis(AbstractBolt):
             db=servers['db'],
             password=servers['password'],
             reconnect_interval=servers['reconnect_interval'],
-            max_retry=servers['max_retry'],
-        )
+            max_retry=servers['max_retry'])
 
     def flush(self):
         self._redis_client.push_messages(
             queue=self._queue_name,
-            messages=self._mails,
-        )
+            messages=self._mails)
         self._mails = []
         self._count = 1
 
@@ -62,10 +60,8 @@ class OutputRedis(AbstractBolt):
                 self._count += 1
 
         except Exception as e:
-            self.log(
-                "Failed process json for mail: {}".format(sha256_random),
-                "error"
-            )
+            self.log("Failed process json for mail: {}".format(
+                sha256_random), "error")
             self.raise_exception(e, tup)
 
     def process_tick(self, freq):
