@@ -23,6 +23,7 @@ With streamparse tecnology you can build your topology in Clojure, add and/or re
 
 ### Apache 2 Open Source License
 SpamScope can be downloaded, used, and modified free of charge. It is available under the Apache 2 license.
+[![Donate](https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2)
 
 
 ## Output example
@@ -55,6 +56,12 @@ There is another requirement: [Faup](https://github.com/stricaud/faup). Install 
 ```
 python setup.py install
 ```
+
+## Configuration
+All details are in `conf` folder.
+
+From SpamScope v1.1 you can decide to **filter mails and attachments** already analyzed. If you enable filter in `tokenizer` section you will enable the RAM database and
+SpamScope will check on it to decide if mail/attachment is already analyzed or not. If yes SpamScope will not analyze it and will store only the hashes.
 
 
 ## Usage
@@ -115,7 +122,7 @@ For more details you can refer [here](http://streamparse.readthedocs.io/en/stabl
 
 ### Apache Tika
 
-It's possible add to results (for mail attachments) the output of [Apache Tika](https://tika.apache.org/) analysis. You should enable it in `attachments-bolt` section. SpamScope use Tika-app JAR with [tika-app](https://pypi.python.org/pypi/tika-app) python library.
+It's possible add to results (for mail attachments) the output of [Apache Tika](https://tika.apache.org/) analysis. You should enable it in `attachments` section. SpamScope use Tika-app JAR with [tika-app](https://pypi.python.org/pypi/tika-app) python library.
 
 ### Virustotal
 
@@ -131,4 +138,3 @@ It's possible to use a complete Docker image with Apache Storm and SpamScope. Ta
 ![SpamScope](docs/images/Docker01.png?raw=true "SpamScope")
 
 ![SpamScope Topology](docs/images/Docker02.png?raw=true "SpamScope Topology")
-
