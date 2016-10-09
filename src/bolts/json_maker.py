@@ -89,6 +89,7 @@ class JsonMaker(Bolt):
         mail['with_attachments'] = greedy_data['attachments'][1]
         if mail['with_attachments']:
             mail['attachments'] = greedy_data['attachments'][2]
+            mail['attachments']['is_filtered'] = greedy_data['attachments'][3]
 
         return mail
 
