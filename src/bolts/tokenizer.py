@@ -38,8 +38,8 @@ class Tokenizer(AbstractBolt):
     outputs = [
         Stream(fields=['sha256_random', 'mail', 'is_filtered'], name='mail'),
         Stream(fields=['sha256_random', 'body', 'is_filtered'], name='body'),
-        Stream(fields=['sha256_random', 'with_attachments', 'attachments'],
-               name='attachments')]
+        Stream(fields=['sha256_random', 'with_attachments', 'attachments',
+                       'is_filtered'], name='attachments')]
 
     def initialize(self, stormconf, context):
         super(Tokenizer, self).initialize(stormconf, context)
@@ -63,11 +63,12 @@ class Tokenizer(AbstractBolt):
     def parser(self):
         return self._parser
 
-    def _filter_attachments(self, analisys_date):
+    def _filter_attachments(self):
         """
         Filter the attachments that are in memory, already analyzed
         """
         attachments = self.parser.attachments_list
+        is_filtered = False
         new_attachments = []
 
         for i in attachments:
@@ -80,17 +81,14 @@ class Tokenizer(AbstractBolt):
                     "sha1": f[1],
                     "sha256": f[2],
                     "sha512": f[3],
-                    "ssdeep": f[4],
-                    "is_filtered": True,
-                    "analisys_date": analisys_date})
+                    "ssdeep": f[4]})
+                is_filtered = True
             else:
-                i["is_filtered"] = False
-                i["analisys_date"] = analisys_date
                 new_attachments.append(i)
 
             self._attachments_analyzed.append(f[1])
 
-        return new_attachments
+        return new_attachments, is_filtered
 
     def _make_mail(self, tup):
         raw_mail = tup.values[0]
@@ -167,11 +165,11 @@ class Tokenizer(AbstractBolt):
 
             # Emit only attachments
             if self.parser.attachments_list:
-                attachments = self._filter_attachments(mail['analisys_date'])
+                attachments, is_filtered = self._filter_attachments()
                 with_attachments = True
 
-            self.emit([sha256_rand, with_attachments, attachments],
-                      stream="attachments")
+            self.emit([sha256_rand, with_attachments, attachments,
+                       is_filtered], stream="attachments")
 
         except Exception as e:
             self.log("Failed parsing mail path: {}".format(raw_mail), "error")

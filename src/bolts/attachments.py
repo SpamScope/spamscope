@@ -22,7 +22,8 @@ from modules.utils import load_config
 
 
 class Attachments(AbstractBolt):
-    outputs = ['sha256_random', 'with_attachments', 'attachments']
+    outputs = ['sha256_random', 'with_attachments',
+               'attachments', 'is_filtered']
 
     def initialize(self, stormconf, context):
         super(Attachments, self).initialize(stormconf, context)
@@ -80,6 +81,7 @@ class Attachments(AbstractBolt):
         sha256_random = tup.values[0]
         with_attachments = tup.values[1]
         attachments = tup.values[2]
+        is_filtered = tup.values[3]
         new_attachments = []
 
         for i in attachments:
@@ -101,4 +103,5 @@ class Attachments(AbstractBolt):
                     sha256_random), "error")
                 self.raise_exception(e, tup)
 
-        self.emit([sha256_random, with_attachments, new_attachments])
+        self.emit([sha256_random, with_attachments,
+                   new_attachments, is_filtered])

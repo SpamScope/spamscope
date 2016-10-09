@@ -100,6 +100,7 @@ attachments:
 
         # All content types to analyze with virustotal
         # Example in content_types/virustotal/generic.example.yml
+        # Now is not active
         content_types_details:
             generic: /path/to/generic_content_types
             custom: /path/to/custom_content_types
