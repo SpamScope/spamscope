@@ -16,12 +16,6 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 from modules.phishing_bitmap import PhishingBitMap
 from modules.errors import ImproperlyConfigured
 from modules.utils import \
@@ -36,14 +30,11 @@ class Phishing(AbstractBolt):
         super(Phishing, self).initialize(stormconf, context)
 
         # Input bolts for Phishing bolt
-        self.input_bolts = set(
-            [
-                "tokenizer",
-                "attachments",
-                "urls-handler-body",
-                "urls-handler-attachments",
-            ]
-        )
+        self.input_bolts = set([
+            "tokenizer",
+            "attachments",
+            "urls-handler-body",
+            "urls-handler-attachments"])
 
         # All mails
         self.mails = {}
@@ -95,12 +86,16 @@ class Phishing(AbstractBolt):
                 if i.get("is_archive"):
                     for j in i.get("files"):
                         all_filenames += j["filename"] + u"\n"
-                        all_contents += j["payload"].decode('base64') + u"\n"
+                        all_contents += \
+                            j["payload"].decode('base64') + u"\n"
                 else:
                     all_contents += i["payload"].decode('base64') + u"\n"
 
+            except KeyError:
+                continue
+
             except UnicodeDecodeError:
-                pass
+                continue
 
         return swt(all_filenames, keywords), swt(all_contents, keywords)
 
@@ -113,7 +108,7 @@ class Phishing(AbstractBolt):
         targets = set()
 
         # Get Tokenizer
-        mail = json.loads(greedy_data['tokenizer'][1])
+        mail = greedy_data['tokenizer'][1]
         body = mail.get('body')
         subject = mail.get('subject')
         from_ = mail.get('from')
@@ -122,25 +117,19 @@ class Phishing(AbstractBolt):
         with_urls_body = greedy_data['urls-handler-body'][1]
         urls = None
         if with_urls_body:
-            urls = json.loads(
-                greedy_data['urls-handler-body'][2]
-            )
+            urls = greedy_data['urls-handler-body'][2]
 
         # Get Urls attachments
         with_urls_attachments = greedy_data['urls-handler-attachments'][1]
         urls_attachments = None
         if with_urls_attachments:
-            urls_attachments = json.loads(
-                greedy_data['urls-handler-attachments'][2]
-            )
+            urls_attachments = greedy_data['urls-handler-attachments'][2]
 
         # Get Attachments
         with_attachments = greedy_data['attachments'][1]
         attachments = None
         if with_attachments:
-            attachments = json.loads(
-                greedy_data['attachments'][2]
-            )
+            attachments = greedy_data['attachments'][2]
 
         # Check body
         if body:
@@ -219,23 +208,14 @@ class Phishing(AbstractBolt):
             if not diff:
                 with_phishing = False
                 score, targets = self._search_phishing(
-                    self.mails.pop(sha256_random)
-                )
+                    self.mails.pop(sha256_random))
+
                 if score:
                     with_phishing = True
 
-                targets = json.dumps(
-                    list(targets),
-                    ensure_ascii=False,
-                )
-
-                self.emit([sha256_random, with_phishing, score, targets])
+                self.emit([sha256_random, with_phishing, score, list(targets)])
 
         except Exception as e:
-            self.log(
-                "Failed processing phishing for mail '{}".format(
-                    sha256_random
-                ),
-                level="error"
-            )
+            self.log("Failed processing phishing for mail '{}".format(
+                sha256_random), "error")
             self.raise_exception(e, tup)
