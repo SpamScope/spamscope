@@ -140,7 +140,7 @@ class OutputElasticsearch(AbstractBolt):
 
     def process_tick(self, freq):
         """Every freq seconds flush messages. """
-        super(OutputElasticsearch, self)._conf_loader()
+        super(OutputElasticsearch, self).process_tick(freq)
 
         if self._mails or self._attachments:
             self.log("Flush mail in Elasticsearch after tick")
