@@ -73,7 +73,7 @@ class Attachments(AbstractBolt):
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
-        super(Attachments, self)._conf_loader()
+        super(Attachments, self).process_tick(freq)
         self._load_settings()
 
     def process(self, tup):

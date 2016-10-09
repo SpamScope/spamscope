@@ -190,7 +190,7 @@ class Phishing(AbstractBolt):
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
-        super(Phishing, self)._conf_loader()
+        super(Phishing, self).process_tick(freq)
         self._load_lists()
 
     def process(self, tup):

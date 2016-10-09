@@ -41,9 +41,7 @@ class AbstractBolt(Bolt):
         if not self.conf_file:
             raise ImproperlyConfigured(
                 "Bolts configuration path NOT set for '{}'".format(
-                    self.component_name
-                )
-            )
+                    self.component_name))
         self.log("Reloading configuration for bolt")
         self._bolts_conf = load_config(self.conf_file)
         self._conf = self.bolts_conf[self.component_name]
@@ -99,7 +97,7 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
     def process_tick(self, freq):
         """Every freq seconds you reload the whitelist """
-        super(AbstractUrlsHandlerBolt, self)._conf_loader()
+        super(AbstractUrlsHandlerBolt, self).process_tick(freq)
         self._load_whitelist()
 
     def _extract_urls(self, text, conv_to_str=True):
@@ -120,9 +118,6 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
             with_urls = True
 
         if conv_to_str:
-            urls = json.dumps(
-                urls,
-                ensure_ascii=False
-            )
+            urls = json.dumps(urls, ensure_ascii=False)
 
         return with_urls, urls
