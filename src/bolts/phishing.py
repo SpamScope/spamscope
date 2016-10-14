@@ -30,11 +30,7 @@ class Phishing(AbstractBolt):
         super(Phishing, self).initialize(stormconf, context)
 
         # Input bolts for Phishing bolt
-        self.input_bolts = set([
-            "tokenizer",
-            "attachments",
-            "urls-handler-body",
-            "urls-handler-attachments"])
+        self.input_bolts = set(context['source->stream->grouping'].keys())
 
         # All mails
         self.mails = {}
