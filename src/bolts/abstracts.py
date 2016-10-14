@@ -109,10 +109,9 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
             urls = self.extractor.urls_obj
             domains = urls.keys()
 
-            if self._whitelist:
-                for d in domains:
-                    if d.lower() in self._whitelist:
-                        urls.pop(d)
+            for d in domains:
+                if d.lower() in self._whitelist:
+                    urls.pop(d)
 
         if urls:
             with_urls = True
