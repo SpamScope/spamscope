@@ -24,13 +24,7 @@ class JsonMaker(Bolt):
 
     def initialize(self, stormconf, context):
         self.mails = {}
-        self.input_bolts = set([
-            "tokenizer",
-            "phishing",
-            "attachments",
-            "forms",
-            "urls-handler-body",
-            "urls-handler-attachments"])
+        self.input_bolts = set(context['source->stream->grouping'].keys())
 
         # Phishing bitmap
         self._phishing_bitmap = PhishingBitMap()
