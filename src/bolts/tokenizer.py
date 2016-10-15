@@ -45,11 +45,14 @@ class Tokenizer(AbstractBolt):
         super(Tokenizer, self).initialize(stormconf, context)
 
         self._parser = MailParser()
-        self._filter_mails_enabled = self.conf["filter_mails"]
-        self._filter_attachments_enabled = self.conf["filter_attachments"]
         self._mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
         self._attachments_analyzed = deque(
             maxlen=self.conf["maxlen_attachments"])
+        self._load_filters()
+
+    def _load_filters(self):
+        self._filter_mails_enabled = self.conf["filter_mails"]
+        self._filter_attachments_enabled = self.conf["filter_attachments"]
 
     @property
     def filter_mails_enabled(self):
@@ -140,6 +143,11 @@ class Tokenizer(AbstractBolt):
         mail.pop("attachments", None)
 
         return sha256_rand, raw_mail, mail
+
+    def process_tick(self, freq):
+        """Every freq seconds you reload configuration. """
+        super(Tokenizer, self).process_tick(freq)
+        self._load_filters()
 
     def process(self, tup):
         try:

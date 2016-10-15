@@ -30,11 +30,7 @@ class Phishing(AbstractBolt):
         super(Phishing, self).initialize(stormconf, context)
 
         # Input bolts for Phishing bolt
-        self.input_bolts = set([
-            "tokenizer",
-            "attachments",
-            "urls-handler-body",
-            "urls-handler-attachments"])
+        self.input_bolts = set(context['source->stream->grouping'].keys())
 
         # All mails
         self.mails = {}
@@ -190,7 +186,7 @@ class Phishing(AbstractBolt):
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
-        super(Phishing, self)._conf_loader()
+        super(Phishing, self).process_tick(freq)
         self._load_lists()
 
     def process(self, tup):
