@@ -19,7 +19,7 @@ You can chose your mails input sources (with spouts) and your functionalities (w
 You can build your custom output bolts and store your data in Elasticsearch, Mongo, filesystem, etc.
 
 ### Build your topology
-With streamparse tecnology you can build your topology in Clojure, add and/or remove spouts and bolts.
+With streamparse tecnology you can build your topology in Python, add and/or remove spouts and bolts.
 
 ### Apache 2 Open Source License
 SpamScope can be downloaded, used, and modified free of charge. It is available under the Apache 2 license.
