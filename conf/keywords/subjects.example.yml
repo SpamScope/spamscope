@@ -1,4 +1,13 @@
 # Add suspect subjects with dash -
 
+# keywords format:
+
+# - word1 word2
+# - word3
+# - word4
+
+# It's equal to:
+# (word1 AND word2) OR word3 OR word4
+
 - conferma
 - bonifico
