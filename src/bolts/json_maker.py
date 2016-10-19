@@ -23,7 +23,7 @@ class JsonMaker(Bolt):
     outputs = ['sha256_random', 'json']
 
     def initialize(self, stormconf, context):
-        self.mails = {}
+        self._mails = {}
         self.input_bolts = set(context['source->stream->grouping'].keys())
 
         # Phishing bitmap
@@ -92,15 +92,15 @@ class JsonMaker(Bolt):
             sha256_random = tup.values[0]
             values = tup.values
 
-            if self.mails.get(sha256_random, None):
-                self.mails[sha256_random][bolt] = values
+            if self._mails.get(sha256_random, None):
+                self._mails[sha256_random][bolt] = values
             else:
-                self.mails[sha256_random] = {bolt: values}
+                self._mails[sha256_random] = {bolt: values}
 
-            diff = self.input_bolts - set(self.mails[sha256_random].keys())
+            diff = self.input_bolts - set(self._mails[sha256_random].keys())
             if not diff:
                 output_json = self._compose_output(
-                    self.mails.pop(sha256_random))
+                    self._mails.pop(sha256_random))
 
                 self.log("New JSON for mail '{}'".format(
                     sha256_random), "debug")
