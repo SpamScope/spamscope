@@ -87,27 +87,21 @@ class JsonMaker(Bolt):
         return mail
 
     def process(self, tup):
-        try:
-            bolt = tup.component
-            sha256_random = tup.values[0]
-            values = tup.values
+        bolt = tup.component
+        sha256_random = tup.values[0]
+        values = tup.values
 
-            if self._mails.get(sha256_random, None):
-                self._mails[sha256_random][bolt] = values
-            else:
-                self._mails[sha256_random] = {bolt: values}
+        if self._mails.get(sha256_random, None):
+            self._mails[sha256_random][bolt] = values
+        else:
+            self._mails[sha256_random] = {bolt: values}
 
-            diff = self.input_bolts - set(self._mails[sha256_random].keys())
-            if not diff:
-                output_json = self._compose_output(
-                    self._mails.pop(sha256_random))
+        diff = self.input_bolts - set(self._mails[sha256_random].keys())
+        if not diff:
+            output_json = self._compose_output(
+                self._mails.pop(sha256_random))
 
-                self.log("New JSON for mail '{}'".format(
-                    sha256_random), "debug")
+            self.log("New JSON for mail '{}'".format(
+                sha256_random), "debug")
 
-                self.emit([sha256_random, output_json])
-
-        except Exception as e:
-            self.log("Failed process json for mail: {}".format(
-                sha256_random), "error")
-            self.raise_exception(e, tup)
+            self.emit([sha256_random, output_json])

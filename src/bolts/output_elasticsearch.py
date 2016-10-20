@@ -60,83 +60,76 @@ class OutputElasticsearch(AbstractBolt):
         self._count = 1
 
     def process(self, tup):
+        mail = tup.values[1]
+
+        # Date for daily index
         try:
-            sha256_random = tup.values[0]
-            mail = tup.values[1]
+            timestamp = datetime.datetime.strptime(
+                mail['analisys_date'], "%Y-%m-%dT%H:%M:%S.%f")
+        except:
+            # Without microseconds
+            timestamp = datetime.datetime.strptime(
+                mail['analisys_date'], "%Y-%m-%dT%H:%M:%S")
 
-            # Date for daily index
-            try:
-                timestamp = datetime.datetime.strptime(
-                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S.%f")
-            except:
-                # Without microseconds
-                timestamp = datetime.datetime.strptime(
-                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S")
+        mail_date = timestamp.strftime("%Y.%m.%d")
 
-            mail_date = timestamp.strftime("%Y.%m.%d")
+        # Get a copy of attachments
+        attachments = []
+        if mail.get("attachments", []):
+            attachments = copy.deepcopy(mail["attachments"])
 
-            # Get a copy of attachments
-            attachments = []
-            if mail.get("attachments", []):
-                attachments = copy.deepcopy(mail["attachments"])
+        # Prepair attachments for bulk
+        for i in attachments:
+            i['@timestamp'] = timestamp
+            i['_index'] = self._index_attachments + mail_date
+            i['_type'] = self._doc_type_attachments
+            i['type'] = self._doc_type_attachments
+            i['is_archived'] = False
 
-            # Prepair attachments for bulk
-            for i in attachments:
-                i['@timestamp'] = timestamp
-                i['_index'] = self._index_attachments + mail_date
-                i['_type'] = self._doc_type_attachments
-                i['type'] = self._doc_type_attachments
-                i['is_archived'] = False
+            for j in i.get("files", []):
 
-                for j in i.get("files", []):
+                f = copy.deepcopy(j)
 
-                    f = copy.deepcopy(j)
+                # Prepair archived files
+                f['@timestamp'] = timestamp
+                f['_index'] = self._index_attachments + mail_date
+                f['_type'] = self._doc_type_attachments
+                f['type'] = self._doc_type_attachments
+                f['is_archived'] = True
+                self._attachments.append(f)
 
-                    # Prepair archived files
-                    f['@timestamp'] = timestamp
-                    f['_index'] = self._index_attachments + mail_date
-                    f['_type'] = self._doc_type_attachments
-                    f['type'] = self._doc_type_attachments
-                    f['is_archived'] = True
-                    self._attachments.append(f)
+                # Remove from archived payload and virustotal,
+                # now in root
+                j.pop("payload", None)
+                j.pop("virustotal", None)
 
-                    # Remove from archived payload and virustotal,
-                    # now in root
-                    j.pop("payload", None)
-                    j.pop("virustotal", None)
+            self._attachments.append(i)
 
-                self._attachments.append(i)
+        # Remove from mail the attachments huge fields like payload
+        # Fetch from Elasticsearch more fast
+        for i in mail.get("attachments", []):
+            i.pop("payload", None)
+            i.pop("tika", None)
+            i.pop("virustotal", None)
 
-            # Remove from mail the attachments huge fields like payload
-            # Fetch from Elasticsearch more fast
-            for i in mail.get("attachments", []):
-                i.pop("payload", None)
-                i.pop("tika", None)
-                i.pop("virustotal", None)
+            for j in i.get("files", []):
+                j.pop("payload", None)
+                j.pop("virustotal", None)
 
-                for j in i.get("files", []):
-                    j.pop("payload", None)
-                    j.pop("virustotal", None)
+        # Prepair mail for bulk
+        mail['@timestamp'] = timestamp
+        mail['_index'] = self._index_mails + mail_date
+        mail['type'] = self._doc_type_mails
+        mail['_type'] = self._doc_type_mails
 
-            # Prepair mail for bulk
-            mail['@timestamp'] = timestamp
-            mail['_index'] = self._index_mails + mail_date
-            mail['type'] = self._doc_type_mails
-            mail['_type'] = self._doc_type_mails
+        # Append mail in own date
+        self._mails.append(mail)
 
-            # Append mail in own date
-            self._mails.append(mail)
-
-            # Flush
-            if self._count == self._flush_size:
-                self.flush()
-            else:
-                self._count += 1
-
-        except Exception as e:
-            self.log("Failed process json for mail: {}".format(
-                sha256_random), "error")
-            self.raise_exception(e, tup)
+        # Flush
+        if self._count == self._flush_size:
+            self.flush()
+        else:
+            self._count += 1
 
     def process_tick(self, freq):
         """Every freq seconds flush messages. """

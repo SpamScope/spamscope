@@ -37,12 +37,12 @@ class FilesMailSpout(AbstractSpout):
         super(FilesMailSpout, self).initialize(stormconf, context)
 
         self._check_conf()
-        self._load_mails()
         self._queue = Queue.PriorityQueue()
         self._queue_tail = set()
         self._count = 1
         self._what = self.conf["post_processing"]["what"].lower()
-        self._writing_sleep = float(self.conf["waiting.sleep"])
+        self._waiting_sleep = float(self.conf["waiting.sleep"])
+        self._load_mails()
 
     def _check_conf(self):
         self._where = self.conf["post_processing"]["where"]
@@ -111,7 +111,7 @@ class FilesMailSpout(AbstractSpout):
         # If queue is empty
         else:
             self.log("Queue mails is empty", "debug")
-            time.sleep(self.waiting_sleep)
+            time.sleep(self._waiting_sleep)
             self._load_mails()
 
     def ack(self, tup_id):
@@ -132,6 +132,8 @@ class FilesMailSpout(AbstractSpout):
                 shutil.move(tup_id, self._where)
 
     def fail(self, tup_id):
+        self.log("Mail '{}' failed".format(tup_id))
+
         if os.path.exists(tup_id):
             shutil.move(tup_id, self._where_failed)
 
