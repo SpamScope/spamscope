@@ -38,20 +38,14 @@ class OutputDebug(AbstractBolt):
             os.makedirs(self._output_path)
 
     def process(self, tup):
-        try:
-            sha256_random = tup.values[0]
-            mail = json.dumps(
-                tup.values[1],
-                ensure_ascii=False,
-                indent=self._json_indent)
+        sha256_random = tup.values[0]
+        mail = json.dumps(
+            tup.values[1],
+            ensure_ascii=False,
+            indent=self._json_indent)
 
-            output = os.path.join(self._output_path, "{}.json".format(
-                sha256_random))
+        output = os.path.join(self._output_path, "{}.json".format(
+            sha256_random))
 
-            with open(output, "w") as f:
-                f.write(mail.encode('utf-8'))
-
-        except Exception as e:
-            self.log("Failed process json for mail: {}".format(
-                sha256_random), "error")
-            self.raise_exception(e, tup)
+        with open(output, "w") as f:
+            f.write(mail.encode('utf-8'))

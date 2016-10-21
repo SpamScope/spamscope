@@ -8,9 +8,6 @@ files-mails:
     # Waiting new mails, sleep seconds
     waiting.sleep: 1
 
-    # Max retry failed tuple
-    max.retry: 3
-
     # Post processing 
     post_processing:
 

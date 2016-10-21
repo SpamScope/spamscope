@@ -28,18 +28,11 @@ class Forms(Bolt):
         is_filtered = tup.values[2]
         with_form = False
 
-        try:
-            if not is_filtered and body.strip():
-                tree = html.fromstring(body)
-                results = tree.xpath('//form')
-                if results:
-                    with_form = True
-                    self.log("Forms for mail '{}'".format(sha256_random))
+        if not is_filtered and body.strip():
+            tree = html.fromstring(body)
+            results = tree.xpath('//form')
+            if results:
+                with_form = True
+                self.log("Forms for mail '{}'".format(sha256_random))
 
-        except Exception as e:
-            self.log("Failed parsing body part for mail '{}".format(
-                sha256_random), "error")
-            self.raise_exception(e, tup)
-
-        finally:
-            self.emit([sha256_random, with_form])
+        self.emit([sha256_random, with_form])
