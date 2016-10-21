@@ -95,9 +95,6 @@ class FilesMailSpout(AbstractSpout):
             # After reload.mails mails put new items in priority queue
             if (self._count % self.conf['reload.mails']):
                 self._count += 1
-                mail = self._queue.get(block=True)
-                self.emit([mail.filename, mail.mail_server, mail.mailbox,
-                           mail.priority, MAIL_PATH], tup_id=mail.filename)
 
             # put new mails in priority queue
             else:
@@ -108,6 +105,15 @@ class FilesMailSpout(AbstractSpout):
                 self._load_mails()
                 self._count = 1
 
+            mail = self._queue.get(block=True)
+            self.emit([
+                mail.filename,
+                mail.mail_server,
+                mail.mailbox,
+                mail.priority,
+                MAIL_PATH],
+                tup_id=mail.filename)
+
         # If queue is empty
         else:
             self.log("Queue mails is empty", "debug")
@@ -117,6 +123,12 @@ class FilesMailSpout(AbstractSpout):
     def ack(self, tup_id):
         """Acknowledge tup_id, that is the path_mail. """
 
+        if os.path.exists(tup_id):
+            if self._what == "remove":
+                os.remove(tup_id)
+            else:
+                shutil.move(tup_id, self._where)
+
         try:
             # Remove from tail analyzed mail
             self._queue.task_done()
@@ -124,12 +136,6 @@ class FilesMailSpout(AbstractSpout):
             self.log("Mails to process: {}".format(len(self._queue_tail)))
         except KeyError:
             pass
-
-        if os.path.exists(tup_id):
-            if self._what == "remove":
-                os.remove(tup_id)
-            else:
-                shutil.move(tup_id, self._where)
 
     def fail(self, tup_id):
         self.log("Mail '{}' failed".format(tup_id))
