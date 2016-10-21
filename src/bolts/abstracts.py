@@ -72,7 +72,7 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
     def initialize(self, stormconf, context):
         super(AbstractUrlsHandlerBolt, self).initialize(stormconf, context)
-        self.extractor = UrlsExtractor()
+        self._extractor = UrlsExtractor()
         self._load_whitelist()
 
     def _load_whitelist(self):
@@ -105,8 +105,8 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
         urls = dict()
 
         if text:
-            self.extractor.extract(text)
-            urls = self.extractor.urls_obj
+            self._extractor.extract(text)
+            urls = self._extractor.urls_obj
             domains = urls.keys()
 
             for d in domains:
