@@ -94,7 +94,7 @@
               "eager_global_ordinals": true
             },
             "match_pattern": "regex",
-            "match": "(charset|mail_server|mailbox|message_id)"
+            "match": "(^|.*\\.)(charset|mail_server|mailbox|message_id|Content-Type|content_transfer_encoding|mail_content_type)"
           }
         },
         {
