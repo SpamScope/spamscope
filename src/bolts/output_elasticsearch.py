@@ -41,11 +41,7 @@ class OutputElasticsearch(AbstractBolt):
         self._doc_type_attachments = servers['doc.type.attachments']
 
         # Elasticsearch object
-        self._es = Elasticsearch(
-            hosts=servers['hosts'],
-            sniff_on_start=True,
-            sniff_on_connection_fail=True,
-            sniffer_timeout=int(servers['sniffer.timeout']))
+        self._es = Elasticsearch(hosts=servers['hosts'])
 
         # Init
         self._mails = []
