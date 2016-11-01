@@ -196,10 +196,6 @@ output-elasticsearch:
             - "node1:9200"
             - "node2"
 
-        # If your application is long-running consider turning on Sniffing 
-        # to make sure the client is up to date on the cluster location.
-        sniffer.timeout: 60
-
         # Prefix with dash '-'. SpamScope use a index for day
         index.prefix.mails: spamscope_mails-
         doc.type.mails: analysis

@@ -1,0 +1,120 @@
+{
+  "order": 10,
+  "template": "spamscope_*-*",
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "header": {
+          "tokenizer": "uax_url_email",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "html_body": {
+          "char_filter": [
+            "html_strip"
+          ],
+          "tokenizer": "uax_url_email",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "path_pattern": {
+          "tokenizer": "path_hierarchy",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    },
+    "index.codec": "best_compression",
+    "index.number_of_shards": 2,
+    "index.number_of_replicas": 0,
+    "index.refresh_interval": "5s"
+  },
+  "mappings": {
+    "_default_": {
+      "dynamic_templates": [
+        {
+          "hashes": {
+            "mapping": {
+              "index": "not_analyzed",
+              "type": "keyword",
+              "eager_global_ordinals": true
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(md5|sha1|sha256|sha512|ssdeep)"
+          }
+        },
+        {
+          "payload": {
+            "mapping": {
+              "type": "binary"
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(payload)"
+          }
+        },
+        {
+          "headers": {
+            "mapping": {
+              "index": "analyzed",
+              "type": "text",
+              "analyzer": "header"
+            },
+            "match_pattern": "regex",
+            "match": "(from|to|headers)"
+          }
+        },
+        {
+          "body": {
+            "mapping": {
+              "index": "analyzed",
+              "type": "text",
+              "analyzer": "html_body"
+            },
+            "match": "body"
+          }
+        },
+        {
+          "path_mail": {
+            "mapping": {
+              "index": "analyzed",
+              "type": "text",
+              "analyzer": "path_pattern"
+            },
+            "match": "path_mail"
+          }
+        },
+        {
+          "all_not_analyzed": {
+            "mapping": {
+              "index": "not_analyzed",
+              "type": "keyword",
+              "eager_global_ordinals": true
+            },
+            "match_pattern": "regex",
+            "match": "(charset|mail_server|mailbox|message_id)"
+          }
+        },
+        {
+          "all_text": {
+            "mapping": {
+              "index": "analyzed",
+              "type": "text",
+              "fields": {
+                "raw": {
+                  "ignore_above": 256,
+                  "index": "not_analyzed",
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                }
+              }
+            },
+            "match_mapping_type": "text"
+          }
+        }
+      ]
+    }
+  }
+}
