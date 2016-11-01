@@ -90,6 +90,8 @@ It's very importart pass configuration file to commands `sparse run` and `sparse
   - `sparse run --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml"`
   - `sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml"`
 
+If you use Elasticsearch output, I suggest you to use Elasticsearch template that comes with SpamScope.
+
 ### Apache Storm settings
 
 It's possible change the default setting for all Apache Storm options. I suggest for SpamScope these options:
