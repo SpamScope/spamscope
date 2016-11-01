@@ -50,19 +50,12 @@ class OutputRedis(AbstractBolt):
         self._count = 1
 
     def process(self, tup):
-        try:
-            sha256_random = tup.values[0]
-            self._mails.append(tup.values[1])
+        self._mails.append(tup.values[1])
 
-            if self._count == self._flush_size:
-                self.flush()
-            else:
-                self._count += 1
-
-        except Exception as e:
-            self.log("Failed process json for mail: {}".format(
-                sha256_random), "error")
-            self.raise_exception(e, tup)
+        if self._count == self._flush_size:
+            self.flush()
+        else:
+            self._count += 1
 
     def process_tick(self, freq):
         """Every freq seconds flush messages. """

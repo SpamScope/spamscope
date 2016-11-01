@@ -40,12 +40,12 @@ class Attachments(AbstractBolt):
             virustotal_api_key=self.conf["virustotal"]["api_key"],
             tika_jar=self.conf["tika"]["path_jar"],
             tika_memory_allocation=self.conf["tika"]["memory_allocation"],
-            tika_valid_content_types=self.tika_valid_content_types)
+            tika_valid_content_types=self._tika_valid_content_types)
 
     def _load_lists(self):
 
         # Load content types for details
-        self.tika_valid_content_types = set()
+        self._tika_valid_content_types = set()
         if self.conf["tika"]["enabled"]:
             self.log("Reloading content types list for Tika details")
             for k, v in self.conf["tika"]["valid_content_types"].iteritems():
@@ -55,7 +55,7 @@ class Attachments(AbstractBolt):
                         "Keywords content types \
                         details list '{}' not valid".format(k))
                 keywords = [i.lower() for i in keywords]
-                self.tika_valid_content_types |= set(keywords)
+                self._tika_valid_content_types |= set(keywords)
                 self.log("Content types Tika '{}' loaded".format(k))
 
         # Load content types for blacklist

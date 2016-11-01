@@ -33,7 +33,7 @@ class Phishing(AbstractBolt):
         self.input_bolts = set(context['source->stream->grouping'].keys())
 
         # All mails
-        self.mails = {}
+        self._mails = {}
 
         # Load keywords
         self._load_lists()
@@ -190,28 +190,22 @@ class Phishing(AbstractBolt):
         self._load_lists()
 
     def process(self, tup):
-        try:
-            bolt = tup.component
-            sha256_random = tup.values[0]
-            values = tup.values
+        bolt = tup.component
+        sha256_random = tup.values[0]
+        values = tup.values
 
-            if self.mails.get(sha256_random, None):
-                self.mails[sha256_random][bolt] = values
-            else:
-                self.mails[sha256_random] = {bolt: values}
+        if self._mails.get(sha256_random, None):
+            self._mails[sha256_random][bolt] = values
+        else:
+            self._mails[sha256_random] = {bolt: values}
 
-            diff = self.input_bolts - set(self.mails[sha256_random].keys())
-            if not diff:
-                with_phishing = False
-                score, targets = self._search_phishing(
-                    self.mails.pop(sha256_random))
+        diff = self.input_bolts - set(self._mails[sha256_random].keys())
+        if not diff:
+            with_phishing = False
+            score, targets = self._search_phishing(
+                self._mails.pop(sha256_random))
 
-                if score:
-                    with_phishing = True
+            if score:
+                with_phishing = True
 
-                self.emit([sha256_random, with_phishing, score, list(targets)])
-
-        except Exception as e:
-            self.log("Failed processing phishing for mail '{}".format(
-                sha256_random), "error")
-            self.raise_exception(e, tup)
+            self.emit([sha256_random, with_phishing, score, list(targets)])

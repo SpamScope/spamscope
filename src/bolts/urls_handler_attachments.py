@@ -48,11 +48,6 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
             except KeyError:
                 continue
 
-            except Exception as e:
-                self.log("Failed process urls attachment for mail: {}".format(
-                    sha256_mail_random), "error")
-                self.raise_exception(e, tup)
-
         with_urls, urls = self._extract_urls(all_contents, False)
 
         self.emit([sha256_mail_random, with_urls, urls])
