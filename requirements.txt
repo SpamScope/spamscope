@@ -1,4 +1,5 @@
 cffi==1.7.0
+chainmap==1.0.2
 contextlib2==0.5.4
 ecdsa==0.13
 elasticsearch==5.0.1
@@ -7,7 +8,7 @@ Fabric3==1.12.post1
 invoke==0.12.2
 Jinja2==2.8
 lxml==3.6.0
-mail-parser==0.4.2
+mail-parser==0.4.4
 MarkupSafe==0.23
 msgpack-python==0.4.8
 paramiko==1.17.2
@@ -29,7 +30,7 @@ six==1.10.0
 ssdeep==3.1.1
 streamparse==3.2.0
 thriftpy==0.3.9
-tika-app==0.4.0
+tika-app==0.5.2
 typing==3.5.2.2
 urllib3==1.19
 virustotal-api==1.1.2
