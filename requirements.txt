@@ -6,9 +6,10 @@ elasticsearch==5.0.1
 Fabric==1.11.1
 Fabric3==1.12.post1
 invoke==0.12.2
+ipaddress==1.0.17
 Jinja2==2.8
 lxml==3.6.0
-mail-parser==0.4.4
+mail-parser==0.5.0
 MarkupSafe==0.23
 msgpack-python==0.4.8
 paramiko==1.17.2
@@ -28,9 +29,9 @@ ruamel.yaml==0.12.15
 simplejson==3.10.0
 six==1.10.0
 ssdeep==3.1.1
-streamparse==3.2.0
+streamparse==3.3.0
 thriftpy==0.3.9
-tika-app==0.5.2
+tika-app==0.5.5
 typing==3.5.2.2
 urllib3==1.19
 virustotal-api==1.1.2

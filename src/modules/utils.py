@@ -34,12 +34,14 @@ class MailItem(object):
         filename,
         mail_server='localhost',
         mailbox='localhost',
-        priority=None
+        priority=None,
+        trust=None,
     ):
         self.filename = filename
         self.mail_server = mail_server
         self.mailbox = mailbox
         self.priority = priority
+        self.trust = trust
         self.timestamp = os.path.getctime(filename)
 
     def __cmp__(self, other):

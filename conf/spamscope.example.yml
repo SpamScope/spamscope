@@ -24,11 +24,15 @@ files-mails:
     mailboxes: 
         test: 
             mail_server: hostname
+            # Trust string is used to get sender IP address from mail server.
+            # More details: https://github.com/SpamScope/mail-parser/blob/v0.4.6/mailparser/__init__.py#L221
+            trust_string: "test_trust_string"
             files_pattern: "*untroubled*"
             priority: 1
             path_mails: /path/mails1
         test1: 
             mail_server: hostname
+            trust_string: "test1_trust_string"
             files_pattern: "*"
             priority: 2
             path_mails: /path/mails2
