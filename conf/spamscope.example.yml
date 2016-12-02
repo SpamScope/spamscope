@@ -71,6 +71,15 @@ tokenizer:
     maxlen_attachments: 1000000
 
 
+thug:
+    # More details:
+    # http://buffer.github.io/thug/doc/usage.html#basic-usage
+    user_agents:
+        - win7ie90
+
+    referer: http://www.google.com/
+
+
 # Attachments bolt configuration
 attachments:
     content_types_blacklist:
