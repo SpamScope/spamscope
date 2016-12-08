@@ -153,6 +153,11 @@ class TestSampleParser(unittest.TestCase):
         self.assertEqual(result['files'][0]['filename'], "test.txt")
         self.assertEqual(result['files'][0]['payload'], data_txt_base64)
 
+        self.assertIn('extension', result)
+        self.assertEqual(result['extension'], ".zip")
+        self.assertIn('extension', result['files'][0])
+        self.assertEqual(result['files'][0]['extension'], '.txt')
+
     def test_tika(self):
         """Test for tika."""
 
@@ -189,9 +194,12 @@ class TestSampleParser(unittest.TestCase):
                 transfer_encoding=i['content_transfer_encoding'])
 
             self.assertIn('virustotal', s.result)
+            self.assertEqual(200, int(s.result['virustotal']['response_code']))
 
             for j in s.result["files"]:
                 self.assertIn('virustotal', j)
+                self.assertEqual(200, int(j['virustotal']['response_code']))
+
 
 if __name__ == '__main__':
     unittest.main()
