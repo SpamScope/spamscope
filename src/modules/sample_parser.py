@@ -22,9 +22,11 @@ import logging
 import magic
 import os
 import patoolib
+import re
 import shutil
 import ssdeep
 import tempfile
+from abc import ABCMeta, abstractmethod
 from tikapp import TikaApp
 from virus_total_apis import PublicApi as VirusTotalPublicApi
 
@@ -51,97 +53,139 @@ class InvalidContentTypes(ValueError):
     pass
 
 
-class TikaAnalysis(object):
+class MissingArgument(ValueError):
+    pass
 
-    def __init__(
-        self,
-        jar=None,
-        memory_allocation=None,
-        valid_content_types=set()
-    ):
+
+class AbstractProcessing(object):
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+        self._check_arguments()
+
+    def __getattr__(self, name):
+        try:
+            return self._kwargs[name]
+        except KeyError:
+            msg = "'{0}' object has no attribute '{1}'"
+            raise AttributeError(msg.format(type(self).__name__, name))
+
+    def __setattr__(self, name, value):
+        super(AbstractProcessing, self).__setattr__(name, value)
+
+    @abstractmethod
+    def process(self, attachments):
+        if not isinstance(attachments, dict):
+            raise InvalidAttachment("Attachment result is not a dict")
+
+    @abstractmethod
+    def _check_arguments(self):
+        pass
+
+
+class TikaProcessing(AbstractProcessing):
+    """ This class processes the output mail attachments to add
+    Apache Tika analysis.
+
+    Keyword arguments:
+    jar -- path of Apache Tika App jar
+    valid_content_types -- list of contents types to analyze
+    memory_allocation -- memory to give to Apache Tika App
+    """
+
+    def __init__(self, **kwargs):
+        super(TikaProcessing, self).__init__(**kwargs)
 
         # Init Tika
         self._tika_client = TikaApp(
-            file_jar=jar,
-            memory_allocation=memory_allocation)
-        self._jar = jar
-        self._memory_allocation = memory_allocation
-        self._valid_content_types = valid_content_types
+            file_jar=self.jar,
+            memory_allocation=self.memory_allocation)
 
-    @property
-    def jar(self):
-        return self._jar
+    def __setattr__(self, name, value):
+        super(TikaProcessing, self).__setattr__(name, value)
 
-    @jar.setter
-    def jar(self, value):
-        self._jar = value
+        if name == "valid_content_types":
+            if not isinstance(value, set) and not isinstance(value, list):
+                raise InvalidContentTypes("Content types must be set or list")
 
-    @property
-    def memory_allocation(self):
-        return self._memory_allocation
+            self._kwargs[name] = value
 
-    @memory_allocation.setter
-    def memory_allocation(self, value):
-        self._memory_allocation = value
-
-    @property
-    def valid_content_types(self):
-        return self._valid_content_types
-
-    @valid_content_types.setter
-    def valid_content_types(self, value):
-        if not isinstance(value, set):
-            raise InvalidContentTypes("Content types must be a set")
-        self._valid_content_types = value
-
-    def add_meta_data(self, attachment):
-        """If content_type in valid_content_types this method
-        extracts meta data and update attachments input results.
+    def _check_arguments(self):
+        """
+        This method check if all mandatory arguments are given
         """
 
-        if not isinstance(attachment, dict):
-            raise InvalidAttachment("Attachment result is not a dict")
+        if 'jar' not in self._kwargs:
+            msg = "Argument '{0}' not in object '{1}'"
+            raise MissingArgument(msg.format('jar', type(self).__name__))
 
-        # The Apache Tika output of archive contains the contents and metadata
-        # of all archived files.
-        if attachment['Content-Type'] in self.valid_content_types:
-            attachment['tika'] = self._tika_client.extract_all_content(
-                payload=attachment['payload'],
+        if 'valid_content_types' not in self._kwargs:
+            msg = "Argument '{0}' not in object '{1}'"
+            raise MissingArgument(msg.format(
+                'valid_content_types', type(self).__name__))
+
+        if 'memory_allocation' not in self._kwargs:
+            msg = "Argument '{0}' not in object '{1}'"
+            raise MissingArgument(msg.format(
+                'memory_allocation', type(self).__name__))
+
+    def process(self, attachments):
+        """
+        This method updates the attachments results with the Tika output
+        """
+        super(TikaProcessing, self).process(attachments)
+
+        if attachments['Content-Type'] in self.valid_content_types:
+            attachments['tika'] = self._tika_client.extract_all_content(
+                payload=attachments['payload'],
                 convert_to_obj=True)
 
 
-class VirusTotalAnalysis(object):
-    def __init__(self, api_key=None):
-        self._api_key = api_key
+class VirusTotalProcessing(AbstractProcessing):
+    """ This class processes the output mail attachments to add
+    VirusTotal report.
 
-    @property
-    def api_key(self):
-        return self._api_key
+    Keyword arguments:
+    api_key -- VirusTotal api key
+    """
 
-    @api_key.setter
-    def api_key(self, value):
-        self._api_key = value
+    def _check_arguments(self):
+        """
+        This method check if all mandatory arguments are given
+        """
 
-    def add_analysis(self, attachment):
-        if not isinstance(attachment, dict):
-            raise InvalidAttachment("Attachment result is not a dict")
+        if 'api_key' not in self._kwargs:
+            msg = "Argument '{0}' not in object '{1}'"
+            raise MissingArgument(msg.format('api_key', type(self).__name__))
 
-        if not self.api_key:
-            raise VirusTotalApiKeyInvalid("Please add a VirusTotal API key!")
+    def process(self, attachments):
+        """
+        This method updates the attachments results with the Virustotal report
+        """
+        super(VirusTotalProcessing, self).process(attachments)
+
+        if not self.api_key or not re.match(r'[a-z0-9]{64}', self.api_key):
+            raise VirusTotalApiKeyInvalid("Add a valid VirusTotal API key!")
 
         vt = VirusTotalPublicApi(self.api_key)
 
-        sha1 = attachment['sha1']
+        sha1 = attachments['sha1']
         result = vt.get_file_report(sha1)
         if result:
-            attachment['virustotal'] = result
+            attachments['virustotal'] = result
 
-        if attachment['is_archive']:
-            for i in attachment['files']:
+        if attachments['is_archive']:
+            for i in attachments['files']:
                 i_sha1 = i['sha1']
                 i_result = vt.get_file_report(i_sha1)
                 if i_result:
                     i['virustotal'] = i_result
+
+
+class ThugProcessing(AbstractProcessing):
+    pass
 
 
 class SampleParser(object):
@@ -302,9 +346,11 @@ class SampleParser(object):
 
         is_archive, file_ = self.is_archive(data, write_sample=True)
         size = os.path.getsize(file_)
+        extension = os.path.splitext(filename)
 
         self._result = {
             'filename': filename,
+            'extension': extension[-1].lower() if len(extension) > 1 else None,
             'payload': data.encode('base64'),
             'mail_content_type': mail_content_type,
             'content_transfer_encoding': transfer_encoding,
@@ -323,10 +369,13 @@ class SampleParser(object):
                     with open(i, 'rb') as f:
                         i_data = f.read()
                         i_filename = os.path.basename(i)
+                        i_extension = os.path.splitext(i_filename)
                         i_size = os.path.getsize(i)
 
                         self._result['files'].append({
                             'filename': i_filename,
+                            'extension': i_extension[-1].lower() if len(
+                                i_extension) > 1 else None,
                             'payload': i_data.encode('base64'),
                             'size': i_size})
 
@@ -425,15 +474,16 @@ class SampleParser(object):
 
             # Add Tika analysis
             if self.tika_enabled:
-                t = TikaAnalysis(
+                TikaProcessing(
                     jar=self.tika_jar,
-                    valid_content_types=self.tika_valid_content_types)
-                t.add_meta_data(self.result)
+                    valid_content_types=self.tika_valid_content_types,
+                    memory_allocation=self.tika_memory_allocation
+                ).process(self.result)
 
             # Add VirusTotal analysis
             if self.virustotal_enabled:
-                v = VirusTotalAnalysis(api_key=self.virustotal_api_key)
-                v.add_analysis(self.result)
+                VirusTotalProcessing(
+                    api_key=self.virustotal_api_key).process(self.result)
 
     def parse_sample_from_base64(
         self,

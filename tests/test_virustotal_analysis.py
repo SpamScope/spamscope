@@ -31,9 +31,9 @@ import src.modules.sample_parser as sp
 API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 
-class TestVirusTotalAnalysis(unittest.TestCase):
+class TestVirusTotalProcessing(unittest.TestCase):
 
-    def test_add_analysis(self):
+    def test_process(self):
         """Test add VirusTotal analysis."""
 
         # Parsing mail
@@ -43,7 +43,7 @@ class TestVirusTotalAnalysis(unittest.TestCase):
         # Init parameters
         new_attachments = []
         s = sp.SampleParser()
-        v = sp.VirusTotalAnalysis(api_key=API_KEY)
+        v = sp.VirusTotalProcessing(api_key=API_KEY)
 
         # Parsing sample
         for i in p.attachments_list:
@@ -58,7 +58,7 @@ class TestVirusTotalAnalysis(unittest.TestCase):
 
         # VirusTotal analysis
         for i in new_attachments:
-            v.add_analysis(i)
+            v.process(i)
             self.assertIn('virustotal', i)
 
             for j in i["files"]:
@@ -67,18 +67,28 @@ class TestVirusTotalAnalysis(unittest.TestCase):
     def test_invalid_attachments(self):
         """Test InvalidAttachments exception."""
 
-        v = sp.VirusTotalAnalysis(api_key=API_KEY)
+        v = sp.VirusTotalProcessing(api_key=API_KEY)
 
         with self.assertRaises(sp.InvalidAttachment):
-            v.add_analysis(["fake_attachment"])
+            v.process([])
 
     def test_invalid_api_key(self):
         """Test VirusTotalApiKeyInvalid exception."""
 
-        v = sp.VirusTotalAnalysis()
-
+        v = sp.VirusTotalProcessing(api_key=None)
         with self.assertRaises(sp.VirusTotalApiKeyInvalid):
-            v.add_analysis({})
+            v.process({})
+
+        v = sp.VirusTotalProcessing(api_key="test")
+        with self.assertRaises(sp.VirusTotalApiKeyInvalid):
+            v.process({})
+
+    def test_missing_api_key(self):
+        """Test MissingArgument exception."""
+
+        with self.assertRaises(sp.MissingArgument):
+            sp.VirusTotalProcessing()
+
 
 if __name__ == '__main__':
     unittest.main()

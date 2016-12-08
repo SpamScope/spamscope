@@ -71,15 +71,6 @@ tokenizer:
     maxlen_attachments: 1000000
 
 
-thug:
-    # More details:
-    # http://buffer.github.io/thug/doc/usage.html#basic-usage
-    user_agents:
-        - win7ie90
-
-    referer: http://www.google.com/
-
-
 # Attachments bolt configuration
 attachments:
     content_types_blacklist:
@@ -114,6 +105,21 @@ attachments:
         content_types_details:
             generic: /path/to/generic_content_types
             custom: /path/to/custom_content_types
+
+    thug:
+        enabled: False
+
+        # File extensions to submit to thug
+        extensions:
+            - .js
+            - .html
+
+        # More details:
+        # http://buffer.github.io/thug/doc/usage.html#basic-usage
+        user_agents:
+            - win7ie90
+
+        referer: http://www.google.com/
 
 
 # Urls handler body

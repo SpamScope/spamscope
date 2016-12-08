@@ -66,9 +66,6 @@ class ThugAnalysis(ThugAPI):
         # No console log
         self.set_log_quiet()
 
-        # Enable file logging mode
-        self.set_file_logging()
-
         # Enable JSON logging mode
         self.set_json_logging()
 

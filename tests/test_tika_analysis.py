@@ -41,8 +41,10 @@ class TestTikaAnalysis(unittest.TestCase):
         # Init parameters
         new_attachments = []
         s = sp.SampleParser()
-        t = sp.TikaAnalysis(
-            jar="/opt/tika/tika-app-1.13.jar")
+        t = sp.TikaProcessing(
+            jar="/opt/tika/tika-app-1.14.jar",
+            valid_content_types=[],
+            memory_allocation=None)
 
         # Parsing sample
         for i in p.attachments_list:
@@ -57,52 +59,64 @@ class TestTikaAnalysis(unittest.TestCase):
 
         # Tika analysis
         for i in new_attachments:
-            t.add_meta_data(i)
+            t.process(i)
             self.assertNotIn('tika', i)
 
-        t = sp.TikaAnalysis(
+        t = sp.TikaProcessing(
             jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"])
+            valid_content_types=["application/zip"],
+            memory_allocation=None)
 
         for i in new_attachments:
-            t.add_meta_data(i)
+            t.process(i)
             self.assertIn('tika', i)
 
     def test_invalid_attachments(self):
         """Test InvalidAttachments exception."""
 
-        t = sp.TikaAnalysis(
+        t = sp.TikaProcessing(
             jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"])
+            valid_content_types=["application/zip"],
+            memory_allocation=None)
 
         with self.assertRaises(sp.InvalidAttachment):
-            t.add_meta_data(["fake_attachment"])
+            t.process(["fake_attachment"])
 
     def test_properties(self):
         """Test properties output."""
 
-        t = sp.TikaAnalysis(
+        t = sp.TikaProcessing(
             jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"])
+            valid_content_types=["application/zip"],
+            memory_allocation=None)
 
         self.assertEqual(t.jar, "/opt/tika/tika-app-1.13.jar")
         self.assertEqual(t.memory_allocation, None)
         self.assertEqual(t.valid_content_types, ["application/zip"])
 
     def test_setters(self):
-        t = sp.TikaAnalysis(
+        t = sp.TikaProcessing(
             jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"])
+            valid_content_types=set(["application/zip"]),
+            memory_allocation=None)
 
-        t.jar = "test1"
-        t.valid_content_types = set(["test2"])
+        t.jar = "jar"
+        t.valid_content_types = ["valid_content_types"]
+        t.memory_allocation = "512m"
 
-        self.assertEqual(t.jar, "test1")
-        self.assertEqual(t.memory_allocation, None)
-        self.assertEqual(t.valid_content_types, set(["test2"]))
+        self.assertEqual(t.jar, "jar")
+        self.assertEqual(t.memory_allocation, "512m")
+        self.assertEqual(t.valid_content_types, ["valid_content_types"])
 
         with self.assertRaises(sp.InvalidContentTypes):
-            t.valid_content_types = ["application/zip"]
+            t.valid_content_types = "application/zip"
+
+    def test_missing_api_key(self):
+        """Test MissingArgument exception."""
+
+        with self.assertRaises(sp.MissingArgument):
+            sp.TikaProcessing()
+
 
 if __name__ == '__main__':
     unittest.main()
