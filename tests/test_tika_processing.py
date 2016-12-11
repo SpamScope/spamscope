@@ -29,7 +29,7 @@ sys.path.append(root)
 import src.modules.sample_parser as sp
 
 
-class TestTikaAnalysis(unittest.TestCase):
+class TestTikaProcessing(unittest.TestCase):
 
     def test_meta_data(self):
         """Test meta data analysis."""

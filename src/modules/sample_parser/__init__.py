@@ -14,4 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from .exceptions import *
 from .sample_parser import SampleParser
+from .thug_processing import ThugProcessing
+from .tika_processing import TikaProcessing
+from .virustotal_processing import VirusTotalProcessing

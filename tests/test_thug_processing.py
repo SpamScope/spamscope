@@ -27,12 +27,8 @@ sys.path.append(root)
 
 file_js = os.path.join(base_path, 'sample', 'snippet_javascript.js')
 
-from src.modules.thug_analysis import ThugAnalysis
 
-
-class TestThugAnalysis(unittest.TestCase):
-    thug_analyzer = ThugAnalysis()
-    results = thug_analyzer.analyze()
+class TestThugProcessing(unittest.TestCase):
 
     def test_result(self):
         pass

@@ -16,7 +16,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
-from modules.errors import ImproperlyConfigured
+from modules.exceptions import ImproperlyConfigured
 from modules.sample_parser import SampleParser
 from modules.utils import load_config
 
@@ -35,12 +35,16 @@ class Attachments(AbstractBolt):
         # Attachments handler
         self._sample_parser = SampleParser(
             blacklist_content_types=self._cont_type_bl,
-            virustotal_enabled=self.conf["virustotal"]["enabled"],
+            thug_enabled=self.conf["thug"]["enabled"],
             tika_enabled=self.conf["tika"]["enabled"],
-            virustotal_api_key=self.conf["virustotal"]["api_key"],
+            virustotal_enabled=self.conf["virustotal"]["enabled"],
             tika_jar=self.conf["tika"]["path_jar"],
             tika_memory_allocation=self.conf["tika"]["memory_allocation"],
-            tika_valid_content_types=self._tika_valid_content_types)
+            tika_valid_content_types=self._tika_valid_content_types,
+            virustotal_api_key=self.conf["virustotal"]["api_key"],
+            thug_referer=self.conf["thug"]["referer"],
+            thug_extensions=self.conf["thug"]["extensions"],
+            thug_user_agents=self.conf["thug"]["user_agents"])
 
     def _load_lists(self):
 

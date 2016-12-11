@@ -28,6 +28,7 @@ import tempfile
 from .exceptions import Base64Error, TempIOError
 from .virustotal_processing import VirusTotalProcessing
 from .tika_processing import TikaProcessing
+from .thug_processing import ThugProcessing
 
 log = logging.getLogger(__name__)
 
@@ -49,6 +50,9 @@ class SampleParser(object):
         tika_valid_content_types (set): Content types to analyze with
                                         Apache Tika
         virustotal_api_key (string): VirusTotal API key
+        thug_referer (string): Referer to use for analysis
+        thug_extensions (list or set): list of extensions to analyze
+        thug_user_agents (list or set): list of user agents to use for analysis
     """
 
     def __init__(self, **kwargs):
@@ -185,7 +189,7 @@ class SampleParser(object):
 
     def _create_sample_result(self, data, filename, mail_content_type,
                               transfer_encoding):
-        """ It creates dict result with basic informations.
+        """ This method creates dict result with basic informations.
 
         Args:
             data (string): raw data
@@ -241,7 +245,7 @@ class SampleParser(object):
             os.remove(file_)
 
     def _add_fingerprints(self):
-        """It adds fingerprints to result attribute. """
+        """This method adds fingerprints to result attribute. """
 
         md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
             self._result['payload'].decode('base64'))
@@ -264,7 +268,7 @@ class SampleParser(object):
                 i['ssdeep'] = ssdeep_
 
     def _add_content_type(self):
-        """It adds content type to result attribute """
+        """This method adds content type to result attribute """
 
         mime = magic.Magic(mime=True)
         content_type = mime.from_buffer(
@@ -282,7 +286,7 @@ class SampleParser(object):
                 i['Content-Type'] = content_type
 
     def _remove_content_type(self):
-        """It removes from result attribute the samples with
+        """This method removes from result attribute the samples with
         content type in blacklist.
         """
 
@@ -300,7 +304,7 @@ class SampleParser(object):
 
     def parse_sample(self, data, filename, mail_content_type=None,
                      transfer_encoding=None):
-        """It analyzes sample and add metadata.
+        """This method analyzes sample and add metadata.
 
         Args:
             data (string): raw data
@@ -345,9 +349,16 @@ class SampleParser(object):
                 VirusTotalProcessing(
                     api_key=self.virustotal_api_key).process(self.result)
 
+            if self.thug_enabled:
+                ThugProcessing(
+                    referer=self.thug_referer,
+                    extensions=self.thug_extensions,
+                    user_agents=self.thug_user_agents,
+                ).process(self.result)
+
     def parse_sample_from_base64(self, data, filename, mail_content_type=None,
                                  transfer_encoding=None):
-        """It analyzes sample and add metadata.
+        """This method analyzes sample and add metadata.
 
         Args:
             data (string): raw data in base64

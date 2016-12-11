@@ -50,12 +50,15 @@ class ThugAnalysis(ThugAPI):
 
     def analyze(self, local_file, useragent="win7ie90",
                 referer="http://www.google.com/"):
-        """ Return a Python object with the results of analysis
+        """ It performs the Thug analysis agaist a loca file
 
-        Keyword arguments:
-            local_file -- Local file (on filesystem) to analyze
-            useragent -- User agent to use for analysis
-            referer -- Referer to use for analysis
+        Args:
+            local_file (string): Local file (on filesystem) to analyze
+            useragent (string): User agent to use for analysis
+            referer (string): Referer to use for analysis
+
+        Returns:
+            Returns a Python object with the analysis
         """
         # Set useragent
         self.set_useragent(useragent)
