@@ -22,219 +22,52 @@ import logging
 import magic
 import os
 import patoolib
-import re
 import shutil
 import ssdeep
 import tempfile
-from abc import ABCMeta, abstractmethod
-from tikapp import TikaApp
-from virus_total_apis import PublicApi as VirusTotalPublicApi
+from .exceptions import Base64Error, TempIOError
+from .virustotal_processing import VirusTotalProcessing
+from .tika_processing import TikaProcessing
 
 log = logging.getLogger(__name__)
 
 
-class Base64Error(ValueError):
-    pass
+class SampleParser(object):
+    """ This class processes a raw mail attachment to add
+    all processing output (TikaProcessing, VirusTotalPublicApi ThugProcessing).
 
-
-class TempIOError(Exception):
-    pass
-
-
-class InvalidAttachment(ValueError):
-    pass
-
-
-class VirusTotalApiKeyInvalid(ValueError):
-    pass
-
-
-class InvalidContentTypes(ValueError):
-    pass
-
-
-class MissingArgument(ValueError):
-    pass
-
-
-class AbstractProcessing(object):
-
-    __metaclass__ = ABCMeta
+    Args:
+        blacklist_content_types (set): content types that will not process.
+                                       Default: set()
+        thug_enabled (boolean): enable Thug analysis is True. Default: False
+        tika_enabled (boolean): enable Apache Tika analysis is True.
+                                Default: False
+        virustotal_enabled (boolean): enable VirusTotal analysis is True.
+                                      Default: False
+        tika_jar (string): Apache Tika App jar path
+        tika_memory_allocation (string): Memory to give to Apache Tika App
+        tika_valid_content_types (set): Content types to analyze with
+                                        Apache Tika
+        virustotal_api_key (string): VirusTotal API key
+    """
 
     def __init__(self, **kwargs):
         self._kwargs = kwargs
-        self._check_arguments()
 
     def __getattr__(self, name):
         try:
             return self._kwargs[name]
         except KeyError:
-            msg = "'{0}' object has no attribute '{1}'"
-            raise AttributeError(msg.format(type(self).__name__, name))
-
-    def __setattr__(self, name, value):
-        super(AbstractProcessing, self).__setattr__(name, value)
-
-    @abstractmethod
-    def process(self, attachments):
-        if not isinstance(attachments, dict):
-            raise InvalidAttachment("Attachment result is not a dict")
-
-    @abstractmethod
-    def _check_arguments(self):
-        pass
-
-
-class TikaProcessing(AbstractProcessing):
-    """ This class processes the output mail attachments to add
-    Apache Tika analysis.
-
-    Keyword arguments:
-    jar -- path of Apache Tika App jar
-    valid_content_types -- list of contents types to analyze
-    memory_allocation -- memory to give to Apache Tika App
-    """
-
-    def __init__(self, **kwargs):
-        super(TikaProcessing, self).__init__(**kwargs)
-
-        # Init Tika
-        self._tika_client = TikaApp(
-            file_jar=self.jar,
-            memory_allocation=self.memory_allocation)
-
-    def __setattr__(self, name, value):
-        super(TikaProcessing, self).__setattr__(name, value)
-
-        if name == "valid_content_types":
-            if not isinstance(value, set) and not isinstance(value, list):
-                raise InvalidContentTypes("Content types must be set or list")
-
-            self._kwargs[name] = value
-
-    def _check_arguments(self):
-        """
-        This method check if all mandatory arguments are given
-        """
-
-        if 'jar' not in self._kwargs:
-            msg = "Argument '{0}' not in object '{1}'"
-            raise MissingArgument(msg.format('jar', type(self).__name__))
-
-        if 'valid_content_types' not in self._kwargs:
-            msg = "Argument '{0}' not in object '{1}'"
-            raise MissingArgument(msg.format(
-                'valid_content_types', type(self).__name__))
-
-        if 'memory_allocation' not in self._kwargs:
-            msg = "Argument '{0}' not in object '{1}'"
-            raise MissingArgument(msg.format(
-                'memory_allocation', type(self).__name__))
-
-    def process(self, attachments):
-        """
-        This method updates the attachments results with the Tika output
-        """
-        super(TikaProcessing, self).process(attachments)
-
-        if attachments['Content-Type'] in self.valid_content_types:
-            attachments['tika'] = self._tika_client.extract_all_content(
-                payload=attachments['payload'],
-                convert_to_obj=True)
-
-
-class VirusTotalProcessing(AbstractProcessing):
-    """ This class processes the output mail attachments to add
-    VirusTotal report.
-
-    Keyword arguments:
-    api_key -- VirusTotal api key
-    """
-
-    def _check_arguments(self):
-        """
-        This method check if all mandatory arguments are given
-        """
-
-        if 'api_key' not in self._kwargs:
-            msg = "Argument '{0}' not in object '{1}'"
-            raise MissingArgument(msg.format('api_key', type(self).__name__))
-
-    def process(self, attachments):
-        """
-        This method updates the attachments results with the Virustotal report
-        """
-        super(VirusTotalProcessing, self).process(attachments)
-
-        if not self.api_key or not re.match(r'[a-z0-9]{64}', self.api_key):
-            raise VirusTotalApiKeyInvalid("Add a valid VirusTotal API key!")
-
-        vt = VirusTotalPublicApi(self.api_key)
-
-        sha1 = attachments['sha1']
-        result = vt.get_file_report(sha1)
-        if result:
-            attachments['virustotal'] = result
-
-        if attachments['is_archive']:
-            for i in attachments['files']:
-                i_sha1 = i['sha1']
-                i_result = vt.get_file_report(i_sha1)
-                if i_result:
-                    i['virustotal'] = i_result
-
-
-class ThugProcessing(AbstractProcessing):
-    pass
-
-
-class SampleParser(object):
-
-    def __init__(
-        self,
-        blacklist_content_types=set(),
-        virustotal_enabled=False,
-        tika_enabled=False,
-        virustotal_api_key=None,
-        tika_jar=None,
-        tika_memory_allocation=None,
-        tika_valid_content_types=set()
-    ):
-        self._virustotal_enabled = virustotal_enabled
-        self._tika_enabled = tika_enabled
-        self._blacklist_content_types = blacklist_content_types
-        self._virustotal_api_key = virustotal_api_key
-        self._tika_jar = tika_jar
-        self._tika_memory_allocation = tika_memory_allocation
-        self._tika_valid_content_types = tika_valid_content_types
-
-    @property
-    def virustotal_enabled(self):
-        return self._virustotal_enabled
-
-    @property
-    def tika_enabled(self):
-        return self._tika_enabled
-
-    @property
-    def blacklist_content_types(self):
-        return self._blacklist_content_types
-
-    @property
-    def virustotal_api_key(self):
-        return self._virustotal_api_key
-
-    @property
-    def tika_jar(self):
-        return self._tika_jar
-
-    @property
-    def tika_memory_allocation(self):
-        return self._tika_memory_allocation
-
-    @property
-    def tika_valid_content_types(self):
-        return self._tika_valid_content_types
+            # Default values
+            if name in ("tika_enabled", "virustotal_enabled", "thug_enabled"):
+                return False
+            elif name in ("blacklist_content_types"):
+                return set()
+            elif name in ("tika_memory_allocation"):
+                return None
+            else:
+                msg = "'{0}' object has no attribute '{1}'"
+                raise AttributeError(msg.format(type(self).__name__, name))
 
     @property
     def result(self):
@@ -242,12 +75,13 @@ class SampleParser(object):
 
     @staticmethod
     def fingerprints_from_base64(data):
-        """This function return the fingerprints of data from base64:
-            - md5
-            - sha1
-            - sha256
-            - sha512
-            - ssdeep
+        """This function return the fingerprints of data from base64.
+
+        Args:
+            data (string): raw data in base64
+
+        Returns:
+            tuple: fingerprints md5, sha1, sha256, sha512, ssdeep
         """
 
         try:
@@ -259,12 +93,13 @@ class SampleParser(object):
 
     @staticmethod
     def fingerprints(data):
-        """This function return the fingerprints of data:
-            - md5
-            - sha1
-            - sha256
-            - sha512
-            - ssdeep
+        """This function return the fingerprints of data.
+
+        Args:
+            data (string): raw data
+
+        Returns:
+            tuple: fingerprints md5, sha1, sha256, sha512, ssdeep
         """
 
         # md5
@@ -294,11 +129,17 @@ class SampleParser(object):
 
     @staticmethod
     def is_archive_from_base64(data, write_sample=False):
-        """If write_sample=False this function return only a boolean:
-            True if data is a archive, else False.
-        Else write_sample=True this function return a tuple:
-            (is_archive, path_sample)
-        Data is in base64.
+        """Check if data is an archive.
+
+        Args:
+            data (string): raw data in base64
+            write_sample (boolean): if True it writes sample on disk
+
+        Returns:
+            boolean: only True is archive (False otherwise)
+                     if write_sample is False
+            tuple (boolean, string): True is archive (False otherwise) and
+                                     sample path
         """
 
         try:
@@ -310,10 +151,17 @@ class SampleParser(object):
 
     @staticmethod
     def is_archive(data, write_sample=False):
-        """If write_sample=False this function return only a boolean:
-            True if data is a archive, else False.
-        Else write_sample=True this function return a tuple:
-            (is_archive, path_sample)
+        """Check if data is an archive.
+
+        Args:
+            data (string): raw data
+            write_sample (boolean): if True it writes sample on disk
+
+        Returns:
+            boolean: only True is archive (False otherwise)
+                     if write_sample is False
+            tuple (boolean, string): True is archive (False otherwise) and
+                                     sample path
         """
 
         is_archive = True
@@ -335,14 +183,19 @@ class SampleParser(object):
                 os.remove(temp)
                 return is_archive
 
-    def _create_sample_result(
-        self,
-        data,
-        filename,
-        mail_content_type,
-        transfer_encoding,
-    ):
-        """ Create dict result with basic informations."""
+    def _create_sample_result(self, data, filename, mail_content_type,
+                              transfer_encoding):
+        """ It creates dict result with basic informations.
+
+        Args:
+            data (string): raw data
+            filename (string): name of attachment file
+            mail_content_type (string): content type in email header
+            transfer_encoding (string): transfer encoding in email header
+
+        Returns:
+            The results are given in result attribute
+        """
 
         is_archive, file_ = self.is_archive(data, write_sample=True)
         size = os.path.getsize(file_)
@@ -388,7 +241,7 @@ class SampleParser(object):
             os.remove(file_)
 
     def _add_fingerprints(self):
-        """ Add fingerprints."""
+        """It adds fingerprints to result attribute. """
 
         md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
             self._result['payload'].decode('base64'))
@@ -411,6 +264,8 @@ class SampleParser(object):
                 i['ssdeep'] = ssdeep_
 
     def _add_content_type(self):
+        """It adds content type to result attribute """
+
         mime = magic.Magic(mime=True)
         content_type = mime.from_buffer(
             self._result['payload'].decode('base64'))
@@ -427,7 +282,9 @@ class SampleParser(object):
                 i['Content-Type'] = content_type
 
     def _remove_content_type(self):
-        """Remove from results the samples with content type in blacklist."""
+        """It removes from result attribute the samples with
+        content type in blacklist.
+        """
 
         if self.blacklist_content_types:
             content_type = self._result['Content-Type']
@@ -441,15 +298,18 @@ class SampleParser(object):
                     for i in self._result['files']
                     if i['Content-Type'] not in self.blacklist_content_types]
 
-    def parse_sample(
-        self,
-        data,
-        filename,
-        mail_content_type=None,
-        transfer_encoding=None,
-    ):
-        """Analyze sample and add metadata.
-        If it's an archive, extract it and put files in a list of dictionaries.
+    def parse_sample(self, data, filename, mail_content_type=None,
+                     transfer_encoding=None):
+        """It analyzes sample and add metadata.
+
+        Args:
+            data (string): raw data
+            filename (string): name of attachment file
+            mail_content_type (string): content type in email header
+            transfer_encoding (string): transfer encoding in email header
+
+        Returns:
+            The results are given in result attribute
         """
 
         # Basic informations without fingerprints
@@ -485,16 +345,18 @@ class SampleParser(object):
                 VirusTotalProcessing(
                     api_key=self.virustotal_api_key).process(self.result)
 
-    def parse_sample_from_base64(
-        self,
-        data,
-        filename,
-        mail_content_type=None,
-        transfer_encoding=None,
-    ):
-        """Analyze sample and add metadata.
-        If it's a archive, extract it and put files in a list of dictionaries.
-        Data is in base64.
+    def parse_sample_from_base64(self, data, filename, mail_content_type=None,
+                                 transfer_encoding=None):
+        """It analyzes sample and add metadata.
+
+        Args:
+            data (string): raw data in base64
+            filename (string): name of attachment file
+            mail_content_type (string): content type in email header
+            transfer_encoding (string): transfer encoding in email header
+
+        Returns:
+            The results are given in result attribute
         """
 
         try:

@@ -54,8 +54,8 @@ class Attachments(AbstractBolt):
                     raise ImproperlyConfigured(
                         "Keywords content types \
                         details list '{}' not valid".format(k))
-                keywords = [i.lower() for i in keywords]
-                self._tika_valid_content_types |= set(keywords)
+                keywords = {i.lower() for i in keywords}
+                self._tika_valid_content_types |= keywords
                 self.log("Content types Tika '{}' loaded".format(k))
 
         # Load content types for blacklist
@@ -67,8 +67,8 @@ class Attachments(AbstractBolt):
                 raise ImproperlyConfigured(
                     "Keywords content types blacklist \
                     list '{}' not valid".format(k))
-            keywords = [i.lower() for i in keywords]
-            self._cont_type_bl |= set(keywords)
+            keywords = {i.lower() for i in keywords}
+            self._cont_type_bl |= keywords
             self.log("Content types blacklist '{}' loaded".format(k))
 
     def process_tick(self, freq):

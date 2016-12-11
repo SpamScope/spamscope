@@ -111,8 +111,9 @@ attachments:
 
         # File extensions to submit to thug
         extensions:
-            - .js
             - .html
+            - .js
+            - .jse
 
         # More details:
         # http://buffer.github.io/thug/doc/usage.html#basic-usage
