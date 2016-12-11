@@ -61,7 +61,7 @@ class TikaProcessing(AbstractProcessing):
             self._kwargs[name] = value
 
     def _check_arguments(self):
-        """This method check if all mandatory arguments are given. """
+        """This method checks if all mandatory arguments are given. """
 
         if 'jar' not in self._kwargs:
             msg = "Argument '{0}' not in object '{1}'"
@@ -71,11 +71,6 @@ class TikaProcessing(AbstractProcessing):
             msg = "Argument '{0}' not in object '{1}'"
             raise MissingArgument(msg.format(
                 'valid_content_types', type(self).__name__))
-
-        if 'memory_allocation' not in self._kwargs:
-            msg = "Argument '{0}' not in object '{1}'"
-            raise MissingArgument(msg.format(
-                'memory_allocation', type(self).__name__))
 
     def process(self, attachment):
         """This method updates the attachment result

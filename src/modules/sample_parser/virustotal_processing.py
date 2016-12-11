@@ -17,10 +17,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import re
-from virus_total_apis import PublicApi as VirusTotalPublicApi
 from .abstract_processing import AbstractProcessing
 from .exceptions import MissingArgument, VirusTotalApiKeyInvalid
+from virus_total_apis import ApiError
+from virus_total_apis import PublicApi as VirusTotalPublicApi
 
 
 class VirusTotalProcessing(AbstractProcessing):
@@ -31,9 +31,17 @@ class VirusTotalProcessing(AbstractProcessing):
         api_key (string): VirusTotal api key
     """
 
+    def __init__(self, **kwargs):
+        super(VirusTotalProcessing, self).__init__(**kwargs)
+
+        try:
+            self._vt = VirusTotalPublicApi(self.api_key)
+        except ApiError:
+            raise VirusTotalApiKeyInvalid("Add a valid VirusTotal API key!")
+
     def _check_arguments(self):
         """
-        This method check if all mandatory arguments are given
+        This method checks if all mandatory arguments are given
         """
 
         if 'api_key' not in self._kwargs:
@@ -52,19 +60,16 @@ class VirusTotalProcessing(AbstractProcessing):
         """
         super(VirusTotalProcessing, self).process(attachment)
 
-        if not self.api_key or not re.match(r'[a-z0-9]{64}', self.api_key):
-            raise VirusTotalApiKeyInvalid("Add a valid VirusTotal API key!")
-
-        vt = VirusTotalPublicApi(self.api_key)
+        self._vt = VirusTotalPublicApi(self.api_key)
 
         sha1 = attachment['sha1']
-        result = vt.get_file_report(sha1)
+        result = self._vt.get_file_report(sha1)
         if result:
             attachment['virustotal'] = result
 
         if attachment['is_archive']:
             for i in attachment['files']:
                 i_sha1 = i['sha1']
-                i_result = vt.get_file_report(i_sha1)
+                i_result = self._vt.get_file_report(i_sha1)
                 if i_result:
                     i['virustotal'] = i_result

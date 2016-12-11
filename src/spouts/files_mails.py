@@ -22,7 +22,7 @@ import os
 import shutil
 import time
 from spouts.abstracts import AbstractSpout
-from modules.errors import ImproperlyConfigured
+from modules.exceptions import ImproperlyConfigured
 from modules.utils import MailItem
 
 

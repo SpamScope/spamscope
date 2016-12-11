@@ -75,13 +75,8 @@ class TestVirusTotalProcessing(unittest.TestCase):
     def test_invalid_api_key(self):
         """Test VirusTotalApiKeyInvalid exception."""
 
-        v = sp.VirusTotalProcessing(api_key=None)
         with self.assertRaises(sp.VirusTotalApiKeyInvalid):
-            v.process({})
-
-        v = sp.VirusTotalProcessing(api_key="test")
-        with self.assertRaises(sp.VirusTotalApiKeyInvalid):
-            v.process({})
+            sp.VirusTotalProcessing(api_key=None)
 
     def test_missing_api_key(self):
         """Test MissingArgument exception."""
