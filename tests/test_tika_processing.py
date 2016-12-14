@@ -31,85 +31,71 @@ import src.modules.sample_parser as sp
 
 class TestTikaProcessing(unittest.TestCase):
 
-    def test_meta_data(self):
-        """Test meta data analysis."""
+    def setUp(self):
 
-        # Parsing mail
+        # Init
         p = MailParser()
-        p.parse_from_file(mail)
-
-        # Init parameters
-        new_attachments = []
         s = sp.SampleParser()
-        t = sp.TikaProcessing(
+        self.tika = sp.TikaProcessing(
             jar="/opt/tika/tika-app-1.14.jar",
-            valid_content_types=[],
+            valid_content_types=['application/zip'],
             memory_allocation=None)
 
-        # Parsing sample
+        # Parsing mail
+        p.parse_from_file(mail)
+        self.attachments = []
+
         for i in p.attachments_list:
             s.parse_sample_from_base64(
                 data=i['payload'],
                 filename=i['filename'],
                 mail_content_type=i['mail_content_type'],
                 transfer_encoding=i['content_transfer_encoding'])
+            self.attachments.append(s.result)
 
-            if s.result:
-                new_attachments.append(s.result)
+    def test_meta_data(self):
+        """Test meta data analysis."""
 
         # Tika analysis
-        for i in new_attachments:
-            t.process(i)
+        self.tika.valid_content_types = []
+        for i in self.attachments:
+            self.tika.process(i)
             self.assertNotIn('tika', i)
 
-        t = sp.TikaProcessing(
-            jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"],
-            memory_allocation=None)
-
-        for i in new_attachments:
-            t.process(i)
+        self.tika.valid_content_types = ['application/zip']
+        for i in self.attachments:
+            self.tika.process(i)
             self.assertIn('tika', i)
 
     def test_invalid_attachments(self):
         """Test InvalidAttachments exception."""
 
-        t = sp.TikaProcessing(
-            jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"],
-            memory_allocation=None)
-
+        self.tika.valid_content_types = ['application/zip']
         with self.assertRaises(sp.InvalidAttachment):
-            t.process(["fake_attachment"])
+            self.tika.process([])
 
     def test_properties(self):
         """Test properties output."""
 
-        t = sp.TikaProcessing(
-            jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"],
-            memory_allocation=None)
+        self.tika.valid_content_types = ['application/zip']
 
-        self.assertEqual(t.jar, "/opt/tika/tika-app-1.13.jar")
-        self.assertEqual(t.memory_allocation, None)
-        self.assertEqual(t.valid_content_types, ["application/zip"])
+        self.assertEqual(self.tika.jar, "/opt/tika/tika-app-1.14.jar")
+        self.assertEqual(self.tika.memory_allocation, None)
+        self.assertEqual(self.tika.valid_content_types, ["application/zip"])
 
     def test_setters(self):
-        t = sp.TikaProcessing(
-            jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=set(["application/zip"]),
-            memory_allocation=None)
 
-        t.jar = "jar"
-        t.valid_content_types = ["valid_content_types"]
-        t.memory_allocation = "512m"
+        self.tika.jar = "jar"
+        self.tika.valid_content_types = ["valid_content_types"]
+        self.tika.memory_allocation = "512m"
 
-        self.assertEqual(t.jar, "jar")
-        self.assertEqual(t.memory_allocation, "512m")
-        self.assertEqual(t.valid_content_types, ["valid_content_types"])
+        self.assertEqual(self.tika.jar, "jar")
+        self.assertEqual(self.tika.memory_allocation, "512m")
+        self.assertEqual(
+            self.tika.valid_content_types, ["valid_content_types"])
 
         with self.assertRaises(sp.InvalidContentTypes):
-            t.valid_content_types = "application/zip"
+            self.tika.valid_content_types = "application/zip"
 
     def test_missing_api_key(self):
         """Test MissingArgument exception."""

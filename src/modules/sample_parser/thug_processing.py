@@ -27,6 +27,10 @@ from ..thug_analysis import ThugAnalysis
 log = logging.getLogger(__name__)
 
 
+class ThugAnalysisFailed(Exception):
+    pass
+
+
 class ThugProcessing(AbstractProcessing):
     """ This class processes the output mail attachments to add
     Thug analysis.
@@ -48,33 +52,60 @@ class ThugProcessing(AbstractProcessing):
 
         if 'referer' not in self._kwargs:
             msg = "Argument '{0}' not in object '{1}'"
-            raise MissingArgument(msg.format('api_key', type(self).__name__))
+            raise MissingArgument(msg.format('referer', type(self).__name__))
 
         if 'extensions' not in self._kwargs:
             msg = "Argument '{0}' not in object '{1}'"
-            raise MissingArgument(msg.format('api_key', type(self).__name__))
+            raise MissingArgument(msg.format(
+                'extensions', type(self).__name__))
 
         if 'user_agents' not in self._kwargs:
             msg = "Argument '{0}' not in object '{1}'"
-            raise MissingArgument(msg.format('api_key', type(self).__name__))
+            raise MissingArgument(msg.format(
+                'user_agents', type(self).__name__))
 
-    def _write_attachment(self, payload):
+    def _write_attachment(self, payload, extension):
         """This method writes the attachment payload on file system in temporary file.
 
         Args:
             payload (string): binary payload string in base64 to write on disk
+            extension (string): file extension. Example '.js'
 
         Returns:
             Local file path of payload
         """
 
         try:
-            temp = tempfile.mkstemp()[1]
+            temp = tempfile.mkstemp()[1] + extension
             with open(temp, 'wb') as f:
                 f.write(payload.decode('base64'))
             return temp
         except:
             raise TempIOError("Failed opening '{}' file".format(temp))
+
+    def _single_analysis(self, sample):
+        results = []
+        local_file = self._write_attachment(
+            sample['payload'], sample['extension'])
+
+        # Thug analysis
+        for u in self.user_agents:
+            try:
+                analysis = self._thug.analyze(local_file, u, self.referer)
+                results.append(analysis)
+            except:
+                msg = "Thug analysis failed for sample sha1 '{}'".format(
+                    sample['sha1'])
+                log.error(msg)
+                raise ThugAnalysisFailed(msg)
+
+        try:
+            os.remove(local_file)
+        except:
+            log.error("Failed removing '{}' temporary file".format(
+                local_file))
+
+        return results
 
     def process(self, attachment):
         """This method updates the attachment result
@@ -88,25 +119,10 @@ class ThugProcessing(AbstractProcessing):
         """
         super(ThugProcessing, self).process(attachment)
 
-        results = []
-
         if attachment['extension'] in self.extensions:
-            local_file = self._write_attachment(attachment['payload'])
+            attachment['thug'] = self._single_analysis(attachment)
 
-            for u in self.user_agents:
-                # Thug analysis
-                analysis = self._thug.analyze(local_file, u, self.referer)
-
-                results.append(
-                    {"user_agent": u,
-                     "referer": self.referer,
-                     "sha1": attachment["sha1"],
-                     "analysis": analysis})
-
-            try:
-                os.remove(local_file)
-            except:
-                log.error("Failed removing '{}' temporary file".format(
-                    local_file))
-
-            attachment['thug'] = results
+        if attachment['is_archive']:
+            for i in attachment['files']:
+                if i['extension'] in self.extensions:
+                    i['thug'] = self._single_analysis(i)

@@ -27,7 +27,7 @@ root = os.path.join(base_path, '..')
 sample_zip = os.path.join(base_path, 'samples', 'test.zip')
 sample_zip_1 = os.path.join(base_path, 'samples', 'test1.zip')
 sample_txt = os.path.join(base_path, 'samples', 'test.txt')
-mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
+mail = os.path.join(base_path, 'samples', 'mail_thug')
 sys.path.append(root)
 import src.modules.sample_parser as sp
 
@@ -38,6 +38,11 @@ class TestSampleParser(unittest.TestCase):
 
     def test_static_methods(self):
         """Test static methods."""
+
+        # Init
+        filename = "test.zip"
+        mail_content_type = "application/zip"
+        transfer_encoding = "application/zip"
 
         with open(sample_zip, 'rb') as f:
             data = f.read()
@@ -63,10 +68,25 @@ class TestSampleParser(unittest.TestCase):
 
         self.assertEqual(result1, result2)
 
+        # Test make_attachment
+        result = sp.SampleParser.make_attachment(
+            data, filename, mail_content_type, transfer_encoding)
+
+        self.assertIsInstance(result, dict)
+        self.assertIn('filename', result)
+        self.assertIn('extension', result)
+        self.assertIn('payload', result)
+        self.assertIn('mail_content_type', result)
+        self.assertIn('content_transfer_encoding', result)
+        self.assertIn('size', result)
+        self.assertIn('is_archive', result)
+
+        # Test add_content_type
+        sp.SampleParser.add_content_type(result)
+        self.assertIn('Content-Type', result)
+
     def test_is_archive(self):
         """Test is_archive functions."""
-
-        parser = sp.SampleParser()
 
         with open(sample_zip, 'rb') as f:
             data = f.read()
@@ -75,40 +95,36 @@ class TestSampleParser(unittest.TestCase):
         sha1_archive = "8760ff1422cf2922b649b796cfb58bfb0ccf7801"
 
         # Test is_archive with write_sample=False
-        result1 = parser.is_archive(data)
+        result1 = sp.SampleParser.is_archive(data)
         self.assertEqual(True, result1)
 
-        result2 = parser.is_archive_from_base64(data_base64)
+        result2 = sp.SampleParser.is_archive_from_base64(data_base64)
         self.assertEqual(True, result2)
 
         self.assertEqual(result1, result2)
 
         # Test is_archive with write_sample=True
-        result = parser.is_archive(data, write_sample=True)
+        result = sp.SampleParser.is_archive(data, write_sample=True)
         self.assertEqual(os.path.exists(result[1]), True)
 
         # Sample on disk
         with open(result[1], 'rb') as f:
             data_new = f.read()
 
-        result = parser.fingerprints(data_new)
+        result = sp.SampleParser.fingerprints(data_new)
         self.assertEqual(sha1_archive, result[1])
 
-        result = parser.is_archive_from_base64(
-            data_base64,
-            write_sample=True
-        )
+        result = sp.SampleParser.is_archive_from_base64(
+            data_base64, write_sample=True)
         self.assertEqual(True, result[0])
         self.assertEqual(os.path.exists(result[1]), True)
 
         # Test is_archive with write_sample=True
-        result = parser.is_archive(data, write_sample=True)
+        result = sp.SampleParser.is_archive(data, write_sample=True)
         self.assertIsInstance(result, tuple)
 
     def test_fingerprints(self):
         """Test fingerprints functions."""
-
-        parser = sp.SampleParser()
 
         with open(sample_zip, 'rb') as f:
             data = f.read()
@@ -117,10 +133,10 @@ class TestSampleParser(unittest.TestCase):
         sha1_archive = "8760ff1422cf2922b649b796cfb58bfb0ccf7801"
 
         # Test fingerprints
-        result1 = parser.fingerprints(data)[1]
+        result1 = sp.SampleParser.fingerprints(data)[1]
         self.assertEqual(sha1_archive, result1)
 
-        result2 = parser.fingerprints_from_base64(data_base64)[1]
+        result2 = sp.SampleParser.fingerprints_from_base64(data_base64)[1]
         self.assertEqual(sha1_archive, result2)
 
         self.assertEqual(result1, result2)
@@ -158,47 +174,45 @@ class TestSampleParser(unittest.TestCase):
         self.assertIn('extension', result['files'][0])
         self.assertEqual(result['files'][0]['extension'], '.txt')
 
-    def test_tika(self):
-        """Test for tika."""
+    def test_complete(self):
+        """Test with all functions enabled. """
 
-        parser = sp.SampleParser(
-            tika_enabled=True,
-            tika_jar="/opt/tika/tika-app-1.13.jar",
-            tika_valid_content_types=["application/zip"])
-
-        with open(sample_zip, 'rb') as f:
-            data = f.read()
-
-        parser.parse_sample(data, "test.zip")
-        result = parser.result
-        self.assertIn('tika', result)
-        self.assertIsInstance(result['tika'], list)
-        self.assertIn('test.txt', result['tika'][0]['X-TIKA:content'])
-
-    def test_virustotal(self):
-        # Parsing mail
+        # Init
         p = MailParser()
-        p.parse_from_file(mail)
-
-        # Init parameters
         s = sp.SampleParser(
+            blacklist_content_types=[],
+            thug_enabled=True,
+            tika_enabled=True,
             virustotal_enabled=True,
-            virustotal_api_key=API_KEY)
+            tika_jar="/opt/tika/tika-app-1.14.jar",
+            tika_memory_allocation=None,
+            tika_valid_content_types=['application/zip'],
+            virustotal_api_key=API_KEY,
+            thug_referer="http://www.google.com/",
+            thug_extensions=[".js"],
+            thug_user_agents=["winxpie80"])
 
-        # Parsing sample
+        # Parsing mail
+        p.parse_from_file(mail)
+        attachments = []
+
         for i in p.attachments_list:
             s.parse_sample_from_base64(
                 data=i['payload'],
                 filename=i['filename'],
                 mail_content_type=i['mail_content_type'],
                 transfer_encoding=i['content_transfer_encoding'])
+            attachments.append(s.result)
 
-            self.assertIn('virustotal', s.result)
-            self.assertEqual(200, int(s.result['virustotal']['response_code']))
+        for i in attachments:
+            self.assertIn("tika", i)
+            self.assertIn("virustotal", i)
+            self.assertNotIn("thug", i)
 
-            for j in s.result["files"]:
-                self.assertIn('virustotal', j)
-                self.assertEqual(200, int(j['virustotal']['response_code']))
+            for j in i['files']:
+                self.assertNotIn("tika", j)
+                self.assertIn("virustotal", j)
+                self.assertIn("thug", j)
 
 
 if __name__ == '__main__':
