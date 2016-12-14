@@ -67,8 +67,6 @@ class SampleParser(object):
                 return False
             elif name in ("blacklist_content_types"):
                 return set()
-            elif name in ("tika_memory_allocation"):
-                return None
             else:
                 msg = "'{0}' object has no attribute '{1}'"
                 raise AttributeError(msg.format(type(self).__name__, name))
@@ -187,8 +185,8 @@ class SampleParser(object):
                 os.remove(temp)
                 return is_archive
 
-    def _create_sample_result(self, data, filename, mail_content_type,
-                              transfer_encoding):
+    @staticmethod
+    def make_attachment(data, filename, mail_content_type, transfer_encoding):
         """ This method creates dict result with basic informations.
 
         Args:
@@ -198,14 +196,14 @@ class SampleParser(object):
             transfer_encoding (string): transfer encoding in email header
 
         Returns:
-            The results are given in result attribute
+            Dict with attachment details (filename, payload, etc.)
         """
 
-        is_archive, file_ = self.is_archive(data, write_sample=True)
+        is_archive, file_ = SampleParser.is_archive(data, write_sample=True)
         size = os.path.getsize(file_)
         extension = os.path.splitext(filename)
 
-        self._result = {
+        attachment = {
             'filename': filename,
             'extension': extension[-1].lower() if len(extension) > 1 else None,
             'payload': data.encode('base64'),
@@ -215,7 +213,7 @@ class SampleParser(object):
             'is_archive': is_archive}
 
         if is_archive:
-            self._result['files'] = list()
+            attachment['files'] = list()
             temp_dir = tempfile.mkdtemp()
             patoolib.extract_archive(file_, outdir=temp_dir, verbosity=-1)
 
@@ -229,7 +227,7 @@ class SampleParser(object):
                         i_extension = os.path.splitext(i_filename)
                         i_size = os.path.getsize(i)
 
-                        self._result['files'].append({
+                        attachment['files'].append({
                             'filename': i_filename,
                             'extension': i_extension[-1].lower() if len(
                                 i_extension) > 1 else None,
@@ -244,21 +242,31 @@ class SampleParser(object):
         if os.path.exists(file_):
             os.remove(file_)
 
-    def _add_fingerprints(self):
-        """This method adds fingerprints to result attribute. """
+        return attachment
 
-        md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
-            self._result['payload'].decode('base64'))
+    @staticmethod
+    def add_fingerprints(attachment):
+        """This method adds fingerprints to attachment.
 
-        self._result['md5'] = md5
-        self._result['sha1'] = sha1
-        self._result['sha256'] = sha256
-        self._result['sha512'] = sha512
-        self._result['ssdeep'] = ssdeep_
+        Args:
+            attachment (dict): dict with details of mail attachment
 
-        if self._result['is_archive']:
-            for i in self._result['files']:
-                md5, sha1, sha256, sha512, ssdeep_ = self.fingerprints(
+        Returns:
+            Add fingerprints to attachment argument
+        """
+
+        md5, sha1, sha256, sha512, ssdeep_ = SampleParser.fingerprints(
+            attachment['payload'].decode('base64'))
+
+        attachment['md5'] = md5
+        attachment['sha1'] = sha1
+        attachment['sha256'] = sha256
+        attachment['sha512'] = sha512
+        attachment['ssdeep'] = ssdeep_
+
+        if attachment['is_archive']:
+            for i in attachment['files']:
+                md5, sha1, sha256, sha512, ssdeep_ = SampleParser.fingerprints(
                     i['payload'].decode('base64'))
 
                 i['md5'] = md5
@@ -267,17 +275,18 @@ class SampleParser(object):
                 i['sha512'] = sha512
                 i['ssdeep'] = ssdeep_
 
-    def _add_content_type(self):
+    @staticmethod
+    def add_content_type(attachment):
         """This method adds content type to result attribute """
 
         mime = magic.Magic(mime=True)
         content_type = mime.from_buffer(
-            self._result['payload'].decode('base64'))
+            attachment['payload'].decode('base64'))
 
-        self._result['Content-Type'] = content_type
+        attachment['Content-Type'] = content_type
 
-        if self._result['is_archive']:
-            for i in self._result['files']:
+        if attachment['is_archive']:
+            for i in attachment['files']:
                 content_type = mime.from_buffer(
                     i['payload'].decode('base64'))
 
@@ -285,21 +294,27 @@ class SampleParser(object):
                 # files in archive
                 i['Content-Type'] = content_type
 
-    def _remove_content_type(self):
-        """This method removes from result attribute the samples with
+    def _filter_content_type(self, attachment):
+        """This method removes from attachment the samples with
         content type in blacklist.
+
+        Args:
+            attachment (dict): dict with details of mail attachment
+
+        Returns:
+            The results are given in attachment argument
         """
 
         if self.blacklist_content_types:
-            content_type = self._result['Content-Type']
+            content_type = attachment['Content-Type']
             if content_type in self.blacklist_content_types:
-                self._result = None
+                attachment = None
                 return
 
-            if self._result['is_archive']:
-                self._result['files'] = [
+            if attachment['is_archive']:
+                attachment['files'] = [
                     i
-                    for i in self._result['files']
+                    for i in attachment['files']
                     if i['Content-Type'] not in self.blacklist_content_types]
 
     def parse_sample(self, data, filename, mail_content_type=None,
@@ -317,24 +332,20 @@ class SampleParser(object):
         """
 
         # Basic informations without fingerprints
-        self._create_sample_result(
-            data,
-            filename,
-            mail_content_type,
-            transfer_encoding,
-        )
+        self._result = SampleParser.make_attachment(
+            data, filename, mail_content_type, transfer_encoding)
 
         # Add content type
-        self._add_content_type()
+        SampleParser.add_content_type(self.result)
 
-        # Blacklist content type
+        # Filter content type
         # If content type in blacklist_content_types result = None
-        self._remove_content_type()
+        self._filter_content_type(self.result)
 
         if self.result:
 
             # Add fingerprints
-            self._add_fingerprints()
+            SampleParser.add_fingerprints(self.result)
 
             # Add Tika analysis
             if self.tika_enabled:
@@ -377,7 +388,4 @@ class SampleParser(object):
             raise Base64Error("Data '{}' is NOT correct".format(data))
 
         return self.parse_sample(
-            data,
-            filename,
-            mail_content_type,
-            transfer_encoding)
+            data, filename, mail_content_type, transfer_encoding)

@@ -33,44 +33,47 @@ API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 class TestVirusTotalProcessing(unittest.TestCase):
 
-    def test_process(self):
-        """Test add VirusTotal analysis."""
+    def setUp(self):
+
+        # Init
+        p = MailParser()
+        s = sp.SampleParser()
+        self.virustotal = sp.VirusTotalProcessing(api_key=API_KEY)
 
         # Parsing mail
-        p = MailParser()
         p.parse_from_file(mail)
+        self.attachments = []
 
-        # Init parameters
-        new_attachments = []
-        s = sp.SampleParser()
-        v = sp.VirusTotalProcessing(api_key=API_KEY)
-
-        # Parsing sample
         for i in p.attachments_list:
             s.parse_sample_from_base64(
                 data=i['payload'],
                 filename=i['filename'],
                 mail_content_type=i['mail_content_type'],
                 transfer_encoding=i['content_transfer_encoding'])
+            self.attachments.append(s.result)
 
-            if s.result:
-                new_attachments.append(s.result)
+    def test_process(self):
+        """Test add VirusTotal analysis."""
 
         # VirusTotal analysis
-        for i in new_attachments:
-            v.process(i)
+        for i in self.attachments:
+            self.virustotal.process(i)
             self.assertIn('virustotal', i)
+            self.assertEqual(i['virustotal']['response_code'], 200)
+            self.assertEqual(i['virustotal']['results']['sha1'],
+                             '2a7cee8c214ac76ba6fdbc3031e73dbede95b803')
 
             for j in i["files"]:
                 self.assertIn('virustotal', j)
+                self.assertEqual(j['virustotal']['response_code'], 200)
+                self.assertEqual(j['virustotal']['results']['sha1'],
+                                 'ed2e480e7ba7e37f77a85efbca4058d8c5f92664')
 
     def test_invalid_attachments(self):
         """Test InvalidAttachments exception."""
 
-        v = sp.VirusTotalProcessing(api_key=API_KEY)
-
         with self.assertRaises(sp.InvalidAttachment):
-            v.process([])
+            self.virustotal.process([])
 
     def test_invalid_api_key(self):
         """Test VirusTotalApiKeyInvalid exception."""
