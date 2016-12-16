@@ -19,7 +19,13 @@ limitations under the License.
 
 import logging
 import tempfile
-from thug.ThugAPI import ThugAPI
+
+try:
+    from thug.ThugAPI import ThugAPI
+except ImportError:
+    raise ImportError(
+        "Thug is not installed. Follow these instructions:" +
+        " http://buffer.github.io/thug/doc/build.html")
 
 try:
     import simplejson as json

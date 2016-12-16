@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from bitmap import BitMap
+from .bitmap import BitMap
 
 
 class PhishingBitMap(BitMap):
