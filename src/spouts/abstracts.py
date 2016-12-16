@@ -18,7 +18,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.spout import Spout
 
 from abc import ABCMeta
-from modules.errors import ImproperlyConfigured
+from modules.exceptions import ImproperlyConfigured
 from modules.utils import load_config
 
 

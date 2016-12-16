@@ -23,7 +23,7 @@ import logging
 import os
 import ssdeep
 import yaml
-from errors import ImproperlyConfigured
+from .exceptions import ImproperlyConfigured
 
 log = logging.getLogger(__name__)
 

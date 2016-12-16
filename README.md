@@ -37,7 +37,7 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
 
 
 ## Installation
-For more details please visit [wiki page](https://github.com/SpamScope/spamscope/wiki/Installation).
+For more details please visit the [wiki page](https://github.com/SpamScope/spamscope/wiki/Installation).
 
 Clone repository
 
@@ -57,11 +57,24 @@ There is another requirement: [Faup](https://github.com/stricaud/faup). Install 
 python setup.py install
 ```
 
+### Tika (optional)
+SpamScope can use [Tika App](https://tika.apache.org/) to parse every attachment mail.
+
+The **Apache Tika** toolkit detects and extracts metadata and text from over a thousand different file types (such as PPT, XLS, and PDF).
+
+``
+wget https://archive.apache.org/dist/tika/tika-app-1.14.jar -O /opt/tika-app-1.14.jar
+```
+
+### Thug (optional)
+If you want to analyze the attachments with Thug, follow [these instructions](http://buffer.github.io/thug/doc/build.html) to install it.
+
+
 ## Configuration
-All details are in `conf` folder.
+For more details please visit the [wiki page](https://github.com/SpamScope/spamscope/wiki/Configuration) or read the comments in the files in `conf` folder.
 
 From SpamScope v1.1 you can decide to **filter mails and attachments** already analyzed. If you enable filter in `tokenizer` section you will enable the RAM database and
-SpamScope will check on it to decide if mail/attachment is already analyzed or not. If yes SpamScope will not analyze it and will store only the hashes.
+SpamScope will check on it to decide if mail/attachment is already analyzed or not. If the mail is in RAM database, SpamScope will not analyze it and will store only the hashes.
 
 
 ## Usage
@@ -129,6 +142,31 @@ It's possible add to results (for mail attachments) the output of [Apache Tika](
 ### Virustotal
 
 It's possible add to results (for mail attachments) Virustotal report. Maybe you need a private API key.
+
+
+### Thug
+From release v1.3 SpamScope can analyze Javascript and HTML attachments with [Thug](https://github.com/buffer/thug). You should enable it in `attachments` section.
+
+What is Thug? From README project:
+```
+Thug is a Python low-interaction honeyclient aimed at mimicing the behavior of a web browser in order to detect and emulate malicious contents.
+```
+
+You can see a complete SpamScope report with Thug analysis [here](https://goo.gl/Y4kWCv).
+
+Thug analysis can be very slow, it depends from attachment. To avoid Apache Storm timeout, you should use these two switches when submit the topology:
+
+```
+supervisor.worker.timeout.secs=600
+topology.message.timeout.secs=600
+```
+
+As you can see, the timeouts are both to 600 seconds. 600 seconds is the default timeout of Thug. 
+
+The complete command is:
+```
+sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10" -o "supervisor.worker.timeout.secs=600" -o "topology.message.timeout.secs=600"
+```
 
 
 ## Docker image
