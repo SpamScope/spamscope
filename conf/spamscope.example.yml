@@ -106,6 +106,22 @@ attachments:
             generic: /path/to/generic_content_types
             custom: /path/to/custom_content_types
 
+    thug:
+        enabled: False
+
+        # File extensions to submit to thug
+        extensions:
+            - .html
+            - .js
+            - .jse
+
+        # More details:
+        # http://buffer.github.io/thug/doc/usage.html#basic-usage
+        user_agents:
+            - win7ie90
+
+        referer: http://www.google.com/
+
 
 # Urls handler body
 urls-handler-body:

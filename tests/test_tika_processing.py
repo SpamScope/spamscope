@@ -29,80 +29,80 @@ sys.path.append(root)
 import src.modules.sample_parser as sp
 
 
-class TestTikaAnalysis(unittest.TestCase):
+class TestTikaProcessing(unittest.TestCase):
 
-    def test_meta_data(self):
-        """Test meta data analysis."""
+    def setUp(self):
+
+        # Init
+        p = MailParser()
+        s = sp.SampleParser()
+        self.tika = sp.TikaProcessing(
+            jar="/opt/tika/tika-app-1.14.jar",
+            valid_content_types=['application/zip'],
+            memory_allocation=None)
 
         # Parsing mail
-        p = MailParser()
         p.parse_from_file(mail)
+        self.attachments = []
 
-        # Init parameters
-        new_attachments = []
-        s = sp.SampleParser()
-        t = sp.TikaAnalysis(
-            jar="/opt/tika/tika-app-1.13.jar")
-
-        # Parsing sample
         for i in p.attachments_list:
             s.parse_sample_from_base64(
                 data=i['payload'],
                 filename=i['filename'],
                 mail_content_type=i['mail_content_type'],
                 transfer_encoding=i['content_transfer_encoding'])
+            self.attachments.append(s.result)
 
-            if s.result:
-                new_attachments.append(s.result)
+    def test_meta_data(self):
+        """Test meta data analysis."""
 
         # Tika analysis
-        for i in new_attachments:
-            t.add_meta_data(i)
+        self.tika.valid_content_types = []
+        for i in self.attachments:
+            self.tika.process(i)
             self.assertNotIn('tika', i)
 
-        t = sp.TikaAnalysis(
-            jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"])
-
-        for i in new_attachments:
-            t.add_meta_data(i)
+        self.tika.valid_content_types = ['application/zip']
+        for i in self.attachments:
+            self.tika.process(i)
             self.assertIn('tika', i)
 
     def test_invalid_attachments(self):
         """Test InvalidAttachments exception."""
 
-        t = sp.TikaAnalysis(
-            jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"])
-
+        self.tika.valid_content_types = ['application/zip']
         with self.assertRaises(sp.InvalidAttachment):
-            t.add_meta_data(["fake_attachment"])
+            self.tika.process([])
 
     def test_properties(self):
         """Test properties output."""
 
-        t = sp.TikaAnalysis(
-            jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"])
+        self.tika.valid_content_types = ['application/zip']
 
-        self.assertEqual(t.jar, "/opt/tika/tika-app-1.13.jar")
-        self.assertEqual(t.memory_allocation, None)
-        self.assertEqual(t.valid_content_types, ["application/zip"])
+        self.assertEqual(self.tika.jar, "/opt/tika/tika-app-1.14.jar")
+        self.assertEqual(self.tika.memory_allocation, None)
+        self.assertEqual(self.tika.valid_content_types, ["application/zip"])
 
     def test_setters(self):
-        t = sp.TikaAnalysis(
-            jar="/opt/tika/tika-app-1.13.jar",
-            valid_content_types=["application/zip"])
 
-        t.jar = "test1"
-        t.valid_content_types = set(["test2"])
+        self.tika.jar = "jar"
+        self.tika.valid_content_types = ["valid_content_types"]
+        self.tika.memory_allocation = "512m"
 
-        self.assertEqual(t.jar, "test1")
-        self.assertEqual(t.memory_allocation, None)
-        self.assertEqual(t.valid_content_types, set(["test2"]))
+        self.assertEqual(self.tika.jar, "jar")
+        self.assertEqual(self.tika.memory_allocation, "512m")
+        self.assertEqual(
+            self.tika.valid_content_types, ["valid_content_types"])
 
         with self.assertRaises(sp.InvalidContentTypes):
-            t.valid_content_types = ["application/zip"]
+            self.tika.valid_content_types = "application/zip"
+
+    def test_missing_api_key(self):
+        """Test MissingArgument exception."""
+
+        with self.assertRaises(sp.MissingArgument):
+            sp.TikaProcessing()
+
 
 if __name__ == '__main__':
     unittest.main()

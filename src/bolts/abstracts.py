@@ -19,7 +19,7 @@ from streamparse.bolt import Bolt
 
 from abc import ABCMeta
 from datetime import datetime
-from modules.errors import ImproperlyConfigured
+from modules.exceptions import ImproperlyConfigured
 from modules.urls_extractor import UrlsExtractor
 from modules.utils import load_config
 
