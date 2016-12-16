@@ -62,7 +62,7 @@ SpamScope can use [Tika App](https://tika.apache.org/) to parse every attachment
 
 The **Apache Tika** toolkit detects and extracts metadata and text from over a thousand different file types (such as PPT, XLS, and PDF).
 
-``
+```
 wget https://archive.apache.org/dist/tika/tika-app-1.14.jar -O /opt/tika-app-1.14.jar
 ```
 
