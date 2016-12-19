@@ -26,9 +26,6 @@ import shutil
 import ssdeep
 import tempfile
 from .exceptions import Base64Error, TempIOError
-from .virustotal_processing import VirusTotalProcessing
-from .tika_processing import TikaProcessing
-from .thug_processing import ThugProcessing
 
 log = logging.getLogger(__name__)
 
@@ -349,6 +346,7 @@ class SampleParser(object):
 
             # Add Tika analysis
             if self.tika_enabled:
+                from .tika_processing import TikaProcessing
                 TikaProcessing(
                     jar=self.tika_jar,
                     valid_content_types=self.tika_valid_content_types,
@@ -357,10 +355,12 @@ class SampleParser(object):
 
             # Add VirusTotal analysis
             if self.virustotal_enabled:
+                from .virustotal_processing import VirusTotalProcessing
                 VirusTotalProcessing(
                     api_key=self.virustotal_api_key).process(self.result)
 
             if self.thug_enabled:
+                from .thug_processing import ThugProcessing
                 ThugProcessing(
                     referer=self.thug_referer,
                     extensions=self.thug_extensions,
