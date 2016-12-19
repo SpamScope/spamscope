@@ -2,7 +2,6 @@
 
 
 ## Overview
-
 SpamScope is an advanced spam analysis tool that use [Apache Storm](http://storm.apache.org/) with [streamparse](https://github.com/Parsely/streamparse) to process a stream of mails. 
 
 It's possible to analyze about 5 milions of mails (without Apache Tika analisys) for day with a 4 cores server and 4 GB of RAM. If you enable Apache Tika, you can analyze about 1 milion of mails.
@@ -26,8 +25,12 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
 [![Donate](https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2)
 
 
+
 ## Output example
-[Here](https://gist.githubusercontent.com/fedelemantuano/5dd702004c25a46b2bd60de21e67458e/raw/3fdff560c2c6078c416b959ca74567ddcb5470d6/1471832668.1377_3.ivanova.orig) an example of raw mail and [here](https://gist.githubusercontent.com/fedelemantuano/e37095442263a51da7f5bd722532aab3/raw/b0c2b2094b4ecca4f1cb3cc3257ecae663ba84f4/1471832668.1377_3.ivanova.orig.json) the **SpamScope** analisys output.
+  - [Raw mail](https://goo.gl/wMBfbF).
+  - [SpamScope output](https://goo.gl/MS7ugy).
+  - [SpamScope output with Thug](https://goo.gl/Y4kWCv).
+
 
 
 ## Authors
@@ -36,8 +39,9 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
  Fedele Mantuano (**Twitter**: [@fedelemantuano](https://twitter.com/fedelemantuano))
 
 
+
 ## Installation
-For more details please visit [wiki page](https://github.com/SpamScope/spamscope/wiki/Installation).
+For more details please visit the [wiki page](https://github.com/SpamScope/spamscope/wiki/Installation).
 
 Clone repository
 
@@ -51,21 +55,41 @@ Install requirements in file `requirements.txt` with `python-pip`:
 pip install -r requirements.txt
 ```
 
-There is another requirement: [Faup](https://github.com/stricaud/faup). Install `faup` tool and then python library with:
+### Faup
+[Faup](https://github.com/stricaud/faup) stands for Finally An Url Parser and is a library and command line tool to parse URLs and normalize fields.
+To install it follow the [wiki](https://github.com/SpamScope/spamscope/wiki/Installation#faup).
 
+### Tika (optional)
+SpamScope can use [Tika App](https://tika.apache.org/) to parse every attachment mail.
+The **Apache Tika** toolkit detects and extracts metadata and text from over a thousand different file types (such as PPT, XLS, and PDF).
+To install it follow the [wiki](https://github.com/SpamScope/spamscope/wiki/Installation#tika-app-optional).
+To enable Apache Tika analisys, you should set in `attachments` section.
+
+### Thug (optional)
+From release v1.3 SpamScope can analyze Javascript and HTML attachments with [Thug](https://github.com/buffer/thug).
+If you want to analyze the attachments with Thug, follow [these instructions](http://buffer.github.io/thug/doc/build.html) to install it and enable it in `attachments` section.
+
+What is Thug? From README project:
 ```
-python setup.py install
+Thug is a Python low-interaction honeyclient aimed at mimicing the behavior of a web browser in order to detect and emulate malicious contents.
 ```
+
+You can see a complete SpamScope report with Thug analysis [here](https://goo.gl/Y4kWCv).
+
+### VirusTotal (optional)
+It's possible add to results (for mail attachments) VirusTotal report. You need a private API key.
+
+
 
 ## Configuration
-All details are in `conf` folder.
+For more details please visit the [wiki page](https://github.com/SpamScope/spamscope/wiki/Configuration) or read the comments in the files in `conf` folder.
 
 From SpamScope v1.1 you can decide to **filter mails and attachments** already analyzed. If you enable filter in `tokenizer` section you will enable the RAM database and
-SpamScope will check on it to decide if mail/attachment is already analyzed or not. If yes SpamScope will not analyze it and will store only the hashes.
+SpamScope will check on it to decide if mail/attachment is already analyzed or not. If the mail is in RAM database, SpamScope will not analyze it and will store only the hashes.
+
 
 
 ## Usage
-
 SpamScope comes with two topologies:
    - spamscope_debug
    - spamscope_elasticsearch
@@ -93,14 +117,13 @@ It's very importart pass configuration file to commands `sparse run` and `sparse
 If you use Elasticsearch output, I suggest you to use Elasticsearch template that comes with SpamScope.
 
 ### Apache Storm settings
-
 It's possible change the default setting for all Apache Storm options. I suggest for SpamScope these options:
 
  - **topology.tick.tuple.freq.secs**: reload configuration of all bolts
  - **topology.max.spout.pending**: Apache Storm framework will then throttle your spout as needed to meet the `topology.max.spout.pending` requirement
  - **topology.sleep.spout.wait.strategy.time.ms**: max sleep for emit new tuple (mail)
 
-For SpamScope I tested these values to avoid failed tuples:
+If you don't enable Apache Tika, Thug and VirusTotal, could use:
 
 ```
 topology.tick.tuple.freq.secs: 60
@@ -108,33 +131,45 @@ topology.max.spout.pending: 100
 topology.sleep.spout.wait.strategy.time.ms: 10
 ```
 
-If Apache Tika is enabled:
+If **Apache Tika** is enabled:
 
 ```
 topology.max.spout.pending: 10
 ```
 
-For submit these options:
+For submit above options use:
 
 ```
 sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10"
 ```
 
+**Thug** analysis can be very slow, it depends from attachment. To avoid Apache Storm timeout, you should use these two switches when submit the topology:
+
+```
+supervisor.worker.timeout.secs=600
+topology.message.timeout.secs=600
+```
+
+As you can see, the timeouts are both to 600 seconds. 600 seconds is the default timeout of Thug. 
+
+The complete command is:
+```
+sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10" -o "supervisor.worker.timeout.secs=600" -o "topology.message.timeout.secs=600"
+```
+
 For more details you can refer [here](http://streamparse.readthedocs.io/en/stable/quickstart.html).
 
-### Apache Tika
-
-It's possible add to results (for mail attachments) the output of [Apache Tika](https://tika.apache.org/) analysis. You should enable it in `attachments` section. SpamScope use Tika-app JAR with [tika-app](https://pypi.python.org/pypi/tika-app) python library.
-
-### Virustotal
-
-It's possible add to results (for mail attachments) Virustotal report. Maybe you need a private API key.
 
 
 ## Docker image
+It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
-It's possible to use a complete Docker image with Apache Storm and SpamScope. Take it [here](https://hub.docker.com/r/fmantuano/spamscope/). There are two tags: **latest** and **develop**.
+ - [debug](https://hub.docker.com/r/fmantuano/spamscope-debug/)
+ - [elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
 
+
+
+## Screenshots
 ![Apache Storm](docs/images/Docker00.png?raw=true "Apache Storm")
 
 ![SpamScope](docs/images/Docker01.png?raw=true "SpamScope")

@@ -14,23 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .bitmap import BitMap
+__all__ = ["Base64Error", "TempIOError", "InvalidAttachment",
+           "VirusTotalApiKeyInvalid", "InvalidContentTypes", "MissingArgument"]
 
 
-class PhishingBitMap(BitMap):
-    """This map assigns a phishing score to the mail.
-    Range from 0 (no phishing) to 127 (high probability).
-    """
+class Base64Error(ValueError):
+    pass
 
-    _map_name = "phishing_bitmap"
 
-    def define_bitmap(self):
-        self._bitmap = {
-            "mail_body": 0,
-            "urls_body": 1,
-            "text_attachments": 2,
-            "urls_attachments": 3,
-            "filename_attachments": 4,
-            "mail_from": 5,
-            "mail_subject": 6,
-        }
+class TempIOError(Exception):
+    pass
+
+
+class InvalidAttachment(ValueError):
+    pass
+
+
+class VirusTotalApiKeyInvalid(ValueError):
+    pass
+
+
+class InvalidContentTypes(ValueError):
+    pass
+
+
+class MissingArgument(ValueError):
+    pass

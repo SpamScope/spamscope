@@ -15,7 +15,7 @@ from bolts.urls_handler_body import UrlsHandlerBody
 from spouts.files_mails import FilesMailSpout
 
 
-class OutputDebugTopology(Topology):
+class OutputTestingTopology(Topology):
     files_spout = FilesMailSpout.spec(
         name="files-mails")
 
