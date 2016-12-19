@@ -98,7 +98,7 @@ class Tokenizer(AbstractBolt):
 
     def _make_mail(self, tup):
         raw_mail = tup.values[0]
-        mail_format = tup.values[4]
+        mail_format = tup.values[5]
         rand = '_' + ''.join(random.choice('0123456789') for i in range(10))
 
         # Check if kind_data is correct
@@ -121,6 +121,7 @@ class Tokenizer(AbstractBolt):
         mail['mail_server'] = tup.values[1]
         mail['mailbox'] = tup.values[2]
         mail['priority'] = tup.values[3]
+        mail['sender_ip'] = self.parser.get_server_ipaddress(tup.values[4])
 
         # Fingerprints of body mail
         (mail['md5'], mail['sha1'], mail['sha256'], mail['sha512'],

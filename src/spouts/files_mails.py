@@ -22,7 +22,7 @@ import os
 import shutil
 import time
 from spouts.abstracts import AbstractSpout
-from modules.errors import ImproperlyConfigured
+from modules.exceptions import ImproperlyConfigured
 from modules.utils import MailItem
 
 
@@ -31,7 +31,7 @@ MAIL_PATH = "path"
 
 class FilesMailSpout(AbstractSpout):
     outputs = ['mail_path', 'mail_server', 'mailbox',
-               'priority', 'kind_data']
+               'priority', 'trust', 'kind_data']
 
     def initialize(self, stormconf, context):
         super(FilesMailSpout, self).initialize(stormconf, context)
@@ -85,7 +85,8 @@ class FilesMailSpout(AbstractSpout):
                         filename=mail,
                         mail_server=v['mail_server'],
                         mailbox=k,
-                        priority=v['priority']))
+                        priority=v['priority'],
+                        trust=v['trust_string']))
 
     def next_tuple(self):
 
@@ -111,6 +112,7 @@ class FilesMailSpout(AbstractSpout):
                 mail.mail_server,
                 mail.mailbox,
                 mail.priority,
+                mail.trust,
                 MAIL_PATH],
                 tup_id=mail.filename)
 

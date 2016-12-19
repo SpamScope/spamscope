@@ -43,7 +43,7 @@
               "eager_global_ordinals": true
             },
             "match_pattern": "regex",
-            "match": "(^|.*\\.)(md5|sha1|sha256|sha512|ssdeep)"
+            "match": "(^|.*\\.)(md5|sha1|sha256|sha512|ssdeep)$"
           }
         },
         {
@@ -52,7 +52,7 @@
               "type": "binary"
             },
             "match_pattern": "regex",
-            "match": "(^|.*\\.)(payload)"
+            "match": "(^|.*\\.)(payload)$"
           }
         },
         {
@@ -63,7 +63,7 @@
               "analyzer": "header"
             },
             "match_pattern": "regex",
-            "match": "(from|to|headers)"
+            "match": "^(from|to|headers)$"
           }
         },
         {
@@ -87,6 +87,15 @@
           }
         },
         {
+          "ipaddress": {
+            "mapping": {
+              "type": "ip"
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(sender_ip|srcip|http_iv_remote_address|clientip|syslog_host|ip)$"
+          }
+        },
+        {
           "all_not_analyzed": {
             "mapping": {
               "index": "not_analyzed",
@@ -94,7 +103,7 @@
               "eager_global_ordinals": true
             },
             "match_pattern": "regex",
-            "match": "(^|.*\\.)(charset|mail_server|mailbox|message_id|Content-Type|content_transfer_encoding|mail_content_type)"
+            "match": "(^|.*\\.)(charset|mail_server|mailbox|message_id|Content-Type|content_transfer_encoding|mail_content_type)$"
           }
         },
         {

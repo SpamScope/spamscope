@@ -14,23 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .bitmap import BitMap
-
-
-class PhishingBitMap(BitMap):
-    """This map assigns a phishing score to the mail.
-    Range from 0 (no phishing) to 127 (high probability).
-    """
-
-    _map_name = "phishing_bitmap"
-
-    def define_bitmap(self):
-        self._bitmap = {
-            "mail_body": 0,
-            "urls_body": 1,
-            "text_attachments": 2,
-            "urls_attachments": 3,
-            "filename_attachments": 4,
-            "mail_from": 5,
-            "mail_subject": 6,
-        }
+from .exceptions import *
+from .sample_parser import SampleParser
+from .thug_processing import ThugProcessing
+from .tika_processing import TikaProcessing
+from .virustotal_processing import VirusTotalProcessing

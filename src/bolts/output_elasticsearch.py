@@ -94,10 +94,11 @@ class OutputElasticsearch(AbstractBolt):
                 f['is_archived'] = True
                 self._attachments.append(f)
 
-                # Remove from archived payload and virustotal,
+                # Remove from archived payload, virustotal and thug
                 # now in root
                 j.pop("payload", None)
                 j.pop("virustotal", None)
+                j.pop("thug", None)
 
             self._attachments.append(i)
 
@@ -107,10 +108,12 @@ class OutputElasticsearch(AbstractBolt):
             i.pop("payload", None)
             i.pop("tika", None)
             i.pop("virustotal", None)
+            i.pop("thug", None)
 
             for j in i.get("files", []):
                 j.pop("payload", None)
                 j.pop("virustotal", None)
+                j.pop("thug", None)
 
         # Prepair mail for bulk
         mail['@timestamp'] = timestamp
