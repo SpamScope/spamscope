@@ -63,7 +63,7 @@ To install it follow the [wiki](https://github.com/SpamScope/spamscope/wiki/Inst
 SpamScope can use [Tika App](https://tika.apache.org/) to parse every attachment mail.
 The **Apache Tika** toolkit detects and extracts metadata and text from over a thousand different file types (such as PPT, XLS, and PDF).
 To install it follow the [wiki](https://github.com/SpamScope/spamscope/wiki/Installation#tika-app-optional).
-To enable Apache Tika analisys, you should set in `attachments` section.
+To enable Apache Tika analisys, you should set it in `attachments` section.
 
 ### Thug (optional)
 From release v1.3 SpamScope can analyze Javascript and HTML attachments with [Thug](https://github.com/buffer/thug).
@@ -127,17 +127,17 @@ If you don't enable Apache Tika, Thug and VirusTotal, could use:
 
 ```
 topology.tick.tuple.freq.secs: 60
-topology.max.spout.pending: 100
+topology.max.spout.pending: 200
 topology.sleep.spout.wait.strategy.time.ms: 10
 ```
 
 If **Apache Tika** is enabled:
 
 ```
-topology.max.spout.pending: 10
+topology.max.spout.pending: 100
 ```
 
-For submit above options use:
+To submit above options use:
 
 ```
 sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10"
@@ -154,7 +154,7 @@ As you can see, the timeouts are both to 600 seconds. 600 seconds is the default
 
 The complete command is:
 ```
-sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10" -o "supervisor.worker.timeout.secs=600" -o "topology.message.timeout.secs=600"
+sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=50" -o "topology.sleep.spout.wait.strategy.time.ms=10" -o "supervisor.worker.timeout.secs=600" -o "topology.message.timeout.secs=600"
 ```
 
 For more details you can refer [here](http://streamparse.readthedocs.io/en/stable/quickstart.html).
