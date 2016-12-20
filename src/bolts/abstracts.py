@@ -23,7 +23,7 @@ from datetime import datetime
 from modules.exceptions import ImproperlyConfigured
 from modules.urls_extractor import UrlsExtractor
 from modules.utils import load_config
-from src import __defaults__
+from options import __defaults__
 
 try:
     import simplejson as json
