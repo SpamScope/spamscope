@@ -15,11 +15,18 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+import os
 from streamparse.spout import Spout
 
 from abc import ABCMeta
 from modules.exceptions import ImproperlyConfigured
 from modules.utils import load_config
+from src import __defaults__
+
+try:
+    from collections import ChainMap
+except ImportError:
+    from chainmap import ChainMap
 
 
 class AbstractSpout(Spout):
@@ -27,16 +34,15 @@ class AbstractSpout(Spout):
     __metaclass__ = ABCMeta
 
     def initialize(self, stormconf, context):
-        self._conf_file = stormconf.get("spamscope_conf", None)
+        self._options = ChainMap(os.environ, __defaults__)
+        self._conf_file = self.options['SPAMSCOPE_CONF_FILE']
         self._conf_loader()
 
     def _conf_loader(self):
         if not self.conf_file:
             raise ImproperlyConfigured(
                 "Spouts configuration path NOT set for '{}'".format(
-                    self.component_name
-                )
-            )
+                    self.component_name))
         self.log("Reloading configuration for spout")
         self._spouts_conf = load_config(self.conf_file)
         self._conf = self.spouts_conf[self.component_name]
@@ -52,6 +58,10 @@ class AbstractSpout(Spout):
     @property
     def conf(self):
         return self._conf
+
+    @property
+    def options(self):
+        return self._options
 
     def next_tuple(self):
         pass

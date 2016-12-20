@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+import os
 from streamparse.bolt import Bolt
 
 from abc import ABCMeta
@@ -22,11 +23,17 @@ from datetime import datetime
 from modules.exceptions import ImproperlyConfigured
 from modules.urls_extractor import UrlsExtractor
 from modules.utils import load_config
+from src import __defaults__
 
 try:
     import simplejson as json
 except ImportError:
     import json
+
+try:
+    from collections import ChainMap
+except ImportError:
+    from chainmap import ChainMap
 
 
 class AbstractBolt(Bolt):
@@ -34,7 +41,8 @@ class AbstractBolt(Bolt):
     __metaclass__ = ABCMeta
 
     def initialize(self, stormconf, context):
-        self._conf_file = stormconf.get("spamscope_conf", None)
+        self._options = ChainMap(os.environ, __defaults__)
+        self._conf_file = self.options['SPAMSCOPE_CONF_FILE']
         self._conf_loader()
 
     def _conf_loader(self):
@@ -61,6 +69,10 @@ class AbstractBolt(Bolt):
     @property
     def conf(self):
         return self._conf
+
+    @property
+    def options(self):
+        return self._options
 
     def process(self):
         pass

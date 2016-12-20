@@ -94,7 +94,7 @@ SpamScope comes with two topologies:
    - spamscope_debug
    - spamscope_elasticsearch
 
-and a general configuration file `spamscope.conf` in `conf/` folder.
+and a general configuration file `spamscope.example.yml` in `conf/` folder.
 
 
 To run topology for debug:
@@ -110,14 +110,16 @@ sparse submit -f --name topology
 ```
 
 ### Important
-It's very importart pass configuration file to commands `sparse run` and `sparse submit`. There is an [open bug](https://github.com/Parsely/streamparse/issues/263) in streamparse:
-  - `sparse run --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml"`
-  - `sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml"`
+It's very important to set the main configuration file. The default value is `/etc/spamscope/spamscope.yml`, but it's possible to set the environment variable `SPAMSCOPE_CONF_FILE`:
+
+```
+$ export SPAMSCOPE_CONF_FILE=/etc/spamscope/spamscope.yml
+```
 
 If you use Elasticsearch output, I suggest you to use Elasticsearch template that comes with SpamScope.
 
 ### Apache Storm settings
-It's possible change the default setting for all Apache Storm options. I suggest for SpamScope these options:
+It's possible change the default settings for all Apache Storm options. I suggest for SpamScope these options:
 
  - **topology.tick.tuple.freq.secs**: reload configuration of all bolts
  - **topology.max.spout.pending**: Apache Storm framework will then throttle your spout as needed to meet the `topology.max.spout.pending` requirement
@@ -140,7 +142,7 @@ topology.max.spout.pending: 100
 To submit above options use:
 
 ```
-sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10"
+sparse submit -f --name topology -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10"
 ```
 
 **Thug** analysis can be very slow, it depends from attachment. To avoid Apache Storm timeout, you should use these two switches when submit the topology:
@@ -154,7 +156,7 @@ As you can see, the timeouts are both to 600 seconds. 600 seconds is the default
 
 The complete command is:
 ```
-sparse submit -f --name topology -o "spamscope_conf=/etc/spamscope/spamscope.yml" -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=50" -o "topology.sleep.spout.wait.strategy.time.ms=10" -o "supervisor.worker.timeout.secs=600" -o "topology.message.timeout.secs=600"
+sparse submit -f --name topology -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=50" -o "topology.sleep.spout.wait.strategy.time.ms=10" -o "supervisor.worker.timeout.secs=600" -o "topology.message.timeout.secs=600"
 ```
 
 For more details you can refer [here](http://streamparse.readthedocs.io/en/stable/quickstart.html).
