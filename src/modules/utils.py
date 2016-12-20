@@ -120,5 +120,4 @@ def load_config(config_file):
     except:
         log.exception("Config file {} not loaded".format(config_file))
         raise ImproperlyConfigured(
-            "Config file {} not loaded".format(config_file)
-        )
+            "Config file {} not loaded".format(config_file))
