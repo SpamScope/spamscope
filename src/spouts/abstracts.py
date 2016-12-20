@@ -21,7 +21,7 @@ from streamparse.spout import Spout
 from abc import ABCMeta
 from modules.exceptions import ImproperlyConfigured
 from modules.utils import load_config
-from src import __defaults__
+from options import __defaults__
 
 try:
     from collections import ChainMap
