@@ -207,7 +207,8 @@ output-redis:
         reconnect_interval: 1
         max_retry: 60
         flush_size: 50
-        queue_name: spamscope
+        queue_mails: spamscope_mails
+        queue_attachments: spamscope_attachments
 
 
 output-elasticsearch:

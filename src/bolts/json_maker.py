@@ -16,7 +16,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
-from modules.phishing_bitmap import PhishingBitMap
+from modules.bitmap import PhishingBitMap
 
 
 class JsonMaker(Bolt):

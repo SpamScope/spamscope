@@ -16,7 +16,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
-from modules.phishing_bitmap import PhishingBitMap
+from modules.bitmap import PhishingBitMap
 from modules.exceptions import ImproperlyConfigured
 from modules.utils import \
     search_words_in_text as swt, \
@@ -50,8 +50,7 @@ class Phishing(AbstractBolt):
             keywords = load_config(v)
             if not isinstance(keywords, list):
                 raise ImproperlyConfigured(
-                    "Keywords subjects list '{}' not valid".format(k)
-                )
+                    "Keywords subjects list '{}' not valid".format(k))
             self._s_keys |= set(keywords)
 
         # Load targets keywords
@@ -61,8 +60,7 @@ class Phishing(AbstractBolt):
             keywords = load_config(v)
             if not isinstance(keywords, dict):
                 raise ImproperlyConfigured(
-                    "Keywords targets dict '{}' not valid".format(k)
-                )
+                    "Keywords targets dict '{}' not valid".format(k))
             self._t_keys.update(keywords)
 
     def _check_urls(self, urls, keywords):
