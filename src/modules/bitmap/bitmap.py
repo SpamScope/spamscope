@@ -80,9 +80,7 @@ class BitMap(object):
         if not isinstance(self.bitmap, dict):
             raise BitMapNotValid(
                 "BitMap must be a dict, {} given".format(
-                    type(self.bitmap)
-                )
-            )
+                    type(self.bitmap)))
 
         bitmap_values = set(self.bitmap.values())
         expected_values = set(range(0, len(self.bitmap)))
@@ -101,8 +99,7 @@ class BitMap(object):
         for p in args:
             if p not in self.bitmap:
                 raise PropertyDoesNotExists(
-                    "Property '{}' does not exists".format(p)
-                )
+                    "Property '{}' does not exists".format(p))
 
             value = self.bitmap.get(p)
 
@@ -115,8 +112,7 @@ class BitMap(object):
         for p in args:
             if p not in self.bitmap:
                 raise PropertyDoesNotExists(
-                    "Property '{}' does not exists".format(p)
-                )
+                    "Property '{}' does not exists".format(p))
 
             value = self.bitmap.get(p)
 
@@ -130,8 +126,7 @@ class BitMap(object):
         for p in args:
             if p not in self.bitmap:
                 raise PropertyDoesNotExists(
-                    "Property '{}' does not exists".format(p)
-                )
+                    "Property '{}' does not exists".format(p))
 
             value = self.bitmap.get(p)
 
@@ -151,8 +146,7 @@ class BitMap(object):
         for score in args:
             if not isinstance(score, int):
                 raise ScoreNotInteger(
-                    "Score '{}' is not a integer".format(score)
-                )
+                    "Score '{}' is not a integer".format(score))
             score_sum |= (1 << score)
 
         return score_sum
@@ -189,10 +183,7 @@ class BitMap(object):
         if value > threshold:
             raise ScoreOutOfRange(
                 "{} can only have values in the range [0, {}]".format(
-                    self.map_name,
-                    threshold
-                )
-            )
+                    self.map_name, threshold))
 
         self._score = value
 

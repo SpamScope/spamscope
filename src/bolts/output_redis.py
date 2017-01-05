@@ -17,6 +17,7 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
 from modules.redis_client import Redis
+from modules.utils import reformat_output
 
 
 class OutputRedis(AbstractBolt):
@@ -25,12 +26,20 @@ class OutputRedis(AbstractBolt):
     def initialize(self, stormconf, context):
         super(OutputRedis, self).initialize(stormconf, context)
 
+        # Load settings
+        self._load_settings()
+
+        # Init
+        self._mails = []
+        self._attachments = []
+        self._count = 1
+
+    def _load_settings(self):
         # Redis parameters
         servers = self.conf['servers']
         self._flush_size = servers['flush_size']
-        self._queue_name = servers['queue_name']
-        self._mails = []
-        self._count = 1
+        self._queue_mails = servers['queue_mails']
+        self._queue_attachments = servers['queue_attachments']
 
         # Redis class
         self._redis_client = Redis(
@@ -44,14 +53,24 @@ class OutputRedis(AbstractBolt):
 
     def flush(self):
         self._redis_client.push_messages(
-            queue=self._queue_name,
-            messages=self._mails)
+            queue=self._queue_mails, messages=self._mails)
+        self._redis_client.push_messages(
+            queue=self._queue_attachments, messages=self._attachments)
         self._mails = []
+        self._attachments = []
         self._count = 1
 
     def process(self, tup):
-        self._mails.append(tup.values[1])
+        raw_mail = tup.values[1]
 
+        # Reformat output
+        mail, attachments = reformat_output(
+            raw_mail, self.component_name)
+
+        self._mails.append(mail)
+        self._attachments += attachments
+
+        # Flush
         if self._count == self._flush_size:
             self.flush()
         else:
@@ -60,6 +79,10 @@ class OutputRedis(AbstractBolt):
     def process_tick(self, freq):
         """Every freq seconds flush messages. """
         super(OutputRedis, self).process_tick(freq)
-        if self._mails:
-            self.log("Flush mail in Redis server after tick")
+
+        if self._mails or self._attachments:
+            self.log("Flush mails/attachments in Redis server after tick")
             self.flush()
+
+        # Reload settings
+        self._load_settings()

@@ -36,9 +36,14 @@ class RabbitPushMessageFailed(Exception):
     pass
 
 
-class Rabbit:
+class RabbitDeadLetterSetupFailed(Exception):
+    pass
 
-    def rabbit_connection(self, server, user, password):
+
+class Rabbit(object):
+
+    @staticmethod
+    def connection(server, user, password):
         credentials = pika.PlainCredentials(user, password)
         try:
             connection = pika.BlockingConnection(
@@ -49,32 +54,53 @@ class Rabbit:
             )
             return connection
         except:
-            log.exception(
-                "Failed rabbit connection to server {}".format(
-                    server,
-                )
-            )
-            raise RabbitConnectionFailed(
-                "Failed rabbit connection to server {}".format(
-                    server,
-                )
-            )
+            message = "Failed rabbit connection to server {}".format(server)
+            log.exception(message)
+            raise RabbitConnectionFailed(message)
 
-    def rabbit_channel(self, connection, queue):
+    @staticmethod
+    def channel(connection, queue, arguments={}):
         try:
             channel = connection.channel()
             channel.queue_declare(
                 queue=queue,
                 durable=True,
+                arguments=arguments,
             )
             return channel
         except:
-            log.exception("Failed creation channel {}".format(queue))
-            raise RabbitChannelFailed(
-                "Failed creation channel {}".format(queue)
-            )
+            message = "Failed creation channel {}".format(queue)
+            log.exception(message)
+            raise RabbitChannelFailed(message)
 
-    def rabbit_push_message(self, channel, queue, message):
+    @staticmethod
+    def deadletter_setup(
+        connection,
+        orig_queue,
+        dl_exchange,
+        dl_queue
+    ):
+        try:
+            dlx_chan = connection.channel()
+            dlx_chan.exchange_declare(exchange=dl_exchange, durable=True)
+            dlx_result = dlx_chan.queue_declare(queue=dl_queue, durable=True)
+            dlx_queue_name = dlx_result.method.queue
+            dlx_chan.queue_bind(
+                exchange=dl_exchange,
+                routing_key=orig_queue,
+                queue=dlx_queue_name)
+            return dlx_chan
+        except:
+            message = "Failed dead-letter setup for orig_queue: {}, "
+            "dl_exchange: {}, dl_queue: {}".format(
+                orig_queue,
+                dl_exchange,
+                dl_queue)
+            log.exception(message)
+            raise RabbitDeadLetterSetupFailed(message)
+
+    @staticmethod
+    def push_message(channel, queue, message):
         try:
             channel.basic_publish(
                 exchange='',
@@ -83,10 +109,12 @@ class Rabbit:
                 properties=pika.BasicProperties(delivery_mode=2)
             )
         except:
-            log.exception("Failed pushing message in queue")
-            raise RabbitPushMessageFailed("Failed pushing message in queue")
+            message = "Failed pushing message in queue"
+            log.exception(message)
+            raise RabbitPushMessageFailed(message)
 
-    def rabbit_get_message(self, channel, queue):
+    @staticmethod
+    def get_message(channel, queue):
         try:
             method_frame, header_frame, message = channel.basic_get(
                 queue=queue
@@ -96,7 +124,8 @@ class Rabbit:
             log.exception("Failed getting message from queue {}".format(queue))
             return
 
-    def rabbit_acknowledge_message(self, channel, delivery_tag):
+    @staticmethod
+    def acknowledge_message(channel, delivery_tag):
         try:
             channel.basic_ack(delivery_tag)
         except:
@@ -104,13 +133,27 @@ class Rabbit:
                 "Failed ack for delivery_tag {}".format(delivery_tag)
             )
 
-    def rabbit_close_connection(self, connection):
+    @staticmethod
+    def nack_message(channel, delivery_tag, requeue=False):
+        try:
+            channel.basic_nack(
+                delivery_tag=delivery_tag,
+                requeue=requeue,
+            )
+        except:
+            log.exception(
+                "Failed nack for delivery_tag {}".format(delivery_tag)
+            )
+
+    @staticmethod
+    def close_connection(connection):
         try:
             connection.close()
         except:
             log.exception("Failed close Rabbit connection")
 
-    def rabbit_close_channel(self, channel):
+    @staticmethod
+    def close_channel(channel):
         try:
             channel.close()
         except:
