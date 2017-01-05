@@ -5,6 +5,7 @@ mail-parser==0.5.0
 patool==1.12
 pyparsing==2.1.10
 python-magic==0.4.12
+redis==2.10.5
 simplejson==3.10.0
 ssdeep==3.1.1
 streamparse==3.3.0

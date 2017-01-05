@@ -1,6 +1,6 @@
 from os.path import join
 
-__version__ = "v1.3.rc4"
+__version__ = "v1.3"
 __configuration_path__ = "/etc/spamscope"
 
 __defaults__ = {

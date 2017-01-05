@@ -101,10 +101,9 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
                 if not isinstance(domains, list):
                     raise ImproperlyConfigured(
-                        "Whitelist {} not loaded".format(k)
-                    )
-                domains = [i.lower() for i in domains]
-                self._whitelist |= set(domains)
+                        "Whitelist {} not loaded".format(k))
+                domains = {i.lower() for i in domains}
+                self._whitelist |= domains
                 self.log("Whitelist '{}' loaded".format(k))
 
     def process_tick(self, freq):

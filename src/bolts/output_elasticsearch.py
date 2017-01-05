@@ -16,10 +16,9 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from bolts.abstracts import AbstractBolt
+from modules.utils import reformat_output
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
-import copy
-import datetime
 
 
 class OutputElasticsearch(AbstractBolt):
@@ -28,25 +27,28 @@ class OutputElasticsearch(AbstractBolt):
     def initialize(self, stormconf, context):
         super(OutputElasticsearch, self).initialize(stormconf, context)
 
-        # Elasticsearch parameters
-        servers = self.conf['servers']
-        self._flush_size = servers['flush_size']
-
-        # For mails
-        self._index_mails = servers['index.prefix.mails']
-        self._doc_type_mails = servers['doc.type.mails']
-
-        # For attachments
-        self._index_attachments = servers['index.prefix.attachments']
-        self._doc_type_attachments = servers['doc.type.attachments']
-
-        # Elasticsearch object
-        self._es = Elasticsearch(hosts=servers['hosts'])
+        # Load settings
+        self._load_settings()
 
         # Init
         self._mails = []
         self._attachments = []
         self._count = 1
+
+    def _load_settings(self):
+        # Elasticsearch parameters
+        servers = self.conf['servers']
+        self._flush_size = servers['flush_size']
+
+        # Parameters for reformat_output function
+        self._parameters = {
+            "elastic_index_mail": servers['index.prefix.mails'],
+            "elastic_type_mail": servers['doc.type.mails'],
+            "elastic_index_attach": servers['index.prefix.attachments'],
+            "elastic_type_attach": servers['doc.type.attachments']}
+
+        # Elasticsearch object
+        self._es = Elasticsearch(hosts=servers['hosts'])
 
     def flush(self):
         helpers.bulk(self._es, self._mails)
@@ -56,73 +58,14 @@ class OutputElasticsearch(AbstractBolt):
         self._count = 1
 
     def process(self, tup):
-        mail = tup.values[1]
+        raw_mail = tup.values[1]
 
-        # Date for daily index
-        try:
-            timestamp = datetime.datetime.strptime(
-                mail['analisys_date'], "%Y-%m-%dT%H:%M:%S.%f")
-        except:
-            # Without microseconds
-            timestamp = datetime.datetime.strptime(
-                mail['analisys_date'], "%Y-%m-%dT%H:%M:%S")
+        # Reformat output
+        mail, attachments = reformat_output(
+            raw_mail, self.component_name, **self._parameters)
 
-        mail_date = timestamp.strftime("%Y.%m.%d")
-
-        # Get a copy of attachments
-        attachments = []
-        if mail.get("attachments", []):
-            attachments = copy.deepcopy(mail["attachments"])
-
-        # Prepair attachments for bulk
-        for i in attachments:
-            i['@timestamp'] = timestamp
-            i['_index'] = self._index_attachments + mail_date
-            i['_type'] = self._doc_type_attachments
-            i['type'] = self._doc_type_attachments
-            i['is_archived'] = False
-
-            for j in i.get("files", []):
-
-                f = copy.deepcopy(j)
-
-                # Prepair archived files
-                f['@timestamp'] = timestamp
-                f['_index'] = self._index_attachments + mail_date
-                f['_type'] = self._doc_type_attachments
-                f['type'] = self._doc_type_attachments
-                f['is_archived'] = True
-                self._attachments.append(f)
-
-                # Remove from archived payload, virustotal and thug
-                # now in root
-                j.pop("payload", None)
-                j.pop("virustotal", None)
-                j.pop("thug", None)
-
-            self._attachments.append(i)
-
-        # Remove from mail the attachments huge fields like payload
-        # Fetch from Elasticsearch more fast
-        for i in mail.get("attachments", []):
-            i.pop("payload", None)
-            i.pop("tika", None)
-            i.pop("virustotal", None)
-            i.pop("thug", None)
-
-            for j in i.get("files", []):
-                j.pop("payload", None)
-                j.pop("virustotal", None)
-                j.pop("thug", None)
-
-        # Prepair mail for bulk
-        mail['@timestamp'] = timestamp
-        mail['_index'] = self._index_mails + mail_date
-        mail['type'] = self._doc_type_mails
-        mail['_type'] = self._doc_type_mails
-
-        # Append mail in own date
         self._mails.append(mail)
+        self._attachments += attachments
 
         # Flush
         if self._count == self._flush_size:
@@ -134,6 +77,10 @@ class OutputElasticsearch(AbstractBolt):
         """Every freq seconds flush messages. """
         super(OutputElasticsearch, self).process_tick(freq)
 
+        # Flush mails
         if self._mails or self._attachments:
-            self.log("Flush mail in Elasticsearch after tick")
+            self.log("Flush mails/attachments in Elasticsearch after tick")
             self.flush()
+
+        # Reload settings
+        self._load_settings()

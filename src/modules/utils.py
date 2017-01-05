@@ -18,6 +18,8 @@ limitations under the License.
 """
 
 from __future__ import unicode_literals
+import copy
+import datetime
 import hashlib
 import logging
 import os
@@ -118,6 +120,109 @@ def load_config(config_file):
         with open(config_file, 'r') as c:
             return yaml.load(c)
     except:
-        log.exception("Config file {} not loaded".format(config_file))
-        raise ImproperlyConfigured(
-            "Config file {} not loaded".format(config_file))
+        message = "Config file {} not loaded".format(config_file)
+        log.exception(message)
+        raise ImproperlyConfigured(message)
+
+
+def reformat_output(mail=None, bolt=None, **kwargs):
+    """ This function replaces the standard SpamScope JSON output.
+    The output is splitted in two parts: mail and attachments.
+    In mail part are reported only the hashes of attachments.
+    In attachments part the archived files are reported in root with the
+    archive files.
+
+    Args:
+        mail (dict): raw SpamScope output
+        bolt (string): only bolt can reformat the output
+        kwargs:
+            elastic_index_mail: prefix of Elastic index for mails
+            elastic_index_attach: prefix of Elastic index for attachments
+            elastic_type_mail: prefix of Elastic doc_type for mails
+            elastic_type_attach: prefix of Elastic doc_type for attachments
+
+    Returns:
+        (mail, attachments):
+            mail (dict): Python object with mail details
+            attachments(list): Python list with all attachments details
+    """
+
+    if bolt not in ('output-elasticsearch', 'output-redis'):
+        message = "Bolt '{}' not in list of permitted bolts".format(bolt)
+        log.exception(message)
+        raise ImproperlyConfigured(message)
+
+    if mail:
+        mail = copy.deepcopy(mail)
+        attachments = []
+
+        if bolt == "output-elasticsearch":
+            # Date for daily index
+            try:
+                timestamp = datetime.datetime.strptime(
+                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S.%f")
+            except:
+                # Without microseconds
+                timestamp = datetime.datetime.strptime(
+                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S")
+
+            mail_date = timestamp.strftime("%Y.%m.%d")
+
+        # Get a copy of attachments
+        raw_attachments = []
+        if mail.get("attachments", []):
+            raw_attachments = copy.deepcopy(mail["attachments"])
+
+        # Prepair attachments for bulk
+        for i in raw_attachments:
+            i['is_archived'] = False
+
+            if bolt == "output-elasticsearch":
+                i['@timestamp'] = timestamp
+                i['_index'] = kwargs['elastic_index_attach'] + mail_date
+                i['_type'] = kwargs['elastic_type_attach']
+                i['type'] = kwargs['elastic_type_attach']
+
+            for j in i.get("files", []):
+                f = copy.deepcopy(j)
+
+                # Prepair archived files
+                f['is_archived'] = True
+
+                if bolt == "output-elasticsearch":
+                    f['@timestamp'] = timestamp
+                    f['_index'] = kwargs['elastic_index_attach'] + mail_date
+                    f['_type'] = kwargs['elastic_type_attach']
+                    f['type'] = kwargs['elastic_type_attach']
+
+                attachments.append(f)
+
+                # Remove from archived payload, virustotal and thug
+                # now in root
+                j.pop("payload", None)
+                j.pop("virustotal", None)
+                j.pop("thug", None)
+
+            attachments.append(i)
+
+        # Remove from mail the attachments huge fields like payload
+        # Fetch from Elasticsearch more fast
+        for i in mail.get("attachments", []):
+            i.pop("payload", None)
+            i.pop("tika", None)
+            i.pop("virustotal", None)
+            i.pop("thug", None)
+
+            for j in i.get("files", []):
+                j.pop("payload", None)
+                j.pop("virustotal", None)
+                j.pop("thug", None)
+
+        # Prepair mail for bulk
+        if bolt == "output-elasticsearch":
+            mail['@timestamp'] = timestamp
+            mail['_index'] = kwargs['elastic_index_mail'] + mail_date
+            mail['type'] = kwargs['elastic_type_mail']
+            mail['_type'] = kwargs['elastic_type_mail']
+
+        return mail, attachments

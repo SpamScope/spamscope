@@ -26,7 +26,7 @@ root = os.path.join(base_path, '..')
 sys.path.append(root)
 
 import src.modules.bitmap as bitmap
-from src.modules.phishing_bitmap import PhishingBitMap
+from src.modules.bitmap import PhishingBitMap
 
 
 class ValidBitMap(bitmap.BitMap):

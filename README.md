@@ -79,6 +79,9 @@ You can see a complete SpamScope report with Thug analysis [here](https://goo.gl
 ### VirusTotal (optional)
 It's possible add to results (for mail attachments) VirusTotal report. You need a private API key.
 
+### Redis (optional)
+It's possible to store the results in Redis. In this case you should install `redis` package.
+
 
 
 ## Configuration
@@ -93,6 +96,7 @@ SpamScope will check on it to decide if mail/attachment is already analyzed or n
 SpamScope comes with two topologies:
    - spamscope_debug
    - spamscope_elasticsearch
+   - spamscope_redis
 
 and a general configuration file `spamscope.example.yml` in `conf/` folder.
 
