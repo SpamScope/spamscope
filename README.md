@@ -96,6 +96,7 @@ SpamScope will check on it to decide if mail/attachment is already analyzed or n
 SpamScope comes with two topologies:
    - spamscope_debug
    - spamscope_elasticsearch
+   - spamscope_redis
 
 and a general configuration file `spamscope.example.yml` in `conf/` folder.
 
