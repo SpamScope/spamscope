@@ -47,7 +47,6 @@ class Attachments(AbstractBolt):
             thug_user_agents=self.conf["thug"]["user_agents"])
 
     def _load_lists(self):
-
         # Load content types for details
         self._tika_valid_content_types = set()
         if self.conf["tika"]["enabled"]:

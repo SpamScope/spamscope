@@ -43,7 +43,7 @@
               "eager_global_ordinals": true
             },
             "match_pattern": "regex",
-            "match": "(^|.*\\.)(md5|sha1|sha256|sha512|ssdeep)$"
+            "match": "(^|.*\\.)(md5|sha1|sha256|sha512|ssdeep|extension)$"
           }
         },
         {
