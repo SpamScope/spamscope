@@ -15,10 +15,8 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
-from modules.utils import reformat_output
-from elasticsearch import Elasticsearch
-from elasticsearch import helpers
+from modules import AbstractBolt, reformat_output
+from elasticsearch import Elasticsearch, helpers
 
 
 class OutputElasticsearch(AbstractBolt):

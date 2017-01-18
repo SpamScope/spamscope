@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
+from modules import AbstractBolt
 
 import os
 
@@ -30,10 +30,9 @@ class OutputDebug(AbstractBolt):
 
     def initialize(self, stormconf, context):
         super(OutputDebug, self).initialize(stormconf, context)
-
         self._json_indent = self.conf['json.indent']
-
         self._output_path = self.conf['output.path']
+
         if not os.path.exists(self._output_path):
             os.makedirs(self._output_path)
 

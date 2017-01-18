@@ -15,14 +15,14 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from collections import deque
-from mailparser import MailParser
-from modules.utils import fingerprints
-from streamparse import Stream
-from bolts.abstracts import AbstractBolt
 import datetime
 import os
 import random
+
+from collections import deque
+from mailparser import MailParser
+from modules import fingerprints, AbstractBolt
+from streamparse import Stream
 
 STRING = "string"
 PATH = "path"

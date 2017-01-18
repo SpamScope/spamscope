@@ -15,9 +15,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
-from modules.redis_client import Redis
-from modules.utils import reformat_output
+from modules import AbstractBolt, reformat_output, Redis
 
 
 class OutputRedis(AbstractBolt):

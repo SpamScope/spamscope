@@ -15,10 +15,10 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
+from modules import AbstractBolt
 from modules.exceptions import ImproperlyConfigured
 from modules.sample_parser import SampleParser
-from modules.utils import load_config
+from modules import load_config
 
 
 class Attachments(AbstractBolt):
@@ -50,7 +50,6 @@ class Attachments(AbstractBolt):
         # Load content types for details
         self._tika_valid_content_types = set()
         if self.conf["tika"]["enabled"]:
-            self.log("Reloading content types list for Tika details")
             for k, v in self.conf["tika"]["valid_content_types"].iteritems():
                 keywords = load_config(v)
                 if not isinstance(keywords, list):
@@ -59,10 +58,9 @@ class Attachments(AbstractBolt):
                         details list '{}' not valid".format(k))
                 keywords = {i.lower() for i in keywords}
                 self._tika_valid_content_types |= keywords
-                self.log("Content types Tika '{}' loaded".format(k))
+                self.log("Content types Tika '{}' reloaded".format(k))
 
         # Load content types for blacklist
-        self.log("Reloading content types list blacklist")
         self._cont_type_bl = set()
         for k, v in self.conf["content_types_blacklist"].iteritems():
             keywords = load_config(v)
@@ -72,7 +70,7 @@ class Attachments(AbstractBolt):
                     list '{}' not valid".format(k))
             keywords = {i.lower() for i in keywords}
             self._cont_type_bl |= keywords
-            self.log("Content types blacklist '{}' loaded".format(k))
+            self.log("Content types blacklist '{}' reloaded".format(k))
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """

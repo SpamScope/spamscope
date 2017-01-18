@@ -15,14 +15,11 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractUrlsHandlerBolt
+from modules import AbstractUrlsHandlerBolt
 
 
 class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
     outputs = ['sha256_random', 'with_urls', 'urls']
-
-    def initialize(self, stormconf, context):
-        super(UrlsHandlerAttachments, self).initialize(stormconf, context)
 
     def process(self, tup):
         sha256_mail_random = tup.values[0]

@@ -21,9 +21,8 @@ import glob
 import os
 import shutil
 import time
-from spouts.abstracts import AbstractSpout
+from modules import AbstractSpout, MailItem
 from modules.exceptions import ImproperlyConfigured
-from modules.utils import MailItem
 
 
 MAIL_PATH = "path"
@@ -48,14 +47,14 @@ class FilesMailSpout(AbstractSpout):
         self._where = self.conf["post_processing"]["where"]
         if not self._where:
             raise ImproperlyConfigured(
-                "where in '{}' is NOT configurated".format(
-                    self.spouts_conf))
+                "where in '{}' is not configurated".format(
+                    self.component_name))
 
         self._where_failed = self.conf["post_processing"]["where.failed"]
         if not self._where_failed:
             raise ImproperlyConfigured(
-                "where.failed in '{}' is NOT configurated".format(
-                    self.spouts_conf))
+                "where.failed in '{}' is not configurated".format(
+                    self.component_name))
 
         if not os.path.exists(self._where):
             os.makedirs(self._where)
@@ -72,7 +71,7 @@ class FilesMailSpout(AbstractSpout):
         for k, v in mailboxes.iteritems():
             if not os.path.exists(v['path_mails']):
                 raise ImproperlyConfigured(
-                    "Mail path '{}' does NOT exist".format(v['path_mails']))
+                    "Mail path '{}' does not exist".format(v['path_mails']))
 
             all_mails = set(glob.glob(os.path.join(
                 v['path_mails'], '{}'.format(v['files_pattern']))))
