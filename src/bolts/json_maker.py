@@ -44,7 +44,6 @@ class JsonMaker(Bolt):
 
             if phishing_score:
                 self._phishing_bitmap.score = phishing_score
-
                 mail['targets'] = greedy_data['phishing'][3]
                 mail['phishing_score_expanded'] = \
                     self._phishing_bitmap.score_properties
@@ -91,17 +90,10 @@ class JsonMaker(Bolt):
         sha256_random = tup.values[0]
         values = tup.values
 
-        if self._mails.get(sha256_random, None):
-            self._mails[sha256_random][bolt] = values
-        else:
-            self._mails[sha256_random] = {bolt: values}
-
+        self._mails.setdefault(sha256_random, {})[bolt] = values
         diff = self.input_bolts - set(self._mails[sha256_random].keys())
+
         if not diff:
-            output_json = self._compose_output(
-                self._mails.pop(sha256_random))
-
-            self.log("New JSON for mail '{}'".format(
-                sha256_random), "debug")
-
+            output_json = self._compose_output(self._mails.pop(sha256_random))
+            self.log("New JSON for mail '{}'".format(sha256_random), "debug")
             self.emit([sha256_random, output_json])

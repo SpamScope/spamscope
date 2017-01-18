@@ -15,12 +15,9 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
+from modules import AbstractBolt, load_config, search_words_in_text as swt
 from modules.bitmap import PhishingBitMap
 from modules.exceptions import ImproperlyConfigured
-from modules.utils import \
-    search_words_in_text as swt, \
-    load_config
 
 
 class Phishing(AbstractBolt):

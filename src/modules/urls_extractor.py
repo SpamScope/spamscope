@@ -17,7 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-# from __future__ import unicode_literals
+from __future__ import unicode_literals
 import logging
 import re
 
@@ -58,8 +58,7 @@ class UrlsExtractor(object):
         self._url_regex = re.compile(
             r'((?:(?:ht|f)tp(?:s?)\:\/\/)'
             r'(?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+)',
-            re.I
-        )
+            re.I)
         self._faup = Faup()
 
     def extract(self, text):
@@ -110,15 +109,7 @@ class UrlsExtractor(object):
             try:
                 self._faup.decode(url)
                 tokens = self._faup.get()
-
-                # Get results for domain
-                domain = self._results.get(tokens['domain'], None)
-
-                if domain:
-                    domain.append(tokens)
-                else:
-                    self._results[tokens['domain']] = [tokens]
-
+                self._results.setdefault(tokens['domain'], []).append(tokens)
             except:
                 raise FailedFaupParsing("Failed tokenize url with Faup")
 
@@ -129,9 +120,6 @@ class UrlsExtractor(object):
     @property
     def urls_json(self):
         try:
-            return json.dumps(
-                self.urls_obj,
-                ensure_ascii=False
-            )
+            return json.dumps(self.urls_obj, ensure_ascii=False)
         except:
             raise FailedReturnJsonUrls("Failed make JSON from urls result")
