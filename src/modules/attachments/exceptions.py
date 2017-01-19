@@ -14,21 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from __future__ import absolute_import, print_function, unicode_literals
-from modules import AbstractUrlsHandlerBolt
+__all__ = ["TempIOError", "InvalidAttachment",
+           "VirusTotalApiKeyInvalid", "InvalidContentTypes", "MissingArgument"]
 
 
-class UrlsHandlerBody(AbstractUrlsHandlerBolt):
-    outputs = ['sha256_random', 'with_urls', 'urls']
+class TempIOError(Exception):
+    pass
 
-    def process(self, tup):
-        sha256_random = tup.values[0]
-        body = tup.values[1]
-        is_filtered = tup.values[2]
-        with_urls = False
-        urls_json = None
 
-        if not is_filtered:
-            with_urls, urls_json = self._extract_urls(body, False)
+class InvalidAttachment(ValueError):
+    pass
 
-        self.emit([sha256_random, with_urls, urls_json])
+
+class VirusTotalApiKeyInvalid(ValueError):
+    pass
+
+
+class InvalidContentTypes(ValueError):
+    pass
+
+
+class MissingArgument(ValueError):
+    pass
