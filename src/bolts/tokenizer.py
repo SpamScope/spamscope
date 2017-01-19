@@ -21,7 +21,8 @@ import random
 
 from collections import deque
 from mailparser import MailParser
-from modules import fingerprints, AbstractBolt
+from modules import AbstractBolt
+from modules.attachments import fingerprints
 from streamparse import Stream
 
 STRING = "string"

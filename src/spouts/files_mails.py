@@ -65,7 +65,7 @@ class FilesMailSpout(AbstractSpout):
     def _load_mails(self):
         """This function load mails in a priority queue. """
 
-        self.log("Loading new mails for spout")
+        self.log("Loading new mails for '{}'".format(self.component_name))
 
         mailboxes = self.conf['mailboxes']
         for k, v in mailboxes.iteritems():
@@ -117,7 +117,8 @@ class FilesMailSpout(AbstractSpout):
 
         # If queue is empty
         else:
-            self.log("Queue mails is empty", "debug")
+            self.log("Queue mails for '{}' is empty".format(
+                self.component_name), "debug")
             time.sleep(self._waiting_sleep)
             self._load_mails()
 
