@@ -22,7 +22,7 @@ import random
 from collections import deque
 from mailparser import MailParser
 from modules import AbstractBolt
-from modules.attachments import fingerprints
+from modules.attachments import fingerprints, MailAttachments
 from streamparse import Stream
 
 STRING = "string"
@@ -66,36 +66,6 @@ class Tokenizer(AbstractBolt):
     @property
     def parser(self):
         return self._parser
-
-    def _filter_attachments(self):
-        """
-        Filter the attachments that are in memory, already analyzed
-        """
-        attachments = self.parser.attachments_list
-        new_attachments = []
-
-        for i in attachments:
-            if i.get("content_transfer_encoding") == "base64":
-                f = fingerprints(i["payload"].decode('base64'))
-            else:
-                f = fingerprints(i["payload"])
-
-            if self.filter_attachments_enabled and \
-                    f[1] in self._attachments_analyzed:
-                new_attachments.append({
-                    "md5": f[0],
-                    "sha1": f[1],
-                    "sha256": f[2],
-                    "sha512": f[3],
-                    "ssdeep": f[4],
-                    "is_filtered": True})
-            else:
-                i["is_filtered"] = False
-                new_attachments.append(i)
-
-            self._attachments_analyzed.append(f[1])
-
-        return new_attachments
 
     def _make_mail(self, tup):
         raw_mail = tup.values[0]
@@ -144,7 +114,7 @@ class Tokenizer(AbstractBolt):
         # Remove attachments
         mail.pop("attachments", None)
 
-        return sha256_rand, raw_mail, mail
+        return sha256_rand, mail
 
     def process_tick(self, freq):
         """Every freq seconds you reload configuration. """
@@ -152,19 +122,22 @@ class Tokenizer(AbstractBolt):
         self._load_filters()
 
     def process(self, tup):
-        sha256_rand, raw_mail, mail = self._make_mail(tup)
+        sha256_rand, mail = self._make_mail(tup)
         with_attachments = False
-        attachments = []
+        attachments = MailAttachments.withhashes
+        body = self.parser.body
 
         # If mail is already analyzed
-        if self.filter_mails_enabled and \
-                mail["sha1"] in self._mails_analyzed:
-            mail.pop("body", None)
-            body = ""
-            is_filtered = True
-        else:
-            body = self.parser.body
-            is_filtered = False
+        if self.filter_mails_enabled:
+            if mail["sha1"] in self._mails_analyzed:
+                mail.pop("body", None)
+                body = ""
+                is_filtered = True
+            else:
+                is_filtered = False
+
+            # Update databese mail analyzed
+            self._mails_analyzed.append(mail["sha1"])
 
         # Emit mail
         self.emit([sha256_rand, mail, is_filtered], stream="mail")
@@ -172,13 +145,15 @@ class Tokenizer(AbstractBolt):
         # Emit body
         self.emit([sha256_rand, body, is_filtered], stream="body")
 
-        # Update databese mail analyzed
-        self._mails_analyzed.append(mail["sha1"])
-
         # Emit only attachments
-        if self.parser.attachments_list:
-            attachments = self._filter_attachments()
-            with_attachments = True
+        raw_attach = self.parser.attachments_list
 
-        self.emit([sha256_rand, with_attachments, attachments],
+        if raw_attach:
+            with_attachments = True
+            attachments(raw_attach)
+            if self.filter_attachments_enabled:
+                hashes = attachments.filter(self._attachments_analyzed)
+                self._attachments_analyzed.extend(hashes)
+
+        self.emit([sha256_rand, with_attachments, list(attachments)],
                   stream="attachments")

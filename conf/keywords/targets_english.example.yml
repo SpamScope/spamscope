@@ -1,0 +1,18 @@
+# For every target insert name and list of keywords with dash -
+
+# keywords format:
+
+# - word1 word2
+# - word3
+# - word4
+
+# It's equal to:
+# (word1 AND word2) OR word3 OR word4
+
+Banca Tizio:
+    - tizio
+    - Caio rossi
+
+Banca Fasulla:
+    - fasulla
+    - azzurra

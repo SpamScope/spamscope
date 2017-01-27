@@ -24,6 +24,7 @@ import os
 import patoolib
 import ssdeep
 import tempfile
+from collections import namedtuple
 from .exceptions import TempIOError
 
 try:
@@ -42,8 +43,10 @@ def fingerprints(data):
         data (string): raw data
 
     Returns:
-        tuple: fingerprints md5, sha1, sha256, sha512, ssdeep
+        namedtuple: fingerprints md5, sha1, sha256, sha512, ssdeep
     """
+
+    Hashes = namedtuple('Hashes', "md5 sha1 sha256 sha512 ssdeep")
 
     # md5
     md5 = hashlib.md5()
@@ -68,10 +71,9 @@ def fingerprints(data):
     # ssdeep
     ssdeep_ = ssdeep.hash(data)
 
-    return md5, sha1, sha256, sha512, ssdeep_
+    return Hashes(md5, sha1, sha256, sha512, ssdeep_)
 
 
-@lru_cache()
 def check_archive(data, write_sample=False):
     """Check if data is an archive.
 
@@ -88,7 +90,7 @@ def check_archive(data, write_sample=False):
 
     is_archive = True
     try:
-        temp = tempfile.mkstemp()[1]
+        temp = tempfile.mkstemp()[-1]
         with open(temp, 'wb') as f:
             f.write(data)
     except:
@@ -99,11 +101,11 @@ def check_archive(data, write_sample=False):
     except:
         is_archive = False
     finally:
-        if write_sample:
-            return is_archive, temp
-        else:
+        if not write_sample:
             os.remove(temp)
-            return is_archive
+            temp = None
+
+        return is_archive, temp
 
 
 @lru_cache()
@@ -114,4 +116,4 @@ def contenttype(payload):
 
 def extension(filename):
     ext = os.path.splitext(filename)
-    return ext[-1].lower() if len(ext) > 1 else None
+    return ext[-1].lower()
