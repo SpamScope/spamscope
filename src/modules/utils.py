@@ -96,6 +96,43 @@ def load_config(config_file):
         raise ImproperlyConfigured(message)
 
 
+def load_keywords_list(obj_paths, lower=True):
+    keywords = set()
+
+    for k, v in obj_paths.iteritems():
+        temp = load_config(v)
+
+        if not isinstance(temp, list):
+            raise ImproperlyConfigured("List {!r} not valid".format(k))
+
+        if lower:
+            keywords |= {i.lower() for i in temp}
+        else:
+            keywords |= set(temp)
+
+    return keywords
+
+
+def load_keywords_dict(obj_paths, lower=True):
+    keywords = {}
+
+    for k, v in obj_paths.iteritems():
+        temp = load_config(v)
+
+        if not isinstance(temp, dict):
+            raise ImproperlyConfigured("List {!r} not valid".format(k))
+
+        keywords.update(temp)
+
+    if lower:
+        keywords_lower = {}
+        for k, v in keywords.iteritems():
+            keywords_lower[k] = {i.lower() for i in v}
+        return keywords_lower
+
+    return keywords
+
+
 def reformat_output(mail=None, bolt=None, **kwargs):
     """ This function replaces the standard SpamScope JSON output.
     The output is splitted in two parts: mail and attachments.

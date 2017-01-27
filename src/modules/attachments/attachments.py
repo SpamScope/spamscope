@@ -43,15 +43,20 @@ class Attachments(UserList):
             msg = "'{0}' object has no attribute '{1}'"
             raise AttributeError(msg.format(type(self).__name__, name))
 
-    def __call__(self, **kwargs):
-        self.run(**kwargs)
+    def __call__(self):
+        self.run()
 
     def _intelligence(self):
         pass
 
-    def run(self, **kwargs):
-        self._kwargs = kwargs
+    def removeall(self):
+        del self[:]
+
+    def run(self):
         self._addmetadata()
+
+    def reload(self, **kwargs):
+        self._kwargs = kwargs
 
     def pophash(self, attach_hash):
         len_hashes = dict([(32, "md5"), (40, "sha1"),
@@ -66,6 +71,20 @@ class Attachments(UserList):
             if key in i and i[key] == attach_hash:
                 self.pop(n)
 
+    def filter(self, check_list, hash_type="sha1"):
+        check_list = set(check_list)
+        matches = set()
+
+        for i in self:
+            if i[hash_type] in check_list:
+                i.pop("payload", None)
+                i["is_filtered"] = True
+                matches.add(i[hash_type])
+                continue
+            i["is_filtered"] = False
+
+        return matches
+
     @staticmethod
     def _metadata(raw_dict):
         if raw_dict["content_transfer_encoding"] == "base64":
@@ -79,51 +98,53 @@ class Attachments(UserList):
 
     def _addmetadata(self):
         for i in self:
-            payload, size, ext = Attachments._metadata(i)
-            content_type = contenttype(payload)
-            flag, f = check_archive(payload, write_sample=True)
+            if not i.get("is_filtered", False):
+                payload, size, ext = Attachments._metadata(i)
+                content_type = contenttype(payload)
+                flag, f = check_archive(payload, write_sample=True)
 
-            i.update({
-                "extension": ext,
-                "size": size,
-                "Content-Type": content_type,
-                "is_archive": flag})
+                i.update({
+                    "extension": ext,
+                    "size": size,
+                    "Content-Type": content_type,
+                    "is_archive": flag})
 
-            if flag:
-                i["files"] = []
-                temp_dir = tempfile.mkdtemp()
-                patoolib.extract_archive(f, outdir=temp_dir, verbosity=-1)
+                if flag:
+                    i["files"] = []
+                    temp_dir = tempfile.mkdtemp()
+                    patoolib.extract_archive(f, outdir=temp_dir, verbosity=-1)
 
-                for path, subdirs, files in os.walk(temp_dir):
-                    for name in files:
-                        j = os.path.join(path, name)
+                    for path, subdirs, files in os.walk(temp_dir):
+                        for name in files:
+                            j = os.path.join(path, name)
 
-                        with open(j, "rb") as a:
-                            t = {}
-                            payload = a.read()
-                            content_type = contenttype(payload)
-                            filename = os.path.basename(j)
+                            with open(j, "rb") as a:
+                                t = {}
+                                payload = a.read()
+                                content_type = contenttype(payload)
+                                filename = os.path.basename(j)
 
-                            t["filename"] = filename
-                            t["extension"] = extension(filename)
-                            t["size"] = len(payload)
-                            t["Content-Type"] = content_type
-                            t["payload"] = payload.encode("base64")
-                            t["md5"], t["sha1"], t["sha256"], t["sha512"], \
-                                t["ssdeep"] = fingerprints(payload)
+                                t["filename"] = filename
+                                t["extension"] = extension(filename)
+                                t["size"] = len(payload)
+                                t["Content-Type"] = content_type
+                                t["payload"] = payload.encode("base64")
+                                t["md5"], t["sha1"], t["sha256"], \
+                                    t["sha512"], t["ssdeep"] = fingerprints(
+                                        payload)
 
-                            i["files"].append(t)
+                                i["files"].append(t)
 
-                # Remove temp dir for archived files
-                if os.path.exists(temp_dir):
-                    shutil.rmtree(temp_dir)
+                    # Remove temp dir for archived files
+                    if os.path.exists(temp_dir):
+                        shutil.rmtree(temp_dir)
 
-            # Remove temp file from filesystem
-            if os.path.exists(f):
-                os.remove(f)
+                # Remove temp file from filesystem
+                if os.path.exists(f):
+                    os.remove(f)
 
     @classmethod
-    def withhashes(cls, attachments):
+    def withhashes(cls, attachments=[]):
         r = copy.deepcopy(attachments)
 
         for i in r:
