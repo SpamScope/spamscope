@@ -173,8 +173,9 @@ For more details you can refer [here](http://streamparse.readthedocs.io/en/stabl
 ## Docker image
 It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
- - [debug](https://hub.docker.com/r/fmantuano/spamscope-debug/)
- - [elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
+ - [Debug](https://hub.docker.com/r/fmantuano/spamscope-debug/)
+ - [Elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
+ - [Redis](https://hub.docker.com/r/fmantuano/spamscope-redis/)
 
 
 

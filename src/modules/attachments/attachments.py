@@ -53,15 +53,19 @@ class Attachments(UserList):
         pass
 
     def removeall(self):
+        """Remove all items from object. """
         del self[:]
 
     def run(self):
+        """Run processing on items in memory. """
         self._addmetadata()
 
     def reload(self, **kwargs):
+        """Reload all configuration parameters"""
         self._kwargs = kwargs
 
     def filenamestext(self):
+        """Return a string with the filenames of all attachments. """
         filenames = six.text_type()
 
         for i in self:
@@ -77,6 +81,7 @@ class Attachments(UserList):
         return filenames.strip()
 
     def payloadstext(self):
+        """Return a string with the not binary payloads of all attachments. """
         text = six.text_type()
 
         for i in self:
@@ -98,6 +103,7 @@ class Attachments(UserList):
         return text.strip()
 
     def pophash(self, attach_hash):
+        """Remove the item with attach_hash from object. """
         len_hashes = dict([(32, "md5"), (40, "sha1"),
                           (64, "sha256"), (128, "sha512")])
 
@@ -111,6 +117,7 @@ class Attachments(UserList):
                 self.pop(n)
 
     def filter(self, check_list, hash_type="sha1"):
+        """Remove from memory the payloads with hash in check_list. """
         check_list = set(check_list)
         matches = set()
 
@@ -126,6 +133,7 @@ class Attachments(UserList):
 
     @staticmethod
     def _metadata(raw_dict):
+        """ Return payload, file size and extension of raw data. """
         if raw_dict["content_transfer_encoding"] == "base64":
             payload = raw_dict["payload"].decode("base64")
         else:
@@ -136,6 +144,9 @@ class Attachments(UserList):
         return (payload, size, ext)
 
     def _addmetadata(self):
+        """For each item in memory add extra informations as: file extension,
+        file size, content type, if is a archive and archived files.
+        """
         for i in self:
             if not i.get("is_filtered", False):
                 payload, size, ext = Attachments._metadata(i)
@@ -184,6 +195,7 @@ class Attachments(UserList):
 
     @classmethod
     def withhashes(cls, attachments=[]):
+        """Alternative costructor that add hashes to the items. """
         r = copy.deepcopy(attachments)
 
         for i in r:
