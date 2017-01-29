@@ -127,14 +127,13 @@ class Tokenizer(AbstractBolt):
         attachments = MailAttachments.withhashes
         body = self.parser.body
 
-        # If mail is already analyzed
+        # If filter mails is enabled
+        is_filtered = False
         if self.filter_mails_enabled:
             if mail["sha1"] in self._mails_analyzed:
                 mail.pop("body", None)
                 body = ""
                 is_filtered = True
-            else:
-                is_filtered = False
 
             # Update databese mail analyzed
             self._mails_analyzed.append(mail["sha1"])
@@ -151,6 +150,8 @@ class Tokenizer(AbstractBolt):
         if raw_attach:
             with_attachments = True
             attachments(raw_attach)
+
+            # If filter attachments is enabled
             if self.filter_attachments_enabled:
                 hashes = attachments.filter(self._attachments_analyzed)
                 self._attachments_analyzed.extend(hashes)

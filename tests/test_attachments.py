@@ -26,6 +26,7 @@ from mailparser import MailParser
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
+mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
 from src.modules.attachments.attachments import HashError
@@ -38,6 +39,9 @@ class TestAttachments(unittest.TestCase):
         p = MailParser()
         p.parse_from_file(mail)
         self.attachments = p.attachments_list
+
+        p.parse_from_file(mail_thug)
+        self.attachments_thug = p.attachments_list
 
     def test_withhashes(self):
         t = MailAttachments.withhashes(self.attachments)
@@ -133,6 +137,36 @@ class TestAttachments(unittest.TestCase):
         t()
         t.removeall()
         self.assertEqual(len(t), 0)
+
+    def test_filenamestext(self):
+        t = MailAttachments.withhashes(self.attachments)
+        t.run()
+        text = t.filenamestext()
+        self.assertIsNotNone(text)
+        self.assertNotIsInstance(text, list)
+        self.assertNotIsInstance(text, dict)
+        self.assertIn("20160523_916527.jpg_.zip", text)
+        self.assertIn("20160523_211439.jpg_.jpg.exe", text)
+
+    def test_payloadstext(self):
+        t = MailAttachments.withhashes(self.attachments_thug)
+        t.run()
+        text = t.payloadstext()
+        self.assertIsNotNone(text)
+        self.assertNotIsInstance(text, list)
+        self.assertNotIsInstance(text, dict)
+        self.assertIn("Windows", text)
+        self.assertIn("setRequestHeader", text)
+
+        check_list = deque(maxlen=10)
+        md5 = "778cf2c48ab482d6134d4d12eb51192f"
+        check_list.append(md5)
+        self.assertIn("payload", t[0])
+        self.assertNotIn("is_filtered", t[0])
+        t.filter(check_list, hash_type="md5")
+        self.assertNotIn("payload", t[0])
+        text = t.payloadstext()
+        self.assertFalse(text)
 
 
 if __name__ == '__main__':

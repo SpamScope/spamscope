@@ -16,8 +16,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 import copy
-from modules import AbstractBolt
-from modules.utils import load_keywords_list
+from modules import AbstractBolt, load_keywords_list
 from modules.attachments import MailAttachments
 
 
@@ -41,10 +40,13 @@ class Attachments(AbstractBolt):
         self.attach.reload(**settings)
 
     def _load_lists(self):
+
+        # Load content types to filter
         self._filter_cont_types = load_keywords_list(
             self.conf["content_types_blacklist"], lower=False)
         self.log("Content types to filter reloaded")
 
+        # Load Tika content types to analyze
         self._tika_whitelist_cont_types = set()
         if self.conf["tika"]["enabled"]:
             self._tika_whitelist_cont_types = load_keywords_list(

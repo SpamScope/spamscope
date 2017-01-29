@@ -71,6 +71,7 @@ def search_words_in_text(text, keywords):
     """
 
     text = text.lower()
+    keywords = set(keywords)
 
     for line in keywords:
         count = 0

@@ -17,6 +17,6 @@ limitations under the License.
 from .abstracts import AbstractBolt, AbstractSpout, AbstractUrlsHandlerBolt
 from .utils import *
 from .redis_client import Redis
+from .urls_extractor import UrlsExtractor
 # from .rabbitmq_client import Rabbit
 # from .thug_analysis import ThugAnalysis
-from .urls_extractor import UrlsExtractor
