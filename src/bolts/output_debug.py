@@ -38,10 +38,8 @@ class OutputDebug(AbstractBolt):
 
     def process(self, tup):
         sha256_random = tup.values[0]
-        mail = json.dumps(
-            tup.values[1],
-            ensure_ascii=False,
-            indent=self._json_indent)
+        mail = json.dumps(tup.values[1], ensure_ascii=False,
+                          indent=self._json_indent)
 
         output = os.path.join(self._output_path, "{}.json".format(
             sha256_random))

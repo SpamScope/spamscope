@@ -19,6 +19,16 @@ from streamparse.bolt import Bolt
 from modules.bitmap import PhishingBitMap
 
 
+def reformat_urls(urls):
+    # Change urls format to fix Elasticsearch issue with dot '.'
+    new_urls = []
+
+    for v in urls.values():
+        new_urls.extend(v)
+
+    return new_urls
+
+
 class JsonMaker(Bolt):
     outputs = ['sha256_random', 'json']
 
@@ -30,14 +40,33 @@ class JsonMaker(Bolt):
         self._phishing_bitmap = PhishingBitMap()
 
     def _compose_output(self, greedy_data):
+
         # Tokenizer
         mail = greedy_data['tokenizer'][1]
         mail['is_filtered'] = greedy_data['tokenizer'][2]
 
+        # Attachments
+        mail['with_attachments'] = greedy_data['attachments'][1]
+
+        if mail['with_attachments']:
+            mail['attachments'] = greedy_data['attachments'][2]
+
+        # Urls in attachments:
+        # Add urls attachments because you can have more differents attachments
+        # in more mails with same hash
+        mail['with_urls_attachments'] = \
+            greedy_data['urls-handler-attachments'][1]
+
+        if mail['with_urls_attachments']:
+            urls = greedy_data['urls-handler-attachments'][2]
+            mail['urls_attachments'] = reformat_urls(urls)
+
         # Add intelligence output only if mail is not filtered
         if not mail['is_filtered']:
 
-            # Phishing
+            # Phishing:
+            # we need of a complete mail for a complete score, so
+            # if mail is filtered we can't compose score
             phishing_score = greedy_data['phishing'][2]
             mail['with_phishing'] = greedy_data['phishing'][1]
             mail['phishing_score'] = phishing_score
@@ -53,35 +82,10 @@ class JsonMaker(Bolt):
 
             # Urls in body
             mail['with_urls_body'] = greedy_data['urls-handler-body'][1]
+
             if mail['with_urls_body']:
-
-                # Change urls format to fix Elasticsearch issue with dot '.'
-                reformat_urls = []
                 urls = greedy_data['urls-handler-body'][2]
-
-                for v in urls.values():
-                    reformat_urls.extend(v)
-
-                mail['urls_body'] = reformat_urls
-
-            # Urls in attachments
-            mail['with_urls_attachments'] = \
-                greedy_data['urls-handler-attachments'][1]
-            if mail['with_urls_attachments']:
-
-                # Change urls format to fix Elasticsearch issue with dot '.'
-                reformat_urls = []
-                urls = greedy_data['urls-handler-attachments'][2]
-
-                for v in urls.values():
-                    reformat_urls.extend(v)
-
-                mail['urls_attachments'] = reformat_urls
-
-        # Attachments
-        mail['with_attachments'] = greedy_data['attachments'][1]
-        if mail['with_attachments']:
-            mail['attachments'] = greedy_data['attachments'][2]
+                mail['urls_body'] = reformat_urls(urls)
 
         return mail
 

@@ -17,6 +17,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 try:
     from UserList import UserList
 except ImportError:
@@ -26,6 +28,7 @@ import copy
 import os
 import patoolib
 import shutil
+import six
 import tempfile
 from .utils import fingerprints, check_archive, contenttype, extension
 
@@ -57,6 +60,42 @@ class Attachments(UserList):
 
     def reload(self, **kwargs):
         self._kwargs = kwargs
+
+    def filenamestext(self):
+        filenames = six.text_type()
+
+        for i in self:
+            try:
+                filenames += i["filename"] + "\n"
+
+                for j in i.get("files", []):
+                    filenames += j["filename"] + "\n"
+
+            except UnicodeDecodeError:
+                continue
+
+        return filenames.strip()
+
+    def payloadstext(self):
+        text = six.text_type()
+
+        for i in self:
+            try:
+                if i.get("is_filtered"):
+                    continue
+
+                if not i.get("is_archive"):
+                    text += i["payload"].decode("base64") + "\n"
+                    continue
+
+                for j in i.get("files", []):
+                    text += j["payload"].decode("base64") + "\n"
+
+            except UnicodeDecodeError:
+                # This exception happens with binary payloads
+                continue
+
+        return text.strip()
 
     def pophash(self, attach_hash):
         len_hashes = dict([(32, "md5"), (40, "sha1"),

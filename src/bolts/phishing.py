@@ -15,9 +15,24 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from modules import AbstractBolt, load_config, search_words_in_text as swt
+from modules import (AbstractBolt, load_keywords_list, load_keywords_dict,
+                     search_words_in_text as swt)
+from modules.attachments import MailAttachments
 from modules.bitmap import PhishingBitMap
-from modules.exceptions import ImproperlyConfigured
+
+
+def check_urls(urls, keywords):
+    for domain, details in urls.iteritems():
+        for i in details:
+            if swt(i['url'], keywords):
+                return True
+
+
+def check_attachments(self, attachments, keywords):
+    attach = MailAttachments(attachments)
+    payloads = attach.payloadstext()
+    filenames = attach.filenames()
+    return swt(filenames, keywords), swt(payloads, keywords)
 
 
 class Phishing(AbstractBolt):
@@ -29,68 +44,32 @@ class Phishing(AbstractBolt):
         # Input bolts for Phishing bolt
         self.input_bolts = set(context['source->stream->grouping'].keys())
 
+        # Phishing bitmap
+        self._pb = PhishingBitMap()
+
         # All mails
         self._mails = {}
 
         # Load keywords
         self._load_lists()
 
-        # Phishing bitmap
-        self._pb = PhishingBitMap()
-
     def _load_lists(self):
 
         # Load subjects keywords
-        self.log("Reloading phishing subjects keywords")
-        self._s_keys = set()
-        for k, v in self.conf["lists"]["subjects"].iteritems():
-            keywords = load_config(v)
-            if not isinstance(keywords, list):
-                raise ImproperlyConfigured(
-                    "Keywords subjects list '{}' not valid".format(k))
-            self._s_keys |= set(keywords)
+        self._s_keys = load_keywords_list(self.conf["lists"]["subjects"])
+        self.log("Phishing subjects keywords reloaded")
 
         # Load targets keywords
-        self.log("Reloading phishing targets keywords")
-        self._t_keys = {}
-        for k, v in self.conf["lists"]["targets"].iteritems():
-            keywords = load_config(v)
-            if not isinstance(keywords, dict):
-                raise ImproperlyConfigured(
-                    "Keywords targets dict '{}' not valid".format(k))
-            self._t_keys.update(keywords)
-
-    def _check_urls(self, urls, keywords):
-        for domain, details in urls.iteritems():
-            for i in details:
-                if swt(i['url'], keywords):
-                    return True
-
-    def _check_attachments(self, attachments, keywords):
-        all_filenames = u""
-        all_contents = u""
-
-        for i in attachments:
-            try:
-                all_filenames += i["filename"] + u"\n"
-
-                if i.get("is_archive"):
-                    for j in i.get("files"):
-                        all_filenames += j["filename"] + u"\n"
-                        all_contents += \
-                            j["payload"].decode('base64') + u"\n"
-                else:
-                    all_contents += i["payload"].decode('base64') + u"\n"
-
-            except KeyError:
-                continue
-
-            except UnicodeDecodeError:
-                continue
-
-        return swt(all_filenames, keywords), swt(all_contents, keywords)
+        self._t_keys = load_keywords_dict(self.conf["lists"]["targets"])
+        self.log("Phishing targets keywords reloaded")
 
     def _search_phishing(self, greedy_data):
+
+        # If mail is filtered don't check for phishing
+        is_filtered = greedy_data['tokenizer'][2]
+
+        if is_filtered:
+            return False, False
 
         # Reset phishing bitmap
         self._pb.reset_score()
@@ -98,86 +77,88 @@ class Phishing(AbstractBolt):
         # Outputs
         targets = set()
 
-        # Get Tokenizer
+        # Get all data
         mail = greedy_data['tokenizer'][1]
         body = mail.get('body')
         subject = mail.get('subject')
         from_ = mail.get('from')
+        urls = greedy_data['urls-handler-body'][2]
+        urls_attachments = greedy_data['urls-handler-attachments'][2]
 
-        # Get Urls in body
-        with_urls_body = greedy_data['urls-handler-body'][1]
-        urls = None
-        if with_urls_body:
-            urls = greedy_data['urls-handler-body'][2]
-
-        # Get Urls attachments
-        with_urls_attachments = greedy_data['urls-handler-attachments'][1]
-        urls_attachments = None
-        if with_urls_attachments:
-            urls_attachments = greedy_data['urls-handler-attachments'][2]
-
-        # Get Attachments
-        with_attachments = greedy_data['attachments'][1]
-        attachments = None
-        if with_attachments:
-            attachments = greedy_data['attachments'][2]
+        # TODO: if an attachment is filtered the score is not complete
+        # more different mails can have same attachment
+        attachments = greedy_data['attachments'][2]
 
         # Check body
+        flag = False
         if body:
             for k, v in self._t_keys.iteritems():
                 if swt(body, v):
                     targets.add(k)
-                    if 'mail_body' not in self._pb.score_properties:
-                        self._pb.set_property_score("mail_body")
+                    flag = True
+            if flag:
+                self._pb.set_property_score("mail_body")
 
         # Check urls body
         # Target not added because urls come from body
+        flag = False
         if urls:
-            for k, v in self._t_keys.iteritems():
-                if 'urls_body' not in self._pb.score_properties:
-                    if self._check_urls(urls, v):
-                        self._pb.set_property_score("urls_body")
+            for v in self._t_keys.values():
+                if check_urls(urls, v):
+                    flag = True
+                    break
+            if flag:
+                self._pb.set_property_score("urls_body")
 
         # Check from
+        flag = False
         if from_:
             for k, v in self._t_keys.iteritems():
                 if swt(from_, v):
                     targets.add(k)
-                    if 'mail_from' not in self._pb.score_properties:
-                        self._pb.set_property_score("mail_from")
+                    flag = True
+            if flag:
+                self._pb.set_property_score("mail_from")
 
         # Check attachments filename and text match
-        if with_attachments:
+        flag_text = False
+        flag_filename = False
+        if attachments:
             for k, v in self._t_keys.iteritems():
-                filename_match, text_match = \
-                    self._check_attachments(attachments, v)
+                filename_match, text_match = check_attachments(attachments, v)
 
                 if filename_match or text_match:
                     targets.add(k)
 
-                if (filename_match and
-                        'filename_attachments' not in
-                        self._pb.score_properties):
-                    self._pb.set_property_score("filename_attachments")
+                if filename_match:
+                    flag_filename = True
 
-                if (text_match and
-                        'text_attachments' not in self._pb.score_properties):
-                    self._pb.set_property_score("text_attachments")
+                if text_match:
+                    flag_text = True
+
+            if flag_filename:
+                self._pb.set_property_score("filename_attachments")
+
+            if flag_text:
+                self._pb.set_property_score("text_attachments")
 
         # Check urls attachments
         # Target not added because urls come from attachments content
+        flag = False
         if urls_attachments:
-            for k, v in self._t_keys.iteritems():
-                if 'urls_attachments' not in self._pb.score_properties:
-                    if self._check_urls(urls_attachments, v):
-                        self._pb.set_property_score("urls_attachments")
+            for v in self._t_keys.values():
+                if check_urls(urls_attachments, v):
+                    flag = True
+                    break
+
+            if flag:
+                self._pb.set_property_score("urls_attachments")
 
         # Check subject
         if swt(subject, self._s_keys):
-            if 'mail_subject' not in self._pb.score_properties:
-                self._pb.set_property_score("mail_subject")
+            self._pb.set_property_score("mail_subject")
 
-        return self._pb.score, targets
+        return self._pb.score, list(targets)
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
@@ -189,18 +170,16 @@ class Phishing(AbstractBolt):
         sha256_random = tup.values[0]
         values = tup.values
 
-        if self._mails.get(sha256_random, None):
-            self._mails[sha256_random][bolt] = values
-        else:
-            self._mails[sha256_random] = {bolt: values}
-
+        self._mails.setdefault(sha256_random, {})[bolt] = values
         diff = self.input_bolts - set(self._mails[sha256_random].keys())
+
         if not diff:
             with_phishing = False
+
             score, targets = self._search_phishing(
                 self._mails.pop(sha256_random))
 
             if score:
                 with_phishing = True
 
-            self.emit([sha256_random, with_phishing, score, list(targets)])
+            self.emit([sha256_random, with_phishing, score, targets])
