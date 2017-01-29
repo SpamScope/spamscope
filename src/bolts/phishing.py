@@ -26,6 +26,7 @@ def check_urls(urls, keywords):
         for i in details:
             if swt(i['url'], keywords):
                 return True
+    return False
 
 
 def check_attachments(self, attachments, keywords):
@@ -101,13 +102,8 @@ class Phishing(AbstractBolt):
 
         # Check urls body
         # Target not added because urls come from body
-        flag = False
         if urls:
-            for v in self._t_keys.values():
-                if check_urls(urls, v):
-                    flag = True
-                    break
-            if flag:
+            if any(check_urls(urls, v) for v in self._t_keys.values()):
                 self._pb.set_property_score("urls_body")
 
         # Check from
@@ -144,14 +140,9 @@ class Phishing(AbstractBolt):
 
         # Check urls attachments
         # Target not added because urls come from attachments content
-        flag = False
         if urls_attachments:
-            for v in self._t_keys.values():
-                if check_urls(urls_attachments, v):
-                    flag = True
-                    break
-
-            if flag:
+            if any(check_urls(urls_attachments,
+                              v) for v in self._t_keys.values()):
                 self._pb.set_property_score("urls_attachments")
 
         # Check subject
