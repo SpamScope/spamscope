@@ -25,7 +25,7 @@ from streamparse.spout import Spout
 from .exceptions import ImproperlyConfigured
 from .urls_extractor import UrlsExtractor
 from .utils import load_config
-from ..options import __defaults__
+from src.options import __defaults__
 
 try:
     import simplejson as json

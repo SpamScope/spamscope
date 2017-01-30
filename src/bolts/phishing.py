@@ -29,10 +29,10 @@ def check_urls(urls, keywords):
     return False
 
 
-def check_attachments(self, attachments, keywords):
+def check_attachments(attachments, keywords):
     attach = MailAttachments(attachments)
     payloads = attach.payloadstext()
-    filenames = attach.filenames()
+    filenames = attach.filenamestext()
     return swt(filenames, keywords), swt(payloads, keywords)
 
 

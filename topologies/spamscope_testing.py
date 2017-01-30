@@ -3,16 +3,10 @@
 
 
 from streamparse import Grouping, Topology
-
-from bolts.attachments import Attachments
-from bolts.forms import Forms
-from bolts.json_maker import JsonMaker
-from bolts.output_debug import OutputDebug
-from bolts.phishing import Phishing
-from bolts.tokenizer import Tokenizer
-from bolts.urls_handler_attachments import UrlsHandlerAttachments
-from bolts.urls_handler_body import UrlsHandlerBody
-from spouts.files_mails import FilesMailSpout
+from bolts import (Attachments, Forms, JsonMaker, OutputElasticsearch,
+                   Phishing, Tokenizer, UrlsHandlerAttachments,
+                   UrlsHandlerBody)
+from spouts import FilesMailSpout
 
 
 class OutputTestingTopology(Topology):
@@ -22,7 +16,7 @@ class OutputTestingTopology(Topology):
     tokenizer = Tokenizer.spec(
         name="tokenizer",
         inputs=[files_spout],
-        par=1)
+        par=2)
 
     attachments = Attachments.spec(
         name="attachments",
@@ -59,6 +53,6 @@ class OutputTestingTopology(Topology):
             urls_body: Grouping.fields('sha256_random'),
             urls_attachments: Grouping.fields('sha256_random')})
 
-    output_debug = OutputDebug.spec(
-        name="output-debug",
+    output_elasticsearch = OutputElasticsearch.spec(
+        name="output-elasticsearch",
         inputs=[json])

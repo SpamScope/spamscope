@@ -124,7 +124,7 @@ class Tokenizer(AbstractBolt):
     def process(self, tup):
         sha256_rand, mail = self._make_mail(tup)
         with_attachments = False
-        attachments = MailAttachments.withhashes
+        attachments = []
         body = self.parser.body
 
         # If filter mails is enabled
@@ -149,7 +149,7 @@ class Tokenizer(AbstractBolt):
 
         if raw_attach:
             with_attachments = True
-            attachments(raw_attach)
+            attachments = MailAttachments.withhashes(raw_attach)
 
             # If filter attachments is enabled
             if self.filter_attachments_enabled:

@@ -129,7 +129,10 @@ class FilesMailSpout(AbstractSpout):
             if self._what == "remove":
                 os.remove(tup_id)
             else:
-                shutil.move(tup_id, self._where)
+                try:
+                    shutil.move(tup_id, self._where)
+                except shutil.Error:
+                    os.remove(tup_id)
 
         try:
             # Remove from tail analyzed mail
