@@ -38,6 +38,7 @@ class HashError(IndexError):
 
 
 class Attachments(UserList):
+    _kwargs = {}
 
     def __getattr__(self, name):
         try:
@@ -90,7 +91,10 @@ class Attachments(UserList):
                     continue
 
                 if not i.get("is_archive"):
-                    text += i["payload"].decode("base64") + "\n"
+                    if i["content_transfer_encoding"] == "base64":
+                        text += i["payload"].decode("base64") + "\n"
+                    else:
+                        text += i["payload"] + "\n"
                     continue
 
                 for j in i.get("files", []):
@@ -119,17 +123,19 @@ class Attachments(UserList):
     def filter(self, check_list, hash_type="sha1"):
         """Remove from memory the payloads with hash in check_list. """
         check_list = set(check_list)
-        matches = set()
+        analyzed = set()
 
         for i in self:
+            analyzed.add(i[hash_type])
+
             if i[hash_type] in check_list:
                 i.pop("payload", None)
                 i["is_filtered"] = True
-                matches.add(i[hash_type])
                 continue
+
             i["is_filtered"] = False
 
-        return matches
+        return analyzed
 
     @staticmethod
     def _metadata(raw_dict):
