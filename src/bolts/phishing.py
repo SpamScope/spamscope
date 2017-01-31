@@ -15,8 +15,9 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+from functools import partial
 from modules import (AbstractBolt, load_keywords_list, load_keywords_dict,
-                     search_words_in_text as swt)
+                     search_words_in_text as swt, search_words_given_key)
 from modules.attachments import MailAttachments
 from modules.bitmap import PhishingBitMap
 
@@ -27,13 +28,6 @@ def check_urls(urls, keywords):
             if swt(i['url'], keywords):
                 return True
     return False
-
-
-def check_attachments(attachments, keywords):
-    attach = MailAttachments(attachments)
-    payloads = attach.payloadstext()
-    filenames = attach.filenamestext()
-    return swt(filenames, keywords), swt(payloads, keywords)
 
 
 class Phishing(AbstractBolt):
@@ -83,67 +77,38 @@ class Phishing(AbstractBolt):
         body = mail.get('body')
         subject = mail.get('subject')
         from_ = mail.get('from')
-        urls = greedy_data['urls-handler-body'][2]
+        urls_body = greedy_data['urls-handler-body'][2]
         urls_attachments = greedy_data['urls-handler-attachments'][2]
 
         # TODO: if an attachment is filtered the score is not complete
         # more different mails can have same attachment
-        attachments = greedy_data['attachments'][2]
+        attachments = MailAttachments(greedy_data['attachments'][2])
 
-        # Check body
-        flag = False
-        if body:
-            for k, v in self._t_keys.iteritems():
-                if swt(body, v):
-                    targets.add(k)
-                    flag = True
-            if flag:
-                self._pb.set_property_score("mail_body")
+        urls = (
+            (urls_body, 'urls_body'),
+            (urls_attachments, 'urls_attachments'))
 
-        # Check urls body
-        # Target not added because urls come from body
-        if urls:
-            if any(check_urls(urls, v) for v in self._t_keys.values()):
-                self._pb.set_property_score("urls_body")
+        # Mapping for targets checks
+        mapping_targets = (
+            (body, 'mail_body'),
+            (from_, 'mail_from'),
+            (attachments.payloadstext(), 'text_attachments'),
+            (attachments.filenames(), 'filename_attachments'))
 
-        # Check from
-        flag = False
-        if from_:
-            for k, v in self._t_keys.iteritems():
-                if swt(from_, v):
-                    targets.add(k)
-                    flag = True
-            if flag:
-                self._pb.set_property_score("mail_from")
+        for k, v in mapping_targets:
+            if k:
+                matcher = partial(search_words_given_key, k)
+                t = set(i for i in map(matcher, self._t_keys.iteritems()) if i)
+                if t:
+                    targets |= t
+                    self._pb.set_property_score(v)
 
-        # Check attachments filename and text match
-        flag_text = False
-        flag_filename = False
-        if attachments:
-            for k, v in self._t_keys.iteritems():
-                filename_match, text_match = check_attachments(attachments, v)
-
-                if filename_match or text_match:
-                    targets.add(k)
-
-                if filename_match:
-                    flag_filename = True
-
-                if text_match:
-                    flag_text = True
-
-            if flag_filename:
-                self._pb.set_property_score("filename_attachments")
-
-            if flag_text:
-                self._pb.set_property_score("text_attachments")
-
-        # Check urls attachments
-        # Target not added because urls come from attachments content
-        if urls_attachments:
-            if any(check_urls(urls_attachments,
-                              v) for v in self._t_keys.values()):
-                self._pb.set_property_score("urls_attachments")
+        # Check urls
+        # Target not added because urls come already analyzed text
+        for k, v in urls:
+            if k:
+                if any(check_urls(k, i) for i in self._t_keys.values()):
+                    self._pb.set_property_score(v)
 
         # Check subject
         if swt(subject, self._s_keys):

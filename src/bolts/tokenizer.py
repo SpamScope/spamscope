@@ -18,6 +18,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import datetime
 import os
 import random
+import six
 
 from collections import deque
 from mailparser import MailParser
@@ -132,7 +133,7 @@ class Tokenizer(AbstractBolt):
         if self.filter_mails_enabled:
             if mail["sha1"] in self._mails_analyzed:
                 mail.pop("body", None)
-                body = ""
+                body = six.text_type()
                 is_filtered = True
 
             # Update databese mail analyzed
