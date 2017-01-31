@@ -58,6 +58,22 @@ class MailItem(object):
         return 0
 
 
+def search_words_given_key(text, key_value):
+    """Given a key - value tuple return the key if the value in text.
+
+    Args:
+        text (string): text to check
+        key_value (tuple): key is a string and value a list
+
+    Returns:
+        key if value in text
+    """
+    key, value = key_value
+
+    if search_words_in_text(text, value):
+        return key
+
+
 def search_words_in_text(text, keywords):
     """Given a list of words return True if one or more
     lines are in text, else False.
