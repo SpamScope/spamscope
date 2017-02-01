@@ -93,7 +93,7 @@ class Phishing(AbstractBolt):
             (body, 'mail_body'),
             (from_, 'mail_from'),
             (attachments.payloadstext(), 'text_attachments'),
-            (attachments.filenames(), 'filename_attachments'))
+            (attachments.filenamestext(), 'filename_attachments'))
 
         for k, v in mapping_targets:
             if k:
