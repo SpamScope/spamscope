@@ -78,4 +78,5 @@ class Attachments(AbstractBolt):
                 sha256_random), "error")
             self.raise_exception(e, tup)
 
-        self.emit([sha256_random, with_attachments, list(self.attach)])
+        else:
+            self.emit([sha256_random, with_attachments, list(self.attach)])

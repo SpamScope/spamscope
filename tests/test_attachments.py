@@ -29,7 +29,7 @@ mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
-from src.modules.attachments.attachments import HashError
+from src.modules.attachments.attachments import HashError, ContentTypeError
 
 
 class TestAttachments(unittest.TestCase):
@@ -167,6 +167,49 @@ class TestAttachments(unittest.TestCase):
         self.assertNotIn("payload", t[0])
         text = t.payloadstext()
         self.assertFalse(text)
+
+    def test_popcontenttype(self):
+        t = MailAttachments.withhashes(self.attachments)
+        t()
+        self.assertEqual(len(t), 1)
+        t.popcontenttype("application/zip")
+        self.assertEqual(len(t), 0)
+
+        t = MailAttachments.withhashes(self.attachments)
+        t()
+        self.assertEqual(len(t[0]["files"]), 1)
+        t.popcontenttype("application/x-dosexec")
+        self.assertEqual(len(t[0]["files"]), 0)
+
+        t = MailAttachments.withhashes(self.attachments)
+        t()
+        t.popcontenttype("application/fake")
+        self.assertEqual(len(t), 1)
+        self.assertEqual(len(t[0]["files"]), 1)
+
+        t = MailAttachments.withhashes(self.attachments)
+        with self.assertRaises(ContentTypeError):
+            t.popcontenttype("application/zip")
+
+    def test_filtercontenttypes(self):
+        t = MailAttachments.withhashes(self.attachments)
+
+        parameters = {"filter_cont_types": ["application/x-dosexec",
+                                            "application/zip"]}
+        t.reload(**parameters)
+        self.assertIn("application/x-dosexec", t.filter_cont_types)
+        self.assertIn("application/zip", t.filter_cont_types)
+
+        self.assertEqual(len(t), 1)
+        t()
+        self.assertEqual(len(t), 0)
+
+        t.extend(self.attachments)
+        parameters = {"filter_cont_types": ["application/x-dosexec"]}
+        t.reload(**parameters)
+        t()
+        self.assertEqual(len(t), 1)
+        self.assertEqual(len(t[0]["files"]), 0)
 
 
 if __name__ == '__main__':

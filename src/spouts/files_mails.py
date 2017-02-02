@@ -143,9 +143,12 @@ class FilesMailSpout(AbstractSpout):
             pass
 
     def fail(self, tup_id):
-        self.log("Mail '{}' failed".format(tup_id))
-
-        if os.path.exists(tup_id):
+        try:
             shutil.move(tup_id, self._where_failed)
 
-        self.ack(tup_id)
+        except IOError:
+            pass
+
+        finally:
+            self.log("Mail '{}' failed".format(tup_id))
+            self.ack(tup_id)
