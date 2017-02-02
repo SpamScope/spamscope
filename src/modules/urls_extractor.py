@@ -21,6 +21,8 @@ from __future__ import unicode_literals
 import logging
 import re
 
+import six
+
 try:
     import simplejson as json
 except ImportError:
@@ -84,9 +86,7 @@ class UrlsExtractor(object):
 
         """
 
-        if not isinstance(text, unicode):
-            raise NotUnicodeError("The given text is not in unicode")
-
+        text = six.text_type(text)
         self._results = dict()
 
         for i in self._url_regex.finditer(text):

@@ -37,6 +37,10 @@ class HashError(IndexError):
     pass
 
 
+class ContentTypeError(IndexError):
+    pass
+
+
 class Attachments(UserList):
     _kwargs = {}
 
@@ -60,6 +64,7 @@ class Attachments(UserList):
     def run(self):
         """Run processing on items in memory. """
         self._addmetadata()
+        self._filtercontenttypes()
 
     def reload(self, **kwargs):
         """Reload all configuration parameters"""
@@ -72,14 +77,13 @@ class Attachments(UserList):
         for i in self:
             try:
                 filenames += i["filename"] + "\n"
-
                 for j in i.get("files", []):
                     filenames += j["filename"] + "\n"
 
             except UnicodeDecodeError:
                 continue
-
-        return filenames.strip()
+        else:
+            return filenames.strip()
 
     def payloadstext(self):
         """Return a string with the not binary payloads of all attachments. """
@@ -103,22 +107,65 @@ class Attachments(UserList):
             except UnicodeDecodeError:
                 # This exception happens with binary payloads
                 continue
+        else:
+            return text.strip()
 
-        return text.strip()
+    def popcontenttype(self, content_type):
+        """ Given a content type remove attachments with same content type,
+        also in files in archive.
+        """
+        content_type = content_type.lower()
+
+        remove = []
+        for i in self:
+            try:
+                if i["Content-Type"].lower() == content_type:
+                    remove.append(i)
+                    continue
+
+                inner_remove = []
+                for j in i.get("files", []):
+                    if j["Content-Type"].lower() == content_type:
+                        inner_remove.append(j)
+
+            except KeyError:
+                raise ContentTypeError("Content-Type key missing. "
+                                       "Add metadata with method '.run()'")
+            else:
+                # Remove inner
+                for j in inner_remove:
+                    i["files"].remove(j)
+
+        else:
+            # Remove
+            for i in remove:
+                self.remove(i)
 
     def pophash(self, attach_hash):
         """Remove the item with attach_hash from object. """
         len_hashes = dict([(32, "md5"), (40, "sha1"),
                           (64, "sha256"), (128, "sha512")])
+        to_remove = []
 
-        for n, i in enumerate(self):
+        for i in self:
             try:
                 key = len_hashes[len(attach_hash)]
             except KeyError:
                 raise HashError("invalid hash {!r}".format(attach_hash))
+            else:
+                if key in i and i[key] == attach_hash:
+                    to_remove.append(i)
+        else:
+            for i in to_remove:
+                self.remove(i)
 
-            if key in i and i[key] == attach_hash:
-                self.pop(n)
+    def _filtercontenttypes(self):
+        """Filtering of all content types in
+        'filter_cont_types' parameter.
+        """
+        if hasattr(self, 'filter_cont_types'):
+            for i in self.filter_cont_types:
+                self.popcontenttype(i)
 
     def filter(self, check_list, hash_type="sha1"):
         """Remove from memory the payloads with hash in check_list. """
@@ -135,7 +182,8 @@ class Attachments(UserList):
 
             i["is_filtered"] = False
 
-        return analyzed
+        else:
+            return analyzed
 
     @staticmethod
     def _metadata(raw_dict):
@@ -190,14 +238,18 @@ class Attachments(UserList):
                                         payload)
 
                                 i["files"].append(t)
+                    else:
+                        try:
+                            # Remove temp dir for archived files
+                            shutil.rmtree(temp_dir)
+                        except OSError:
+                            pass
 
-                    # Remove temp dir for archived files
-                    if os.path.exists(temp_dir):
-                        shutil.rmtree(temp_dir)
-
-                # Remove temp file from filesystem
-                if os.path.exists(f):
+                try:
+                    # Remove temp file from filesystem
                     os.remove(f)
+                except OSError:
+                    pass
 
     @classmethod
     def withhashes(cls, attachments=[]):
@@ -212,5 +264,5 @@ class Attachments(UserList):
 
             i["md5"], i["sha1"], i["sha256"], i["sha512"], i["ssdeep"] = \
                 fingerprints(payload)
-
-        return cls(r)
+        else:
+            return cls(r)

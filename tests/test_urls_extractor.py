@@ -45,16 +45,6 @@ class TestUrlsExtractor(unittest.TestCase):
      <p>https://tweetdeck.twitter.com/random_2</p>
     """
 
-    body_not_unicode = """
-     bla bla http://tweetdeck.twitter.com/ bla bla
-     http://kafka.apache.org/documentation.html
-     http://kafka.apache.org/documentation1.html
-     bla bla bla https://docs.python.org/2/library/re.html bla bla
-     bla bla bla https://docs.python.org/2/library/re_2.html> bla bla
-     <p>https://tweetdeck.twitter.com/random</p> bla bla
-     <p>https://tweetdeck.twitter.com/random_2</p>
-    """
-
     body_unicode_error = u"""
     Return-Path: <>
     Delivered-To: umaronly@poormail.com
@@ -94,9 +84,6 @@ class TestUrlsExtractor(unittest.TestCase):
         )
 
     def test_extractor(self):
-        with self.assertRaises(urls_extractor.NotUnicodeError):
-            self.extractor.extract(self.body_not_unicode)
-
         self.extractor.extract(self.body)
         results = self.extractor.urls_obj
 

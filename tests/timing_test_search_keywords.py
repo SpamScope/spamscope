@@ -219,12 +219,13 @@ def search_words_in_text(text, keywords):
 
 
 if __name__ == "__main__":
-    """Result:
-        search_words_pyparsing_set()    1.513286 sec
-        search_words_pyparsing_list()   8.964113 sec
-        search_words_regex()            0.043425 sec
-        search_words_in_text()          0.008111 sec
-        search_words_regex_compiled()   0.043672 sec
+    """Test results:
+
+        search_words_pyparsing_set()    1.550626 sec
+        search_words_pyparsing_list()   9.066026 sec
+        search_words_regex()            0.044425 sec
+        search_words_in_text()          0.007933 sec
+        search_words_regex_compiled()   0.044599 sec
     """
 
     repeats = 15

@@ -87,17 +87,10 @@ def search_words_in_text(text, keywords):
     """
 
     text = text.lower()
-    keywords = set(keywords)
+    keywords = {k.lower() for k in keywords}
 
     for line in keywords:
-        count = 0
-        words = line.lower().split()
-
-        for w in words:
-            if w in text:
-                count += 1
-
-        if count == len(words):
+        if all(True if w in text else False for w in line.split()):
             return True
 
     return False
