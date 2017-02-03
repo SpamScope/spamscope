@@ -29,6 +29,6 @@ class UrlsHandlerBody(AbstractUrlsHandlerBolt):
         urls_json = None
 
         if not is_filtered:
-            with_urls, urls_json = self._extract_urls(body, False)
+            with_urls, urls_json = self._extract_urls(body)
 
         self.emit([sha256_random, with_urls, urls_json])

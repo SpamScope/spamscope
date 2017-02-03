@@ -115,26 +115,26 @@ class Attachments(UserList):
         also in files in archive.
         """
         content_type = content_type.lower()
-
         remove = []
+
         for i in self:
-            try:
-                if i["Content-Type"].lower() == content_type:
-                    remove.append(i)
-                    continue
+            if not i.get("is_filtered", False):
+                try:
+                    if i["Content-Type"].lower() == content_type:
+                        remove.append(i)
+                        continue
 
-                inner_remove = []
-                for j in i.get("files", []):
-                    if j["Content-Type"].lower() == content_type:
-                        inner_remove.append(j)
-
-            except KeyError:
-                raise ContentTypeError("Content-Type key missing. "
-                                       "Add metadata with method '.run()'")
-            else:
-                # Remove inner
-                for j in inner_remove:
-                    i["files"].remove(j)
+                    inner_remove = []
+                    for j in i.get("files", []):
+                        if j["Content-Type"].lower() == content_type:
+                            inner_remove.append(j)
+                except KeyError:
+                    raise ContentTypeError("Content-Type key missing. "
+                                           "Add metadata with method '.run()'")
+                else:
+                    # Remove inner
+                    for j in inner_remove:
+                        i["files"].remove(j)
 
         else:
             # Remove

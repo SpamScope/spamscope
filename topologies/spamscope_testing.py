@@ -16,12 +16,12 @@ class OutputTestingTopology(Topology):
     tokenizer = Tokenizer.spec(
         name="tokenizer",
         inputs=[files_spout],
-        par=2)
+        par=1)
 
     attachments = Attachments.spec(
         name="attachments",
         inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
-        par=2)
+        par=1)
 
     urls_body = UrlsHandlerBody.spec(
         name="urls-handler-body",
@@ -54,4 +54,4 @@ class OutputTestingTopology(Topology):
             urls_attachments: Grouping.fields('sha256_random')})
 
     output_elasticsearch = OutputElasticsearch.spec(
-        name="output-elasticsearch", inputs=[json], par=2)
+        name="output-elasticsearch", inputs=[json], par=1)

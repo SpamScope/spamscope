@@ -21,10 +21,11 @@ import os
 
 from streamparse.bolt import Bolt
 from streamparse.spout import Spout
+from pyfaup.faup import Faup
 
 from .exceptions import ImproperlyConfigured
 from .urls_extractor import UrlsExtractor
-from .utils import load_config
+from .utils import load_config, urls_extractor
 
 try:
     # import for streamparse
@@ -32,11 +33,6 @@ try:
 except ImportError:
     # import for unittest
     from ..options import __defaults__
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
 
 try:
     from collections import ChainMap
@@ -105,6 +101,7 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
         self._extractor = UrlsExtractor()
         self._load_whitelist()
+        self._parser_faup = Faup()
 
     def process_tick(self, freq):
         """Every freq seconds you reload the whitelist """
@@ -137,13 +134,12 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
                 self.log("Reloded whitelist domains '{}' for '{}'".format(
                     k, self.component_name))
 
-    def _extract_urls(self, text, conv_to_str=True):
+    def _extract_urls(self, text):
         with_urls = False
         urls = dict()
 
         if text:
-            self._extractor.extract(text)
-            urls = self._extractor.urls_obj
+            urls = urls_extractor(self._parser_faup, text)
             domains = urls.keys()
 
             for d in domains:
@@ -152,8 +148,5 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
         if urls:
             with_urls = True
-
-        if conv_to_str:
-            urls = json.dumps(urls, ensure_ascii=False)
 
         return with_urls, urls

@@ -22,8 +22,13 @@ import copy
 import datetime
 import logging
 import os
+import re
+import six
 import yaml
 from .exceptions import ImproperlyConfigured
+
+RE_URL = re.compile(r'((?:(?:ht|f)tp(?:s?)\:\/\/)'
+                    r'(?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+)', re.I)
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +61,44 @@ class MailItem(object):
             return -1
 
         return 0
+
+
+def urls_extractor(faup_parser, text):
+    """This function extract all url http(s) and ftp(s) from text.
+
+    Args:
+        text (string): text string with urls to extract
+
+    Returns:
+        Return a dict, with a key for every second-level domain and
+        value a list of disassembled urls (output Faup tool).
+
+        Example disassembled url https://drive.google.com/drive/my-drive:
+
+            {
+                'domain': 'google.com',
+                'domain_without_tld': 'google',
+                'fragment': None,
+                'host': 'drive.google.com',
+                'port': None,
+                'query_string': None,
+                'resource_path': '/drive/my-drive',
+                'scheme': 'https',
+                'subdomain': 'drive',
+                'tld': 'com',
+                'url': 'https://drive.google.com/drive/my-drive'
+            }
+    """
+
+    text = six.text_type(text)
+    results = {}
+
+    for i in set(match.group().strip() for match in RE_URL.finditer(text)):
+        faup_parser.decode(i)
+        tokens = faup_parser.get()
+        results.setdefault(tokens["domain"], []).append(tokens)
+    else:
+        return results
 
 
 def search_words_given_key(text, key_value):

@@ -28,9 +28,10 @@ root = os.path.join(base_path, '..')
 sys.path.append(root)
 
 import src.modules.utils as utils
+from mailparser import MailParser
+from pyfaup.faup import Faup
 from src.modules.attachments import MailAttachments
 from src.modules.exceptions import ImproperlyConfigured
-from mailparser import MailParser
 
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
@@ -210,6 +211,51 @@ class TestSearchText(unittest.TestCase):
         with self.assertRaises(ImproperlyConfigured):
             d = {"generic": "conf/keywords/subjects.example.yml"}
             results = utils.load_keywords_dict(d)
+
+    def test_urls_extractor(self):
+
+        body = """
+        bla bla https://tweetdeck.twitter.com/random bla bla
+        http://kafka.apache.org/documentation.html
+        http://kafka.apache.org/documentation1.html
+        bla bla bla https://docs.python.org/2/library/re.html bla bla
+        bla bla bla https://docs.python.org/2/library/re_2.html> bla bla
+        <p>https://tweetdeck.twitter.com/random</p> bla bla
+        <p>https://tweetdeck.twitter.com/random_2</p>
+        """
+
+        body_unicode_error = """
+        Return-Path: <>
+        Delivered-To: umaronly@poormail.com
+        Received: (qmail 15482 invoked from network); 29 Nov 2015 12:28:40 -000
+        Received: from unknown (HELO 112.149.154.61) (112.149.154.61)
+        by smtp.customers.net with SMTP; 29 Nov 2015 12:28:40 -0000
+        Received: from unknown (HELO localhost)
+            (meghan3353839.5f10e@realiscape.com@110.68.103.81)
+                by 112.149.154.61 with ESMTPA; Sun, 29 Nov 2015 21:29:24 +0900
+                From: meghan3353839.5f10e@realiscape.com
+                To: umaronly@poormail.com
+                Subject: Gain your male attrctiveness
+
+                Give satisfaction to your loved one
+                http://contents.xn--90afavbplfx2a6a5b2a.xn--p1ai/
+        """
+        parser = Faup()
+
+        urls = utils.urls_extractor(parser, body)
+        self.assertIsInstance(urls, dict)
+        self.assertIn("apache.org", urls)
+        self.assertIn("python.org", urls)
+        self.assertIn("twitter.com", urls)
+
+        for i in ("apache.org", "python.org", "twitter.com"):
+            self.assertIsInstance(urls[i], list)
+            self.assertEqual(len(urls[i]), 2)
+
+        urls = utils.urls_extractor(parser, body_unicode_error)
+        self.assertIsInstance(urls, dict)
+        self.assertIn("xn--90afavbplfx2a6a5b2a.xn--p1ai", urls)
+        self.assertEqual(len(urls["xn--90afavbplfx2a6a5b2a.xn--p1ai"]), 1)
 
 
 if __name__ == '__main__':

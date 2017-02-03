@@ -26,5 +26,5 @@ class UrlsHandlerAttachments(AbstractUrlsHandlerBolt):
         sha256_mail_random = tup.values[0]
         attachments = MailAttachments(tup.values[2])
         text = attachments.payloadstext()
-        with_urls, urls = self._extract_urls(text, False)
+        with_urls, urls = self._extract_urls(text)
         self.emit([sha256_mail_random, with_urls, urls])
