@@ -211,6 +211,20 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(len(t), 1)
         self.assertEqual(len(t[0]["files"]), 0)
 
+    def test_tika(self):
+        t = MailAttachments.withhashes(self.attachments)
+        parameters = {
+            "tika": {"enabled": True,
+                     "path_jar": "/opt/tika/tika-app-1.14.jar",
+                     "memory_allocation": None},
+            "tika_whitelist_cont_types": ["application/zip"]}
+
+        t.reload(**parameters)
+        t.run()
+        t.intelligence()
+        for i in t:
+            self.assertIn("tika", i)
+
 
 if __name__ == '__main__':
     unittest.main()

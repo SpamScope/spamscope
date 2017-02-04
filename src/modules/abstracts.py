@@ -24,7 +24,6 @@ from streamparse.spout import Spout
 from pyfaup.faup import Faup
 
 from .exceptions import ImproperlyConfigured
-from .urls_extractor import UrlsExtractor
 from .utils import load_config, urls_extractor
 
 try:
@@ -98,8 +97,6 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
 
     def initialize(self, stormconf, context):
         super(AbstractUrlsHandlerBolt, self).initialize(stormconf, context)
-
-        self._extractor = UrlsExtractor()
         self._load_whitelist()
         self._parser_faup = Faup()
 
