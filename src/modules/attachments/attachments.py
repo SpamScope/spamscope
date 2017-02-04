@@ -31,6 +31,7 @@ import shutil
 import six
 import tempfile
 from .utils import fingerprints, check_archive, contenttype, extension
+from .post_processing import processors
 
 
 class HashError(IndexError):
@@ -54,8 +55,9 @@ class Attachments(UserList):
     def __call__(self):
         self.run()
 
-    def _intelligence(self):
-        pass
+    def intelligence(self):
+        for p in processors:
+            p(getattr(self, p.__name__), self)
 
     def removeall(self):
         """Remove all items from object. """
@@ -69,6 +71,13 @@ class Attachments(UserList):
     def reload(self, **kwargs):
         """Reload all configuration parameters"""
         self._kwargs = kwargs
+
+        # tika needs to load external list
+        try:
+            self._kwargs["tika"].update({
+                "whitelist_cont_types": self.tika_whitelist_cont_types})
+        except KeyError:
+            pass
 
     def filenamestext(self):
         """Return a string with the filenames of all attachments. """
