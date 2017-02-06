@@ -28,7 +28,8 @@ mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 sys.path.append(root)
 from src.modules.attachments import (MailAttachments, virustotal, tika)
 
-API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+API_KEY = "99958e8c748f8f2d2dad3e0e09d45fa2461cac26360a24921b682959e68d9e7c"
 
 
 class TestPostProcessing(unittest.TestCase):
@@ -40,12 +41,12 @@ class TestPostProcessing(unittest.TestCase):
         p.parse_from_file(mail)
         self.attachments = p.attachments_list
 
-    def virustotal(self):
+    def test_virustotal(self):
         """Test add VirusTotal processing."""
 
         conf = {"enabled": True, "api_key": API_KEY}
         attachments = MailAttachments.withhashes(self.attachments)
-
+        attachments(intelligence=False)
         virustotal(conf, attachments)
 
         # VirusTotal analysis
@@ -70,7 +71,7 @@ class TestPostProcessing(unittest.TestCase):
                 "memory_allocation": None,
                 "whitelist_cont_types": ["application/zip"]}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments()
+        attachments(intelligence=False)
         tika(conf, attachments)
 
         for i in attachments:

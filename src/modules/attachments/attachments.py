@@ -25,21 +25,19 @@ except ImportError:
     from collections import UserList
 
 import copy
+import logging
 import os
 import patoolib
 import shutil
 import six
 import tempfile
-from .utils import fingerprints, check_archive, contenttype, extension
+
+from .exceptions import HashError, ContentTypeError
 from .post_processing import processors
+from .utils import fingerprints, check_archive, contenttype, extension
 
 
-class HashError(IndexError):
-    pass
-
-
-class ContentTypeError(IndexError):
-    pass
+log = logging.getLogger(__name__)
 
 
 class Attachments(UserList):
@@ -52,21 +50,31 @@ class Attachments(UserList):
             msg = "'{0}' object has no attribute '{1}'"
             raise AttributeError(msg.format(type(self).__name__, name))
 
-    def __call__(self):
-        self.run()
+    def __call__(self, filtercontenttypes=True, intelligence=True):
+        self.run(filtercontenttypes, intelligence)
 
-    def intelligence(self):
+    def _intelligence(self):
         for p in processors:
-            p(getattr(self, p.__name__), self)
+            try:
+                p(getattr(self, p.__name__), self)
+            except AttributeError:
+                log.warning(
+                    "AttributeError: {!r} doesn't exist".format(p.__name__))
 
     def removeall(self):
         """Remove all items from object. """
         del self[:]
 
-    def run(self):
+    def run(self, filtercontenttypes=True, intelligence=True):
         """Run processing on items in memory. """
+
         self._addmetadata()
-        self._filtercontenttypes()
+
+        if filtercontenttypes:
+            self._filtercontenttypes()
+
+        if intelligence:
+            self._intelligence()
 
     def reload(self, **kwargs):
         """Reload all configuration parameters"""
@@ -77,7 +85,7 @@ class Attachments(UserList):
             self._kwargs["tika"].update({
                 "whitelist_cont_types": self.tika_whitelist_cont_types})
         except KeyError:
-            pass
+            log.warning("KeyError: 'tika' doesn't exist")
 
     def filenamestext(self):
         """Return a string with the filenames of all attachments. """
@@ -172,9 +180,11 @@ class Attachments(UserList):
         """Filtering of all content types in
         'filter_cont_types' parameter.
         """
-        if hasattr(self, 'filter_cont_types'):
+        try:
             for i in self.filter_cont_types:
                 self.popcontenttype(i)
+        except AttributeError:
+            log.warning("AttributeError: 'filter_cont_types' doesn't exist")
 
     def filter(self, check_list, hash_type="sha1"):
         """Remove from memory the payloads with hash in check_list. """

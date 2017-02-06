@@ -17,5 +17,3 @@ limitations under the License.
 from .abstracts import AbstractBolt, AbstractSpout, AbstractUrlsHandlerBolt
 from .utils import *
 from .redis_client import Redis
-# from .rabbitmq_client import Rabbit
-# from .thug_analysis import ThugAnalysis
