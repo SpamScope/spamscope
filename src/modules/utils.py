@@ -24,6 +24,7 @@ import logging
 import os
 import re
 import six
+import tempfile
 import yaml
 from .exceptions import ImproperlyConfigured
 
@@ -61,6 +62,25 @@ class MailItem(object):
             return -1
 
         return 0
+
+
+def write_payload(payload, extension):
+    """This method writes the attachment payload on file system in temporary file.
+
+    Args:
+        payload (string): binary payload string in base64 to write on disk
+        extension (string): file extension. Example '.js'
+
+    Returns:
+        Local file path of payload
+    """
+
+    temp = tempfile.mkstemp()[1] + extension
+
+    with open(temp, 'wb') as f:
+        f.write(payload.decode('base64'))
+
+    return temp
 
 
 def urls_extractor(faup_parser, text):

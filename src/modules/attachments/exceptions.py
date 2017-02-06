@@ -14,25 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-__all__ = ["TempIOError", "InvalidAttachment",
-           "VirusTotalApiKeyInvalid", "InvalidContentTypes", "MissingArgument"]
+__all__ = ["TempIOError", "ThugAnalysisFailed",
+           "HashError", "ContentTypeError"]
 
 
 class TempIOError(Exception):
     pass
 
 
-class InvalidAttachment(ValueError):
+class ThugAnalysisFailed(Exception):
     pass
 
 
-class VirusTotalApiKeyInvalid(ValueError):
+class HashError(IndexError):
     pass
 
 
-class InvalidContentTypes(ValueError):
-    pass
-
-
-class MissingArgument(ValueError):
+class ContentTypeError(IndexError):
     pass

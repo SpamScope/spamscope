@@ -221,7 +221,6 @@ class TestAttachments(unittest.TestCase):
 
         t.reload(**parameters)
         t.run()
-        t.intelligence()
         for i in t:
             self.assertIn("tika", i)
 
