@@ -31,7 +31,7 @@ import src.modules.utils as utils
 from mailparser import MailParser
 from pyfaup.faup import Faup
 from src.modules.attachments import MailAttachments
-from src.modules.exceptions import ImproperlyConfigured
+from src.modules import ImproperlyConfigured
 
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
@@ -55,6 +55,9 @@ class TestSearchText(unittest.TestCase):
             'elastic_type_mail': "spamscope",
             'elastic_index_attach': "spamscope_attachments-",
             'elastic_type_attach': "spamscope"}
+
+    def test_write_payload(self):
+        pass
 
     def test_search_words_in_text(self):
         with open(text_files) as f:

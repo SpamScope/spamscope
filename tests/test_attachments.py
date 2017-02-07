@@ -224,6 +224,15 @@ class TestAttachments(unittest.TestCase):
         for i in t:
             self.assertIn("tika", i)
 
+    def test_virustotal(self):
+        pass
+
+    def test_thug(self):
+        pass
+
+    def test_post_processing(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

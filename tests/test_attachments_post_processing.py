@@ -28,8 +28,7 @@ mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 sys.path.append(root)
 from src.modules.attachments import (MailAttachments, virustotal, tika)
 
-# API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-API_KEY = "99958e8c748f8f2d2dad3e0e09d45fa2461cac26360a24921b682959e68d9e7c"
+API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 
 class TestPostProcessing(unittest.TestCase):

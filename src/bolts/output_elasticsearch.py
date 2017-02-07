@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -35,18 +38,18 @@ class OutputElasticsearch(AbstractBolt):
 
     def _load_settings(self):
         # Elasticsearch parameters
-        servers = self.conf['servers']
-        self._flush_size = servers['flush_size']
+        servers = self.conf["servers"]
+        self._flush_size = servers["flush_size"]
 
         # Parameters for reformat_output function
         self._parameters = {
-            "elastic_index_mail": servers['index.prefix.mails'],
-            "elastic_type_mail": servers['doc.type.mails'],
-            "elastic_index_attach": servers['index.prefix.attachments'],
-            "elastic_type_attach": servers['doc.type.attachments']}
+            "elastic_index_mail": servers["index.prefix.mails"],
+            "elastic_type_mail": servers["doc.type.mails"],
+            "elastic_index_attach": servers["index.prefix.attachments"],
+            "elastic_type_attach": servers["doc.type.attachments"]}
 
         # Elasticsearch object
-        self._es = Elasticsearch(hosts=servers['hosts'])
+        self._es = Elasticsearch(hosts=servers["hosts"])
 
     def flush(self):
         helpers.bulk(self._es, self._mails)

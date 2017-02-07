@@ -229,7 +229,7 @@ def reformat_output(mail=None, bolt=None, **kwargs):
     """
 
     if bolt not in ('output-elasticsearch', 'output-redis'):
-        message = "Bolt '{}' not in list of permitted bolts".format(bolt)
+        message = "Bolt {!r} not in list of permitted bolts".format(bolt)
         log.exception(message)
         raise ImproperlyConfigured(message)
 
@@ -241,11 +241,11 @@ def reformat_output(mail=None, bolt=None, **kwargs):
             # Date for daily index
             try:
                 timestamp = datetime.datetime.strptime(
-                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S.%f")
+                    mail["analisys_date"], "%Y-%m-%dT%H:%M:%S.%f")
             except:
                 # Without microseconds
                 timestamp = datetime.datetime.strptime(
-                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S")
+                    mail["analisys_date"], "%Y-%m-%dT%H:%M:%S")
 
             mail_date = timestamp.strftime("%Y.%m.%d")
 
@@ -256,25 +256,25 @@ def reformat_output(mail=None, bolt=None, **kwargs):
 
         # Prepair attachments for bulk
         for i in raw_attachments:
-            i['is_archived'] = False
+            i["is_archived"] = False
 
             if bolt == "output-elasticsearch":
-                i['@timestamp'] = timestamp
-                i['_index'] = kwargs['elastic_index_attach'] + mail_date
-                i['_type'] = kwargs['elastic_type_attach']
-                i['type'] = kwargs['elastic_type_attach']
+                i["@timestamp"] = timestamp
+                i["_index"] = kwargs["elastic_index_attach"] + mail_date
+                i["_type"] = kwargs["elastic_type_attach"]
+                i["type"] = kwargs["elastic_type_attach"]
 
             for j in i.get("files", []):
                 f = copy.deepcopy(j)
 
                 # Prepair archived files
-                f['is_archived'] = True
+                f["is_archived"] = True
 
                 if bolt == "output-elasticsearch":
-                    f['@timestamp'] = timestamp
-                    f['_index'] = kwargs['elastic_index_attach'] + mail_date
-                    f['_type'] = kwargs['elastic_type_attach']
-                    f['type'] = kwargs['elastic_type_attach']
+                    f["@timestamp"] = timestamp
+                    f["_index"] = kwargs["elastic_index_attach"] + mail_date
+                    f["_type"] = kwargs["elastic_type_attach"]
+                    f["type"] = kwargs["elastic_type_attach"]
 
                 attachments.append(f)
 
@@ -301,9 +301,9 @@ def reformat_output(mail=None, bolt=None, **kwargs):
 
         # Prepair mail for bulk
         if bolt == "output-elasticsearch":
-            mail['@timestamp'] = timestamp
-            mail['_index'] = kwargs['elastic_index_mail'] + mail_date
-            mail['type'] = kwargs['elastic_type_mail']
-            mail['_type'] = kwargs['elastic_type_mail']
+            mail["@timestamp"] = timestamp
+            mail["_index"] = kwargs["elastic_index_mail"] + mail_date
+            mail["type"] = kwargs["elastic_type_mail"]
+            mail["_type"] = kwargs["elastic_type_mail"]
 
         return mail, attachments

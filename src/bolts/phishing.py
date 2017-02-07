@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -25,7 +28,7 @@ from modules.bitmap import PhishingBitMap
 def check_urls(urls, keywords):
     for domain, details in urls.iteritems():
         for i in details:
-            if swt(i['url'], keywords):
+            if swt(i["url"], keywords):
                 return True
     return False
 
@@ -37,7 +40,7 @@ class Phishing(AbstractBolt):
         super(Phishing, self).initialize(stormconf, context)
 
         # Input bolts for Phishing bolt
-        self.input_bolts = set(context['source->stream->grouping'].keys())
+        self.input_bolts = set(context["source->stream->grouping"].keys())
 
         # Phishing bitmap
         self._pb = PhishingBitMap()
@@ -61,7 +64,7 @@ class Phishing(AbstractBolt):
     def _search_phishing(self, greedy_data):
 
         # If mail is filtered don't check for phishing
-        is_filtered = greedy_data['tokenizer'][2]
+        is_filtered = greedy_data["tokenizer"][2]
 
         if is_filtered:
             return False, False
@@ -73,16 +76,16 @@ class Phishing(AbstractBolt):
         targets = set()
 
         # Get all data
-        mail = greedy_data['tokenizer'][1]
+        mail = greedy_data["tokenizer"][1]
         body = mail.get('body')
         subject = mail.get('subject')
         from_ = mail.get('from')
-        urls_body = greedy_data['urls-handler-body'][2]
-        urls_attachments = greedy_data['urls-handler-attachments'][2]
+        urls_body = greedy_data["urls-handler-body"][2]
+        urls_attachments = greedy_data["urls-handler-attachments"][2]
 
         # TODO: if an attachment is filtered the score is not complete
         # more different mails can have same attachment
-        attachments = MailAttachments(greedy_data['attachments'][2])
+        attachments = MailAttachments(greedy_data["attachments"][2])
 
         urls = (
             (urls_body, 'urls_body'),

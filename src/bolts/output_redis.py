@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -34,20 +37,20 @@ class OutputRedis(AbstractBolt):
 
     def _load_settings(self):
         # Redis parameters
-        servers = self.conf['servers']
-        self._flush_size = servers['flush_size']
-        self._queue_mails = servers['queue_mails']
-        self._queue_attachments = servers['queue_attachments']
+        servers = self.conf["servers"]
+        self._flush_size = servers["flush_size"]
+        self._queue_mails = servers["queue_mails"]
+        self._queue_attachments = servers["queue_attachments"]
 
         # Redis class
         self._redis_client = Redis(
-            hosts=servers['hosts'],
-            shuffle_hosts=servers['shuffle_hosts'],
-            port=servers['port'],
-            db=servers['db'],
-            password=servers['password'],
-            reconnect_interval=servers['reconnect_interval'],
-            max_retry=servers['max_retry'])
+            hosts=servers["hosts"],
+            shuffle_hosts=servers["shuffle_hosts"],
+            port=servers["port"],
+            db=servers["db"],
+            password=servers["password"],
+            reconnect_interval=servers["reconnect_interval"],
+            max_retry=servers["max_retry"])
 
     def flush(self):
         self._redis_client.push_messages(
