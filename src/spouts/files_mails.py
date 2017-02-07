@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -47,13 +50,13 @@ class FilesMailSpout(AbstractSpout):
         self._where = self.conf["post_processing"]["where"]
         if not self._where:
             raise ImproperlyConfigured(
-                "where in '{}' is not configurated".format(
+                "where in {!r} is not configurated".format(
                     self.component_name))
 
         self._where_failed = self.conf["post_processing"]["where.failed"]
         if not self._where_failed:
             raise ImproperlyConfigured(
-                "where.failed in '{}' is not configurated".format(
+                "where.failed in {!r} is not configurated".format(
                     self.component_name))
 
         if not os.path.exists(self._where):
@@ -65,16 +68,16 @@ class FilesMailSpout(AbstractSpout):
     def _load_mails(self):
         """This function load mails in a priority queue. """
 
-        self.log("Loading new mails for '{}'".format(self.component_name))
+        self.log("Loading new mails for {!r}".format(self.component_name))
 
-        mailboxes = self.conf['mailboxes']
+        mailboxes = self.conf["mailboxes"]
         for k, v in mailboxes.iteritems():
-            if not os.path.exists(v['path_mails']):
+            if not os.path.exists(v["path_mails"]):
                 raise ImproperlyConfigured(
-                    "Mail path '{}' does not exist".format(v['path_mails']))
+                    "Mail path {!r} does not exist".format(v["path_mails"]))
 
-            all_mails = set(glob.glob(os.path.join(
-                v['path_mails'], '{}'.format(v['files_pattern']))))
+            all_mails = set(
+                glob.glob(os.path.join(v["path_mails"], v["files_pattern"])))
 
             # put new mails in queue
             for mail in (all_mails - self._queue_tail):
@@ -82,10 +85,10 @@ class FilesMailSpout(AbstractSpout):
                 self._queue.put(
                     MailItem(
                         filename=mail,
-                        mail_server=v['mail_server'],
+                        mail_server=v["mail_server"],
                         mailbox=k,
-                        priority=v['priority'],
-                        trust=v['trust_string']))
+                        priority=v["priority"],
+                        trust=v["trust_string"]))
 
     def next_tuple(self):
 
@@ -93,7 +96,7 @@ class FilesMailSpout(AbstractSpout):
         if not self._queue.empty():
 
             # After reload.mails mails put new items in priority queue
-            if (self._count % self.conf['reload.mails']):
+            if (self._count % self.conf["reload.mails"]):
                 self._count += 1
 
             # put new mails in priority queue
@@ -117,7 +120,7 @@ class FilesMailSpout(AbstractSpout):
 
         # If queue is empty
         else:
-            self.log("Queue mails for '{}' is empty".format(
+            self.log("Queue mails for {!r} is empty".format(
                 self.component_name), "debug")
             time.sleep(self._waiting_sleep)
             self._load_mails()
@@ -150,5 +153,5 @@ class FilesMailSpout(AbstractSpout):
             pass
 
         finally:
-            self.log("Mail '{}' failed".format(tup_id))
+            self.log("Mail {!r} failed".format(tup_id))
             self.ack(tup_id)

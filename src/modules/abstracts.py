@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -46,13 +49,13 @@ class AbstractComponentMixin(object):
     _options = ChainMap(os.environ, __defaults__)
 
     def _conf_loader(self):
-        self.log("Reloading configuration for '{}'".format(
+        self.log("Reloading configuration for {!r}".format(
             self.component_name))
         self._spamscope_conf = load_config(self.conf_file)
 
     @property
     def conf_file(self):
-        return self.options['SPAMSCOPE_CONF_FILE']
+        return self.options["SPAMSCOPE_CONF_FILE"]
 
     @property
     def spamscope_conf(self):
@@ -108,7 +111,7 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
     def _load_whitelist(self):
         self._whitelist = set()
 
-        for k, v in self.conf['whitelists'].iteritems():
+        for k, v in self.conf["whitelists"].iteritems():
             expiry = v.get('expiry')
             reload_ = True
 
@@ -118,17 +121,17 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
                     expiry, "%Y-%m-%dT%H:%M:%S.%fZ") > now)
 
             if reload_:
-                domains = load_config(v['path'])
+                domains = load_config(v["path"])
 
                 if not isinstance(domains, list):
                     raise ImproperlyConfigured(
-                        "Whitelist '{}' for '{}' not loaded".format(
+                        "Whitelist {!r} for {!r} not loaded".format(
                             k, self.component_name))
 
                 domains = {i.lower() for i in domains}
                 self._whitelist |= domains
 
-                self.log("Reloded whitelist domains '{}' for '{}'".format(
+                self.log("Reloded whitelist domains {!r} for {!r}".format(
                     k, self.component_name))
 
     def _extract_urls(self, text):

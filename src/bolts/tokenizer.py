@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -76,7 +79,7 @@ class Tokenizer(AbstractBolt):
         # Check if kind_data is correct
         if mail_format != STRING and mail_format != PATH:
             raise InvalidMailFormat(
-                "Invalid mail format '{}'. Choose '{}' or '{}'".format(
+                "Invalid mail format {!r}. Choose {!r} or {!r}".format(
                     mail_format, STRING, PATH))
 
         # Parsing mail
@@ -90,27 +93,27 @@ class Tokenizer(AbstractBolt):
         mail = self.parser.parsed_mail_obj
 
         # Data mail sources
-        mail['mail_server'] = tup.values[1]
-        mail['mailbox'] = tup.values[2]
-        mail['priority'] = tup.values[3]
-        mail['sender_ip'] = self.parser.get_server_ipaddress(tup.values[4])
+        mail["mail_server"] = tup.values[1]
+        mail["mailbox"] = tup.values[2]
+        mail["priority"] = tup.values[3]
+        mail["sender_ip"] = self.parser.get_server_ipaddress(tup.values[4])
 
         # Fingerprints of body mail
-        (mail['md5'], mail['sha1'], mail['sha256'], mail['sha512'],
-            mail['ssdeep']) = fingerprints(self.parser.body.encode('utf-8'))
-        sha256_rand = mail['sha256'] + rand
+        (mail["md5"], mail["sha1"], mail["sha256"], mail["sha512"],
+            mail["ssdeep"]) = fingerprints(self.parser.body.encode('utf-8'))
+        sha256_rand = mail["sha256"] + rand
 
         # Add path to result
         if mail_format == PATH:
-            mail['path_mail'] = raw_mail
+            mail["path_mail"] = raw_mail
 
         # Dates
         if mail.get('date'):
-            mail['date'] = mail.get('date').isoformat()
+            mail["date"] = mail.get('date').isoformat()
         else:
-            mail['date'] = datetime.datetime.utcnow().isoformat()
+            mail["date"] = datetime.datetime.utcnow().isoformat()
 
-        mail['analisys_date'] = datetime.datetime.utcnow().isoformat()
+        mail["analisys_date"] = datetime.datetime.utcnow().isoformat()
 
         # Remove attachments
         mail.pop("attachments", None)

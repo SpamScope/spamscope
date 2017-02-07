@@ -94,7 +94,7 @@ def check_archive(data, write_sample=False):
         with open(temp, 'wb') as f:
             f.write(data)
     except:
-        raise TempIOError("Failed opening '{}' file".format(temp))
+        raise TempIOError("Failed opening {!r} file".format(temp))
 
     try:
         patoolib.test_archive(temp, verbosity=-1)

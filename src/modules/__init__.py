@@ -17,3 +17,4 @@ limitations under the License.
 from .abstracts import AbstractBolt, AbstractSpout, AbstractUrlsHandlerBolt
 from .utils import *
 from .redis_client import Redis
+from .exceptions import *
