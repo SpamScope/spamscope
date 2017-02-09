@@ -31,6 +31,12 @@ sys.path.append(root)
 from src.modules.attachments import MailAttachments
 from src.modules.attachments.attachments import HashError, ContentTypeError
 
+try:
+    API_FILE = "/tmp/virustotal.api"
+    API_KEY = open(API_FILE).read().strip()
+except IOError:
+    raise IOError("Put VirusTotal api key in {!r} file".format(API_FILE))
+
 
 class TestAttachments(unittest.TestCase):
 
@@ -90,7 +96,7 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(2, len(check_list))
 
         # It should not fail
-        t.run()
+        t.run(filtercontenttypes=False, intelligence=False)
 
         t = MailAttachments.withhashes(self.attachments)
         check_list = deque(maxlen=10)
@@ -105,7 +111,7 @@ class TestAttachments(unittest.TestCase):
 
     def test_run(self):
         t = MailAttachments.withhashes(self.attachments)
-        t()
+        t(filtercontenttypes=False, intelligence=False)
 
         for i in t:
             self.assertIn("extension", i)
@@ -134,13 +140,13 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(t.key2, "value2")
         self.assertEqual(len(t), 1)
 
-        t()
+        t(filtercontenttypes=False, intelligence=False)
         t.removeall()
         self.assertEqual(len(t), 0)
 
     def test_filenamestext(self):
         t = MailAttachments.withhashes(self.attachments)
-        t.run()
+        t.run(filtercontenttypes=False, intelligence=False)
         text = t.filenamestext()
         self.assertIsNotNone(text)
         self.assertNotIsInstance(text, list)
@@ -150,7 +156,7 @@ class TestAttachments(unittest.TestCase):
 
     def test_payloadstext(self):
         t = MailAttachments.withhashes(self.attachments_thug)
-        t.run()
+        t.run(filtercontenttypes=False, intelligence=False)
         text = t.payloadstext()
         self.assertIsNotNone(text)
         self.assertNotIsInstance(text, list)
@@ -170,19 +176,19 @@ class TestAttachments(unittest.TestCase):
 
     def test_popcontenttype(self):
         t = MailAttachments.withhashes(self.attachments)
-        t()
+        t(filtercontenttypes=False, intelligence=False)
         self.assertEqual(len(t), 1)
         t.popcontenttype("application/zip")
         self.assertEqual(len(t), 0)
 
         t = MailAttachments.withhashes(self.attachments)
-        t()
+        t(filtercontenttypes=False, intelligence=False)
         self.assertEqual(len(t[0]["files"]), 1)
         t.popcontenttype("application/x-dosexec")
         self.assertEqual(len(t[0]["files"]), 0)
 
         t = MailAttachments.withhashes(self.attachments)
-        t()
+        t(filtercontenttypes=False, intelligence=False)
         t.popcontenttype("application/fake")
         self.assertEqual(len(t), 1)
         self.assertEqual(len(t[0]["files"]), 1)
@@ -201,38 +207,32 @@ class TestAttachments(unittest.TestCase):
         self.assertIn("application/zip", t.filter_cont_types)
 
         self.assertEqual(len(t), 1)
-        t()
+        t(intelligence=False)
         self.assertEqual(len(t), 0)
 
         t.extend(self.attachments)
         parameters = {"filter_cont_types": ["application/x-dosexec"]}
         t.reload(**parameters)
-        t()
+        t(intelligence=False)
         self.assertEqual(len(t), 1)
         self.assertEqual(len(t[0]["files"]), 0)
 
-    def test_tika(self):
+    def test_post_processing(self):
         t = MailAttachments.withhashes(self.attachments)
         parameters = {
             "tika": {"enabled": True,
                      "path_jar": "/opt/tika/tika-app-1.14.jar",
                      "memory_allocation": None},
-            "tika_whitelist_cont_types": ["application/zip"]}
+            "tika_whitelist_cont_types": ["application/zip"],
+            "virustotal": {"enabled": False},
+            "thug": {"enabled": False},
+        }
 
         t.reload(**parameters)
-        t.run()
+        t.run(filtercontenttypes=False)
         for i in t:
             self.assertIn("tika", i)
 
-    def test_virustotal(self):
-        pass
-
-    def test_thug(self):
-        pass
-
-    def test_post_processing(self):
-        pass
-
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

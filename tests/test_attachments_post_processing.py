@@ -25,10 +25,15 @@ from mailparser import MailParser
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
+mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 sys.path.append(root)
-from src.modules.attachments import (MailAttachments, virustotal, tika)
+from src.modules.attachments import MailAttachments
 
-API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+try:
+    API_FILE = "/tmp/virustotal.api"
+    API_KEY = open(API_FILE).read().strip()
+except IOError:
+    raise IOError("Put VirusTotal api key in {!r} file".format(API_FILE))
 
 
 class TestPostProcessing(unittest.TestCase):
@@ -40,12 +45,17 @@ class TestPostProcessing(unittest.TestCase):
         p.parse_from_file(mail)
         self.attachments = p.attachments_list
 
+        p.parse_from_file(mail_thug)
+        self.attachments_thug = p.attachments_list
+
     def test_virustotal(self):
         """Test add VirusTotal processing."""
 
+        from src.modules.attachments import virustotal
+
         conf = {"enabled": True, "api_key": API_KEY}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False)
+        attachments(intelligence=False, filtercontenttypes=False)
         virustotal(conf, attachments)
 
         # VirusTotal analysis
@@ -64,13 +74,15 @@ class TestPostProcessing(unittest.TestCase):
     def test_tika(self):
         """Test add Tika processing."""
 
+        from src.modules.attachments import tika
+
         # Complete parameters
         conf = {"enabled": True,
                 "path_jar": "/opt/tika/tika-app-1.14.jar",
                 "memory_allocation": None,
                 "whitelist_cont_types": ["application/zip"]}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False)
+        attachments(intelligence=False, filtercontenttypes=False)
         tika(conf, attachments)
 
         for i in attachments:
@@ -84,7 +96,7 @@ class TestPostProcessing(unittest.TestCase):
         # tika disabled
         conf["enabled"] = False
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments()
+        attachments(intelligence=False, filtercontenttypes=False)
         tika(conf, attachments)
 
         for i in attachments:
@@ -105,6 +117,56 @@ class TestPostProcessing(unittest.TestCase):
             attachments = MailAttachments.withhashes(self.attachments)
             tika(conf_inner, attachments)
 
+    @unittest.skip("Thug unittest to be do")
+    def test_thug(self):
+        """Test add Thug processing."""
+
+        from src.modules.attachments import thug
+
+        # Complete parameters
+        conf = {"enabled": True,
+                "extensions": [".html", ".js", ".jse"],
+                "user_agents": ["win7ie90"],
+                "referer": "http://google.com/"}
+        attachments = MailAttachments.withhashes(self.attachments_thug)
+        attachments(intelligence=False, filtercontenttypes=False)
+
+        first_attachment = attachments[0]
+        self.assertNotIn('thug', first_attachment)
+
+        thug(conf, attachments)
+
+        # Thug attachment
+        thug_attachment = first_attachment['files'][0]
+        self.assertIn('thug', thug_attachment)
+
+        thug_analysis = thug_attachment['thug']
+        self.assertIsInstance(thug_analysis, list)
+        self.assertEqual(len(thug_analysis), 2)
+
+        first_thug_analysis = thug_analysis[0]
+        self.assertIn('files', first_thug_analysis)
+        self.assertIn('code', first_thug_analysis)
+        self.assertIn('exploits', first_thug_analysis)
+        self.assertIn('url', first_thug_analysis)
+        self.assertIn('timestamp', first_thug_analysis)
+        self.assertIn('locations', first_thug_analysis)
+        self.assertIn('connections', first_thug_analysis)
+        self.assertIn('logtype', first_thug_analysis)
+        self.assertIn('behavior', first_thug_analysis)
+        self.assertIn('thug', first_thug_analysis)
+        self.assertIn('classifiers', first_thug_analysis)
+        self.assertEqual(first_thug_analysis['files'][0]['sha1'],
+                         "e2835a38f50d287c65b0e53b4787d41095a3514f")
+        self.assertEqual(first_thug_analysis['files'][0]['md5'],
+                         "b83c7ac97c22ce248b09f4388c130df0")
+        self.assertEqual(
+            first_thug_analysis['thug']['personality']['useragent'],
+            'win7ie90')
+        self.assertEqual(
+            first_thug_analysis['thug']['options']['referer'],
+            'http://www.google.com/')
+
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
