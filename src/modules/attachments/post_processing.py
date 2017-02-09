@@ -113,4 +113,4 @@ def thug(conf, attachments):
 
             for i in a.get("files", []):
                 if i["extension"] in conf["extensions"]:
-                    i["thug"] = thug.run(i)
+                    i["thug"] = thug.run(i, **conf)
