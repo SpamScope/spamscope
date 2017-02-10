@@ -30,10 +30,18 @@ sys.path.append(root)
 from src.modules.attachments import MailAttachments
 
 try:
-    API_FILE = "/tmp/virustotal.api"
-    API_KEY = open(API_FILE).read().strip()
-except IOError:
-    raise IOError("Put VirusTotal api key in {!r} file".format(API_FILE))
+    from collections import ChainMap
+except ImportError:
+    from chainmap import ChainMap
+
+# Set environment variables to change defaults:
+# Example export VIRUSTOTAL_APIKEY=your_api_key
+
+DEFAULTS = {"TIKA_APP_PATH": "/opt/tika/tika-app-1.14.jar",
+            "VIRUSTOTAL_APIKEY": "no_api_key",
+            "THUG_ENABLED": "False"}
+
+OPTIONS = ChainMap(os.environ, DEFAULTS)
 
 
 class TestPostProcessing(unittest.TestCase):
@@ -41,6 +49,7 @@ class TestPostProcessing(unittest.TestCase):
     def setUp(self):
 
         # Init
+
         p = MailParser()
         p.parse_from_file(mail)
         self.attachments = p.attachments_list
@@ -53,7 +62,8 @@ class TestPostProcessing(unittest.TestCase):
 
         from src.modules.attachments import virustotal
 
-        conf = {"enabled": True, "api_key": API_KEY}
+        conf = {"enabled": True,
+                "api_key": OPTIONS["VIRUSTOTAL_APIKEY"]}
         attachments = MailAttachments.withhashes(self.attachments)
         attachments(intelligence=False, filtercontenttypes=False)
         virustotal(conf, attachments)
@@ -78,7 +88,7 @@ class TestPostProcessing(unittest.TestCase):
 
         # Complete parameters
         conf = {"enabled": True,
-                "path_jar": "/opt/tika/tika-app-1.14.jar",
+                "path_jar": OPTIONS["TIKA_APP_PATH"],
                 "memory_allocation": None,
                 "whitelist_cont_types": ["application/zip"]}
         attachments = MailAttachments.withhashes(self.attachments)
@@ -112,12 +122,14 @@ class TestPostProcessing(unittest.TestCase):
         # attachments a key of conf
         with self.assertRaises(KeyError):
             conf_inner = {"enabled": True,
-                          "path_jar": "/opt/tika/tika-app-1.14.jar",
+                          "path_jar": OPTIONS["TIKA_APP_PATH"],
                           "memory_allocation": None}
             attachments = MailAttachments.withhashes(self.attachments)
             tika(conf_inner, attachments)
 
-    @unittest.skip("Thug unittest to be do")
+    @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False",
+                     "Thug test skipped: "
+                     "set env variable 'THUG_ENABLED' to True")
     def test_thug(self):
         """Test add Thug processing."""
 
@@ -126,8 +138,8 @@ class TestPostProcessing(unittest.TestCase):
         # Complete parameters
         conf = {"enabled": True,
                 "extensions": [".html", ".js", ".jse"],
-                "user_agents": ["win7ie90"],
-                "referer": "http://google.com/"}
+                "user_agents": ["win7ie90", "winxpie80"],
+                "referer": "http://www.google.com/"}
         attachments = MailAttachments.withhashes(self.attachments_thug)
         attachments(intelligence=False, filtercontenttypes=False)
 

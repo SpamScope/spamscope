@@ -30,7 +30,7 @@ sys.path.append(root)
 import src.modules.utils as utils
 from mailparser import MailParser
 from pyfaup.faup import Faup
-from src.modules.attachments import MailAttachments
+from src.modules.attachments import MailAttachments, fingerprints
 from src.modules import ImproperlyConfigured
 
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
@@ -57,7 +57,22 @@ class TestSearchText(unittest.TestCase):
             'elastic_type_attach': "spamscope"}
 
     def test_write_payload(self):
-        pass
+        with open(text_files) as f:
+            payload = f.read()
+        sha1_origin = fingerprints(payload).sha1
+
+        file_path = utils.write_payload(payload.encode("base64"), ".txt")
+        self.assertEqual(os.path.splitext(file_path)[-1], ".txt")
+
+        with open(file_path) as f:
+            payload = f.read()
+        sha1_clone = fingerprints(payload).sha1
+
+        self.assertEqual(sha1_origin, sha1_clone)
+        self.assertTrue(os.path.exists(file_path))
+
+        os.remove(file_path)
+        self.assertFalse(os.path.exists(file_path))
 
     def test_search_words_in_text(self):
         with open(text_files) as f:
