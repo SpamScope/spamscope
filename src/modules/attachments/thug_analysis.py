@@ -21,7 +21,11 @@ import logging
 import os
 import tempfile
 
-from modules import write_payload
+try:
+    from modules import write_payload
+except ImportError:
+    from ...modules import write_payload
+
 from .exceptions import ThugAnalysisFailed
 
 try:

@@ -22,6 +22,33 @@ from __future__ import absolute_import, print_function, unicode_literals
 processors = set()
 
 
+"""
+This module conteins all post processors for mail attachments
+(i.e.: VirusTotal, Thug, etc.).
+
+The skeleton of function must be like this:
+
+    @register(active=True)
+    def processor(conf, attachments):
+        if conf["enabled"]:
+            from module_x import y # import custom object for this processor
+
+            for a in attachments:
+                # check if sample is filtered
+                if not a.get("is_filtered", False):
+                    pass
+
+The function must be have the same name of configuration section in
+conf/spamscope.yml --> attachments --> processor
+
+The results will be added on attachments given as input.
+
+Don't forget decorator @register()
+
+You don't need anything else.
+"""
+
+
 def register(active=True):
     """Add processor to set of processors.
     From the best Python book Fluent Python (https://github.com/fluentpython).
@@ -57,9 +84,10 @@ def tika(conf, attachments):
                        memory_allocation=conf["memory_allocation"])
 
         for a in attachments:
-            if a["Content-Type"] in conf["whitelist_cont_types"]:
-                a["tika"] = tika.extract_all_content(
-                    payload=a["payload"], convert_to_obj=True)
+            if not a.get("is_filtered", False):
+                if a["Content-Type"] in conf["whitelist_cont_types"]:
+                    a["tika"] = tika.extract_all_content(
+                        payload=a["payload"], convert_to_obj=True)
 
 
 @register(active=True)
@@ -79,19 +107,20 @@ def virustotal(conf, attachments):
         vt = VirusTotalPublicApi(conf["api_key"])
 
         for a in attachments:
-            result = vt.get_file_report(a["sha1"])
+            if not a.get("is_filtered", False):
+                result = vt.get_file_report(a["sha1"])
 
-            if result:
-                a["virustotal"] = result
+                if result:
+                    a["virustotal"] = result
 
-            for i in a.get("files", []):
-                i_result = vt.get_file_report(i["sha1"])
+                for i in a.get("files", []):
+                    i_result = vt.get_file_report(i["sha1"])
 
-                if i_result:
-                    i["virustotal"] = i_result
+                    if i_result:
+                        i["virustotal"] = i_result
 
 
-@register(active=False)
+@register(active=True)
 def thug(conf, attachments):
     """This method updates the attachments results
     with the Thug reports.
@@ -108,9 +137,10 @@ def thug(conf, attachments):
         thug = ThugAnalysis()
 
         for a in attachments:
-            if a["extension"] in conf["extensions"]:
-                a["thug"] = thug.run(a, **conf)
+            if not a.get("is_filtered", False):
+                if a["extension"] in conf["extensions"]:
+                    a["thug"] = thug.run(a, **conf)
 
-            for i in a.get("files", []):
-                if i["extension"] in conf["extensions"]:
-                    i["thug"] = thug.run(i, **conf)
+                for i in a.get("files", []):
+                    if i["extension"] in conf["extensions"]:
+                        i["thug"] = thug.run(i, **conf)
