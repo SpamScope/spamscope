@@ -9,7 +9,7 @@ python-magic==0.4.12
 redis==2.10.5
 simplejson==3.10.0
 six==1.10.0
-ssdeep==3.1.1
+ssdeep==3.2
 streamparse==3.4.0
 tika-app==0.5.5
 virustotal-api==1.1.2
