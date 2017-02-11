@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/logo/spamscope.jpg"/></p>
+![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 
 
 ## Overview
