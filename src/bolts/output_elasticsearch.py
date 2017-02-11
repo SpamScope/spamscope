@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -15,10 +18,8 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
-from modules.utils import reformat_output
-from elasticsearch import Elasticsearch
-from elasticsearch import helpers
+from modules import AbstractBolt, reformat_output
+from elasticsearch import Elasticsearch, helpers
 
 
 class OutputElasticsearch(AbstractBolt):
@@ -37,18 +38,18 @@ class OutputElasticsearch(AbstractBolt):
 
     def _load_settings(self):
         # Elasticsearch parameters
-        servers = self.conf['servers']
-        self._flush_size = servers['flush_size']
+        servers = self.conf["servers"]
+        self._flush_size = servers["flush_size"]
 
         # Parameters for reformat_output function
         self._parameters = {
-            "elastic_index_mail": servers['index.prefix.mails'],
-            "elastic_type_mail": servers['doc.type.mails'],
-            "elastic_index_attach": servers['index.prefix.attachments'],
-            "elastic_type_attach": servers['doc.type.attachments']}
+            "elastic_index_mail": servers["index.prefix.mails"],
+            "elastic_type_mail": servers["doc.type.mails"],
+            "elastic_index_attach": servers["index.prefix.attachments"],
+            "elastic_type_attach": servers["doc.type.attachments"]}
 
         # Elasticsearch object
-        self._es = Elasticsearch(hosts=servers['hosts'])
+        self._es = Elasticsearch(hosts=servers["hosts"])
 
     def flush(self):
         helpers.bulk(self._es, self._mails)
@@ -77,10 +78,10 @@ class OutputElasticsearch(AbstractBolt):
         """Every freq seconds flush messages. """
         super(OutputElasticsearch, self).process_tick(freq)
 
+        # Reload settings
+        self._load_settings()
+
         # Flush mails
         if self._mails or self._attachments:
             self.log("Flush mails/attachments in Elasticsearch after tick")
             self.flush()
-
-        # Reload settings
-        self._load_settings()

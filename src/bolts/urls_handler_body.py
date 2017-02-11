@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -15,14 +18,11 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractUrlsHandlerBolt
+from modules import AbstractUrlsHandlerBolt
 
 
 class UrlsHandlerBody(AbstractUrlsHandlerBolt):
     outputs = ['sha256_random', 'with_urls', 'urls']
-
-    def initialize(self, stormconf, context):
-        super(UrlsHandlerBody, self).initialize(stormconf, context)
 
     def process(self, tup):
         sha256_random = tup.values[0]
@@ -32,6 +32,6 @@ class UrlsHandlerBody(AbstractUrlsHandlerBolt):
         urls_json = None
 
         if not is_filtered:
-            with_urls, urls_json = self._extract_urls(body, False)
+            with_urls, urls_json = self._extract_urls(body)
 
         self.emit([sha256_random, with_urls, urls_json])

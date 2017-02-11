@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -19,70 +22,73 @@ from streamparse.bolt import Bolt
 from modules.bitmap import PhishingBitMap
 
 
+def reformat_urls(urls):
+    # Change urls format to fix Elasticsearch issue with dot '.'
+    new_urls = []
+
+    for v in urls.values():
+        new_urls.extend(v)
+
+    return new_urls
+
+
 class JsonMaker(Bolt):
     outputs = ['sha256_random', 'json']
 
     def initialize(self, stormconf, context):
         self._mails = {}
-        self.input_bolts = set(context['source->stream->grouping'].keys())
+        self.input_bolts = set(context["source->stream->grouping"].keys())
 
         # Phishing bitmap
         self._phishing_bitmap = PhishingBitMap()
 
     def _compose_output(self, greedy_data):
+
         # Tokenizer
-        mail = greedy_data['tokenizer'][1]
-        mail['is_filtered'] = greedy_data['tokenizer'][2]
+        mail = greedy_data["tokenizer"][1]
+        mail["is_filtered"] = greedy_data["tokenizer"][2]
+
+        # Attachments
+        mail["with_attachments"] = greedy_data["attachments"][1]
+
+        if mail["with_attachments"]:
+            mail["attachments"] = greedy_data["attachments"][2]
+
+        # Urls in attachments:
+        # Add urls attachments because you can have more differents attachments
+        # in more mails with same hash
+        mail["with_urls_attachments"] = \
+            greedy_data["urls-handler-attachments"][1]
+
+        if mail["with_urls_attachments"]:
+            urls = greedy_data["urls-handler-attachments"][2]
+            mail["urls_attachments"] = reformat_urls(urls)
 
         # Add intelligence output only if mail is not filtered
-        if not mail['is_filtered']:
+        if not mail["is_filtered"]:
 
-            # Phishing
-            phishing_score = greedy_data['phishing'][2]
-            mail['with_phishing'] = greedy_data['phishing'][1]
-            mail['phishing_score'] = phishing_score
+            # Phishing:
+            # we need of a complete mail for a complete score, so
+            # if mail is filtered we can't compose score
+            phishing_score = greedy_data["phishing"][2]
+            mail["with_phishing"] = greedy_data["phishing"][1]
+            mail["phishing_score"] = phishing_score
 
             if phishing_score:
                 self._phishing_bitmap.score = phishing_score
-
-                mail['targets'] = greedy_data['phishing'][3]
-                mail['phishing_score_expanded'] = \
+                mail["targets"] = greedy_data["phishing"][3]
+                mail["phishing_score_expanded"] = \
                     self._phishing_bitmap.score_properties
 
             # Forms
-            mail['with_forms'] = greedy_data['forms'][1]
+            mail["with_forms"] = greedy_data["forms"][1]
 
             # Urls in body
-            mail['with_urls_body'] = greedy_data['urls-handler-body'][1]
-            if mail['with_urls_body']:
+            mail["with_urls_body"] = greedy_data["urls-handler-body"][1]
 
-                # Change urls format to fix Elasticsearch issue with dot '.'
-                reformat_urls = []
-                urls = greedy_data['urls-handler-body'][2]
-
-                for v in urls.values():
-                    reformat_urls.extend(v)
-
-                mail['urls_body'] = reformat_urls
-
-            # Urls in attachments
-            mail['with_urls_attachments'] = \
-                greedy_data['urls-handler-attachments'][1]
-            if mail['with_urls_attachments']:
-
-                # Change urls format to fix Elasticsearch issue with dot '.'
-                reformat_urls = []
-                urls = greedy_data['urls-handler-attachments'][2]
-
-                for v in urls.values():
-                    reformat_urls.extend(v)
-
-                mail['urls_attachments'] = reformat_urls
-
-        # Attachments
-        mail['with_attachments'] = greedy_data['attachments'][1]
-        if mail['with_attachments']:
-            mail['attachments'] = greedy_data['attachments'][2]
+            if mail["with_urls_body"]:
+                urls = greedy_data["urls-handler-body"][2]
+                mail["urls_body"] = reformat_urls(urls)
 
         return mail
 
@@ -91,17 +97,10 @@ class JsonMaker(Bolt):
         sha256_random = tup.values[0]
         values = tup.values
 
-        if self._mails.get(sha256_random, None):
-            self._mails[sha256_random][bolt] = values
-        else:
-            self._mails[sha256_random] = {bolt: values}
-
+        self._mails.setdefault(sha256_random, {})[bolt] = values
         diff = self.input_bolts - set(self._mails[sha256_random].keys())
+
         if not diff:
-            output_json = self._compose_output(
-                self._mails.pop(sha256_random))
-
-            self.log("New JSON for mail '{}'".format(
-                sha256_random), "debug")
-
+            output_json = self._compose_output(self._mails.pop(sha256_random))
+            self.log("New JSON for mail {!r}".format(sha256_random), "debug")
             self.emit([sha256_random, output_json])

@@ -3,16 +3,10 @@
 
 
 from streamparse import Grouping, Topology
-
-from bolts.attachments import Attachments
-from bolts.forms import Forms
-from bolts.json_maker import JsonMaker
-from bolts.output_debug import OutputDebug
-from bolts.phishing import Phishing
-from bolts.tokenizer import Tokenizer
-from bolts.urls_handler_attachments import UrlsHandlerAttachments
-from bolts.urls_handler_body import UrlsHandlerBody
-from spouts.files_mails import FilesMailSpout
+from bolts import (Attachments, Forms, JsonMaker, OutputDebug,
+                   Phishing, Tokenizer, UrlsHandlerAttachments,
+                   UrlsHandlerBody)
+from spouts import FilesMailSpout
 
 
 class OutputDebugTopology(Topology):

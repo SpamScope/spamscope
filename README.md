@@ -1,10 +1,10 @@
-<p align="center"><img src="docs/logo/spamscope.jpg"/></p>
+![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 
 
 ## Overview
 SpamScope is an advanced spam analysis tool that use [Apache Storm](http://storm.apache.org/) with [streamparse](https://github.com/Parsely/streamparse) to process a stream of mails. 
 
-It's possible to analyze about 5 milions of mails (without Apache Tika analisys) for day with a 4 cores server and 4 GB of RAM. If you enable Apache Tika, you can analyze about 1 milion of mails.
+It's possible to analyze more than 5 milions of mails (without attachments processors) for day with a 4 cores server and 4 GB of RAM. 
 
 ![Schema topology](docs/images/schema_topology.png?raw=true "Schema topology")
 
@@ -22,6 +22,8 @@ With streamparse tecnology you can build your topology in Python, add and/or rem
 
 ### Apache 2 Open Source License
 SpamScope can be downloaded, used, and modified free of charge. It is available under the Apache 2 license.
+
+
 [![Donate](https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2)
 
 
@@ -78,6 +80,9 @@ You can see a complete SpamScope report with Thug analysis [here](https://goo.gl
 
 ### VirusTotal (optional)
 It's possible add to results (for mail attachments) VirusTotal report. You need a private API key.
+
+### Elasticsearch (optional)
+It's possible to store the results in Elasticsearch. In this case you should install `elasticsearch` package.
 
 ### Redis (optional)
 It's possible to store the results in Redis. In this case you should install `redis` package.
@@ -167,11 +172,25 @@ For more details you can refer [here](http://streamparse.readthedocs.io/en/stabl
 
 
 
+## Unittest
+SpamScope comes with unittests for each its modules. In bolts and spouts there are no special features, all intelligence is in external modules.
+All unittests are in `tests` folder.
+
+To have complete tests you should set the followings variables enviroment:
+
+```
+$ export THUG_ENABLED=True
+$ export VIRUSTOTAL_APIKEY=only_your_own_virustotal_api
+```
+
+
+
 ## Docker image
 It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
- - [debug](https://hub.docker.com/r/fmantuano/spamscope-debug/)
- - [elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
+ - [Debug](https://hub.docker.com/r/fmantuano/spamscope-debug/)
+ - [Elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
+ - [Redis](https://hub.docker.com/r/fmantuano/spamscope-redis/)
 
 
 

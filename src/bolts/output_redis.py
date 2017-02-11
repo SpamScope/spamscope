@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -15,9 +18,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
-from modules.redis_client import Redis
-from modules.utils import reformat_output
+from modules import AbstractBolt, reformat_output, Redis
 
 
 class OutputRedis(AbstractBolt):
@@ -36,20 +37,20 @@ class OutputRedis(AbstractBolt):
 
     def _load_settings(self):
         # Redis parameters
-        servers = self.conf['servers']
-        self._flush_size = servers['flush_size']
-        self._queue_mails = servers['queue_mails']
-        self._queue_attachments = servers['queue_attachments']
+        servers = self.conf["servers"]
+        self._flush_size = servers["flush_size"]
+        self._queue_mails = servers["queue_mails"]
+        self._queue_attachments = servers["queue_attachments"]
 
         # Redis class
         self._redis_client = Redis(
-            hosts=servers['hosts'],
-            shuffle_hosts=servers['shuffle_hosts'],
-            port=servers['port'],
-            db=servers['db'],
-            password=servers['password'],
-            reconnect_interval=servers['reconnect_interval'],
-            max_retry=servers['max_retry'])
+            hosts=servers["hosts"],
+            shuffle_hosts=servers["shuffle_hosts"],
+            port=servers["port"],
+            db=servers["db"],
+            password=servers["password"],
+            reconnect_interval=servers["reconnect_interval"],
+            max_retry=servers["max_retry"])
 
     def flush(self):
         self._redis_client.push_messages(

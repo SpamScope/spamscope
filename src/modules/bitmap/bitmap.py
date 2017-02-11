@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -50,8 +53,7 @@ class BitMap(object):
         self.define_bitmap()
         if not hasattr(self, "_bitmap"):
             raise BitMapNotDefined(
-                "Bitmap for {} not defined.".format(self.map_name)
-            )
+                "Bitmap for {} not defined.".format(self.map_name))
 
         self._valide_bitmap()
         self.reset_score()
@@ -99,7 +101,7 @@ class BitMap(object):
         for p in args:
             if p not in self.bitmap:
                 raise PropertyDoesNotExists(
-                    "Property '{}' does not exists".format(p))
+                    "Property {!r} does not exists".format(p))
 
             value = self.bitmap.get(p)
 
@@ -112,7 +114,7 @@ class BitMap(object):
         for p in args:
             if p not in self.bitmap:
                 raise PropertyDoesNotExists(
-                    "Property '{}' does not exists".format(p))
+                    "Property {!r} does not exists".format(p))
 
             value = self.bitmap.get(p)
 
@@ -126,7 +128,7 @@ class BitMap(object):
         for p in args:
             if p not in self.bitmap:
                 raise PropertyDoesNotExists(
-                    "Property '{}' does not exists".format(p))
+                    "Property {!r} does not exists".format(p))
 
             value = self.bitmap.get(p)
 
@@ -146,7 +148,7 @@ class BitMap(object):
         for score in args:
             if not isinstance(score, int):
                 raise ScoreNotInteger(
-                    "Score '{}' is not a integer".format(score))
+                    "Score {!r} is not a integer".format(score))
             score_sum |= (1 << score)
 
         return score_sum

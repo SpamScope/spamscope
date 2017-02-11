@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -15,7 +18,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
-from bolts.abstracts import AbstractBolt
+from modules import AbstractBolt
 
 import os
 
@@ -30,19 +33,16 @@ class OutputDebug(AbstractBolt):
 
     def initialize(self, stormconf, context):
         super(OutputDebug, self).initialize(stormconf, context)
+        self._json_indent = self.conf["json.indent"]
+        self._output_path = self.conf["output.path"]
 
-        self._json_indent = self.conf['json.indent']
-
-        self._output_path = self.conf['output.path']
         if not os.path.exists(self._output_path):
             os.makedirs(self._output_path)
 
     def process(self, tup):
         sha256_random = tup.values[0]
-        mail = json.dumps(
-            tup.values[1],
-            ensure_ascii=False,
-            indent=self._json_indent)
+        mail = json.dumps(tup.values[1], ensure_ascii=False,
+                          indent=self._json_indent)
 
         output = os.path.join(self._output_path, "{}.json".format(
             sha256_random))

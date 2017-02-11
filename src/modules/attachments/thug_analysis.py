@@ -18,13 +18,21 @@ limitations under the License.
 """
 
 import logging
+import os
 import tempfile
+
+try:
+    from modules import write_payload
+except ImportError:
+    from ...modules import write_payload
+
+from .exceptions import ThugAnalysisFailed
 
 try:
     from thug.ThugAPI import ThugAPI
 except ImportError:
     raise ImportError(
-        "Thug is not installed. Follow these instructions:" +
+        "Thug is not installed. Follow these instructions:"
         " http://buffer.github.io/thug/doc/build.html")
 
 try:
@@ -53,6 +61,29 @@ class ThugAnalysis(ThugAPI):
 
         report = json.loads(m(tempfile.gettempdir()))
         return report
+
+    def run(self, attachment, **conf):
+        results = []
+        local_file = write_payload(attachment["payload"],
+                                   attachment["extension"])
+
+        # Thug analysis
+        for u in conf["user_agents"]:
+            try:
+                analysis = self.analyze(local_file, u, conf["referer"])
+                results.append(analysis)
+            except:
+                msg = "Thug analysis failed for sample sha1 {!r}".format(
+                    attachment["sha1"])
+                log.error(msg)
+                raise ThugAnalysisFailed(msg)
+        else:
+            try:
+                os.remove(local_file)
+            except OSError:
+                pass
+
+            return results
 
     def analyze(self, local_file, useragent="win7ie90",
                 referer="http://www.google.com/"):

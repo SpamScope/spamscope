@@ -20,12 +20,16 @@ limitations under the License.
 from __future__ import unicode_literals
 import copy
 import datetime
-import hashlib
 import logging
 import os
-import ssdeep
+import re
+import six
+import tempfile
 import yaml
 from .exceptions import ImproperlyConfigured
+
+RE_URL = re.compile(r'((?:(?:ht|f)tp(?:s?)\:\/\/)'
+                    r'(?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+)', re.I)
 
 log = logging.getLogger(__name__)
 
@@ -60,31 +64,77 @@ class MailItem(object):
         return 0
 
 
-def fingerprints(data):
-    # md5
-    md5 = hashlib.md5()
-    md5.update(data)
-    md5 = md5.hexdigest()
+def write_payload(payload, extension):
+    """This method writes the attachment payload on file system in temporary file.
 
-    # sha1
-    sha1 = hashlib.sha1()
-    sha1.update(data)
-    sha1 = sha1.hexdigest()
+    Args:
+        payload (string): binary payload string in base64 to write on disk
+        extension (string): file extension. Example '.js'
 
-    # sha256
-    sha256 = hashlib.sha256()
-    sha256.update(data)
-    sha256 = sha256.hexdigest()
+    Returns:
+        Local file path of payload
+    """
 
-    # sha512
-    sha512 = hashlib.sha512()
-    sha512.update(data)
-    sha512 = sha512.hexdigest()
+    temp = tempfile.mkstemp()[1] + extension
 
-    # ssdeep
-    ssdeep_ = ssdeep.hash(data)
+    with open(temp, 'wb') as f:
+        f.write(payload.decode('base64'))
 
-    return md5, sha1, sha256, sha512, ssdeep_
+    return temp
+
+
+def urls_extractor(faup_parser, text):
+    """This function extract all url http(s) and ftp(s) from text.
+
+    Args:
+        text (string): text string with urls to extract
+
+    Returns:
+        Return a dict, with a key for every second-level domain and
+        value a list of disassembled urls (output Faup tool).
+
+        Example disassembled url https://drive.google.com/drive/my-drive:
+
+            {
+                'domain': 'google.com',
+                'domain_without_tld': 'google',
+                'fragment': None,
+                'host': 'drive.google.com',
+                'port': None,
+                'query_string': None,
+                'resource_path': '/drive/my-drive',
+                'scheme': 'https',
+                'subdomain': 'drive',
+                'tld': 'com',
+                'url': 'https://drive.google.com/drive/my-drive'
+            }
+    """
+
+    text = six.text_type(text)
+    results = {}
+
+    for i in set(match.group().strip() for match in RE_URL.finditer(text)):
+        faup_parser.decode(i)
+        tokens = faup_parser.get()
+        results.setdefault(tokens["domain"], []).append(tokens)
+    else:
+        return results
+
+
+def search_words_given_key(text, key_value):
+    """Given a key - value tuple return the key if the value in text.
+
+    Args:
+        text (string): text to check
+        key_value (tuple): key is a string and value a list
+
+    Returns:
+        key if value in text
+    """
+    key, value = key_value
+
+    if search_words_in_text(text, value):
+        return key
 
 
 def search_words_in_text(text, keywords):
@@ -100,16 +150,10 @@ def search_words_in_text(text, keywords):
     """
 
     text = text.lower()
+    keywords = {k.lower() for k in keywords}
 
     for line in keywords:
-        count = 0
-        words = line.lower().split()
-
-        for w in words:
-            if w in text:
-                count += 1
-
-        if count == len(words):
+        if all(True if w in text else False for w in line.split()):
             return True
 
     return False
@@ -123,6 +167,43 @@ def load_config(config_file):
         message = "Config file {} not loaded".format(config_file)
         log.exception(message)
         raise ImproperlyConfigured(message)
+
+
+def load_keywords_list(obj_paths, lower=True):
+    keywords = set()
+
+    for k, v in obj_paths.iteritems():
+        temp = load_config(v)
+
+        if not isinstance(temp, list):
+            raise ImproperlyConfigured("List {!r} not valid".format(k))
+
+        if lower:
+            keywords |= {i.lower() for i in temp}
+        else:
+            keywords |= set(temp)
+
+    return keywords
+
+
+def load_keywords_dict(obj_paths, lower=True):
+    keywords = {}
+
+    for k, v in obj_paths.iteritems():
+        temp = load_config(v)
+
+        if not isinstance(temp, dict):
+            raise ImproperlyConfigured("List {!r} not valid".format(k))
+
+        keywords.update(temp)
+
+    if lower:
+        keywords_lower = {}
+        for k, v in keywords.iteritems():
+            keywords_lower[k] = {i.lower() for i in v}
+        return keywords_lower
+
+    return keywords
 
 
 def reformat_output(mail=None, bolt=None, **kwargs):
@@ -148,7 +229,7 @@ def reformat_output(mail=None, bolt=None, **kwargs):
     """
 
     if bolt not in ('output-elasticsearch', 'output-redis'):
-        message = "Bolt '{}' not in list of permitted bolts".format(bolt)
+        message = "Bolt {!r} not in list of permitted bolts".format(bolt)
         log.exception(message)
         raise ImproperlyConfigured(message)
 
@@ -160,11 +241,11 @@ def reformat_output(mail=None, bolt=None, **kwargs):
             # Date for daily index
             try:
                 timestamp = datetime.datetime.strptime(
-                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S.%f")
+                    mail["analisys_date"], "%Y-%m-%dT%H:%M:%S.%f")
             except:
                 # Without microseconds
                 timestamp = datetime.datetime.strptime(
-                    mail['analisys_date'], "%Y-%m-%dT%H:%M:%S")
+                    mail["analisys_date"], "%Y-%m-%dT%H:%M:%S")
 
             mail_date = timestamp.strftime("%Y.%m.%d")
 
@@ -175,25 +256,25 @@ def reformat_output(mail=None, bolt=None, **kwargs):
 
         # Prepair attachments for bulk
         for i in raw_attachments:
-            i['is_archived'] = False
+            i["is_archived"] = False
 
             if bolt == "output-elasticsearch":
-                i['@timestamp'] = timestamp
-                i['_index'] = kwargs['elastic_index_attach'] + mail_date
-                i['_type'] = kwargs['elastic_type_attach']
-                i['type'] = kwargs['elastic_type_attach']
+                i["@timestamp"] = timestamp
+                i["_index"] = kwargs["elastic_index_attach"] + mail_date
+                i["_type"] = kwargs["elastic_type_attach"]
+                i["type"] = kwargs["elastic_type_attach"]
 
             for j in i.get("files", []):
                 f = copy.deepcopy(j)
 
                 # Prepair archived files
-                f['is_archived'] = True
+                f["is_archived"] = True
 
                 if bolt == "output-elasticsearch":
-                    f['@timestamp'] = timestamp
-                    f['_index'] = kwargs['elastic_index_attach'] + mail_date
-                    f['_type'] = kwargs['elastic_type_attach']
-                    f['type'] = kwargs['elastic_type_attach']
+                    f["@timestamp"] = timestamp
+                    f["_index"] = kwargs["elastic_index_attach"] + mail_date
+                    f["_type"] = kwargs["elastic_type_attach"]
+                    f["type"] = kwargs["elastic_type_attach"]
 
                 attachments.append(f)
 
@@ -220,9 +301,9 @@ def reformat_output(mail=None, bolt=None, **kwargs):
 
         # Prepair mail for bulk
         if bolt == "output-elasticsearch":
-            mail['@timestamp'] = timestamp
-            mail['_index'] = kwargs['elastic_index_mail'] + mail_date
-            mail['type'] = kwargs['elastic_type_mail']
-            mail['_type'] = kwargs['elastic_type_mail']
+            mail["@timestamp"] = timestamp
+            mail["_index"] = kwargs["elastic_index_mail"] + mail_date
+            mail["type"] = kwargs["elastic_type_mail"]
+            mail["_type"] = kwargs["elastic_type_mail"]
 
         return mail, attachments

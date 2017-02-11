@@ -14,20 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .exceptions import *
-from .sample_parser import SampleParser
-
-try:
-    from .thug_processing import ThugProcessing
-except ImportError:
-    pass
-
-try:
-    from .tika_processing import TikaProcessing
-except ImportError:
-    pass
-
-try:
-    from .virustotal_processing import VirusTotalProcessing
-except ImportError:
-    pass
+from .utils import *
+from .attachments import Attachments as MailAttachments
+from .post_processing import processors, tika, virustotal, thug

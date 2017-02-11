@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -14,29 +17,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-__all__ = ["Base64Error", "TempIOError", "InvalidAttachment",
-           "VirusTotalApiKeyInvalid", "InvalidContentTypes", "MissingArgument"]
-
-
-class Base64Error(ValueError):
-    pass
+__all__ = ["TempIOError", "ThugAnalysisFailed",
+           "HashError", "ContentTypeError"]
 
 
 class TempIOError(Exception):
     pass
 
 
-class InvalidAttachment(ValueError):
+class ThugAnalysisFailed(Exception):
     pass
 
 
-class VirusTotalApiKeyInvalid(ValueError):
+class HashError(IndexError):
     pass
 
 
-class InvalidContentTypes(ValueError):
-    pass
-
-
-class MissingArgument(ValueError):
+class ContentTypeError(IndexError):
     pass

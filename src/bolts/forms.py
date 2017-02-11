@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -33,6 +36,6 @@ class Forms(Bolt):
             results = tree.xpath('//form')
             if results:
                 with_form = True
-                self.log("Forms for mail '{}'".format(sha256_random))
+                self.log("Forms for mail {!r}".format(sha256_random))
 
         self.emit([sha256_random, with_form])
