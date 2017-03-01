@@ -54,4 +54,4 @@ class OutputElasticsearchTopology(Topology):
             urls_attachments: Grouping.fields('sha256_random')})
 
     output_elasticsearch = OutputElasticsearch.spec(
-        name="output-elasticsearch", inputs=[json], par=2)
+        name="output-elasticsearch", inputs=[json], par=1)
