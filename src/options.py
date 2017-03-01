@@ -3,7 +3,7 @@
 
 from os.path import join
 
-__version__ = "v1.4.0"
+__version__ = "v1.4.1"
 __configuration_path__ = "/etc/spamscope"
 
 __defaults__ = {
