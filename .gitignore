@@ -3,7 +3,10 @@
 .DS_Store
 .env
 .ropeproject
+SpamScope.egg-info/
 _build
 _resources
+build/
+dist/
 logs
 virtualenvs

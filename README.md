@@ -98,10 +98,11 @@ SpamScope will check on it to decide if mail/attachment is already analyzed or n
 
 
 ## Usage
-SpamScope comes with two topologies:
-   - spamscope_debug
-   - spamscope_elasticsearch
-   - spamscope_redis
+SpamScope comes with four topologies:
+   - debug
+   - elasticsearch
+   - redis
+   - testing
 
 and a general configuration file `spamscope.example.yml` in `conf/` folder.
 
