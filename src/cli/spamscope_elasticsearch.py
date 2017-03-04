@@ -38,7 +38,7 @@ log.setLevel(logging.INFO)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter(
-    "%(asctime)s - %(funcName)s - %(levelname)s - %(message)s")
+    "[%(asctime)s] [%(levelname)s] [%(funcName)s] %(message)s")
 ch.setFormatter(formatter)
 log.addHandler(ch)
 

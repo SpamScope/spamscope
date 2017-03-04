@@ -1,0 +1,9 @@
+{
+  "order": 10,
+  "template": "*",
+  "settings": {
+    "index.codec": "best_compression",
+    "index.number_of_replicas": 0,
+    "index.refresh_interval": "5s"
+  }
+}
