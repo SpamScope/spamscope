@@ -25,7 +25,7 @@ import sys
 import time
 
 from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import ConnectionError
+from elasticsearch.exceptions import ConnectionError, NotFoundError
 
 
 current = os.path.realpath(os.path.dirname(__file__))
@@ -125,7 +125,7 @@ def update_nr_replicas(client_host, max_retry, nr_replicas, index):
             log.info("Updating replicas done")
             return
 
-        except ConnectionError:
+        except (ConnectionError, NotFoundError):
             log.warning(
                 "Updating replicas failed. Waiting for {} sec".format(i))
             time.sleep(i)
@@ -145,7 +145,7 @@ def update_template(client_host, max_retry, template_path, template_name):
             log.info("Updating template done")
             return
 
-        except ConnectionError:
+        except (ConnectionError, NotFoundError):
             log.warning(
                 "Updating template failed. Waiting for {} sec".format(i))
             time.sleep(i)
