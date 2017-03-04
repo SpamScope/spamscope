@@ -24,9 +24,6 @@ from setuptools import setup, find_packages
 
 current = os.path.realpath(os.path.dirname(__file__))
 
-with open(os.path.join(current, 'requirements.txt')) as f:
-    requires = f.read().splitlines()
-
 __version__ = runpy.run_path(
     os.path.join(current, "src", "options.py"))["__version__"]
 
@@ -52,15 +49,7 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.0",
-        "Programming Language :: Python :: 3.1",
-        "Programming Language :: Python :: 3.2",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
     ],
-    install_requires=requires,
     entry_points={'console_scripts': [
         "spamscope-topology = src.cli.spamscope_topology:main",
         "spamscope-elasticsearch = src.cli.spamscope_elasticsearch:main",

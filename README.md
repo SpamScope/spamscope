@@ -54,6 +54,7 @@ git clone https://github.com/SpamScope/spamscope.git
 Enter in SpamScope directory install it:
 
 ```
+pip install -r requirements.txt
 python setup.py install
 ```
 
