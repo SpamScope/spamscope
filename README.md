@@ -51,10 +51,10 @@ Clone repository
 git clone https://github.com/SpamScope/spamscope.git
 ```
 
-Install requirements in file `requirements.txt` with `python-pip`:
+Enter in SpamScope directory install it:
 
 ```
-pip install -r requirements.txt
+python setup.py install
 ```
 
 ### Faup
@@ -107,17 +107,13 @@ SpamScope comes with four topologies:
 and a general configuration file `spamscope.example.yml` in `conf/` folder.
 
 
-To run topology for debug:
+If you want submit SpamScope topology use `spamscope-topology submit` tool. For more details `spamscope-topology submit -h`:
 
 ```
-sparse run --name topology
+$ spamscope-topology submit --topology {debug,elasticsearch,redis,testing}
 ```
 
-If you want submit topology to Apache Storm:
-
-```
-sparse submit -f --name topology
-```
+There are some options that you can use.
 
 ### Important
 It's very important to set the main configuration file. The default value is `/etc/spamscope/spamscope.yml`, but it's possible to set the environment variable `SPAMSCOPE_CONF_FILE`:
@@ -139,20 +135,20 @@ If you don't enable Apache Tika, Thug and VirusTotal, could use:
 
 ```
 topology.tick.tuple.freq.secs: 60
-topology.max.spout.pending: 200
+topology.max.spout.pending: 500
 topology.sleep.spout.wait.strategy.time.ms: 10
 ```
 
 If **Apache Tika** is enabled:
 
 ```
-topology.max.spout.pending: 100
+topology.max.spout.pending: 200
 ```
 
 To submit above options use:
 
 ```
-sparse submit -f --name topology -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=100" -o "topology.sleep.spout.wait.strategy.time.ms=10"
+sparse submit -f --name topology -o "topology.tick.tuple.freq.secs=60" -o "topology.max.spout.pending=200" -o "topology.sleep.spout.wait.strategy.time.ms=10"
 ```
 
 **Thug** analysis can be very slow, it depends from attachment. To avoid Apache Storm timeout, you should use these two switches when submit the topology:
@@ -172,6 +168,9 @@ sparse submit -f --name topology -o "topology.tick.tuple.freq.secs=60" -o "topol
 For more details you can refer [here](http://streamparse.readthedocs.io/en/stable/quickstart.html).
 
 
+To simplify this operation, SpamScope comes with a custom tool `spamscope-topology submit` where you can choose the values of all these parameters.
+
+
 
 ## Unittest
 SpamScope comes with unittests for each its modules. In bolts and spouts there are no special features, all intelligence is in external modules.
@@ -189,9 +188,8 @@ $ export VIRUSTOTAL_APIKEY=only_your_own_virustotal_api
 ## Docker image
 It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
- - [Debug](https://hub.docker.com/r/fmantuano/spamscope-debug/)
+ - [Root](https://hub.docker.com/r/fmantuano/spamscope-root/)
  - [Elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
- - [Redis](https://hub.docker.com/r/fmantuano/spamscope-redis/)
 
 
 

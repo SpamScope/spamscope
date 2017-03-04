@@ -33,7 +33,7 @@ __version__ = runpy.run_path(
 
 setup(
     name="SpamScope",
-    description="Tools to manage SpamScope",
+    description="Fast Advanced Spam Analysis tool",
     license="Apache License, Version 2.0",
     url="https://github.com/SpamScope/spamscope",
     version=__version__,

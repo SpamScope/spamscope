@@ -73,7 +73,7 @@ def get_args():
         action='version',
         version='%(prog)s {}'.format(__version__))
 
-    # Submit args
+    # Replicas args
     replicas = subparsers.add_parser(
         "replicas", help="Update the number of replicas")
 
@@ -93,25 +93,64 @@ def get_args():
               "or empty string to perform the operation on all indices."),
         dest="index")
 
+    # Template args
+    template = subparsers.add_parser(
+        "template", help="Update/add template")
+
+    template.add_argument(
+        "-p",
+        "--template-path",
+        required=True,
+        help="Path of template.",
+        dest="template_path")
+
+    template.add_argument(
+        "-n",
+        "--template-name",
+        required=True,
+        help="Template name",
+        dest="template_name")
+
     return parser.parse_args()
 
 
 def update_nr_replicas(client_host, max_retry, nr_replicas, index):
+    es = Elasticsearch(hosts=client_host)
 
     for i in range(1, max_retry):
         try:
-            es = Elasticsearch(hosts=client_host)
             es.indices.put_settings(
                 body={"index": {"number_of_replicas": int(nr_replicas)}},
                 index=index)
-            log.info("Update replicas done")
+            log.info("Updating replicas done")
             return
 
         except ConnectionError:
-            log.warning("Update replicas failed. Waiting for {} sec".format(i))
+            log.warning(
+                "Updating replicas failed. Waiting for {} sec".format(i))
             time.sleep(i)
 
-    log.error("Update replicas definitely failed")
+    log.error("Updating replicas definitely failed")
+
+
+def update_template(client_host, max_retry, template_path, template_name):
+    es = Elasticsearch(hosts=client_host)
+
+    with open(template_path) as f:
+        body = f.read()
+
+    for i in range(1, max_retry):
+        try:
+            es.indices.put_template(name=template_name, body=body)
+            log.info("Updating template done")
+            return
+
+        except ConnectionError:
+            log.warning(
+                "Updating template failed. Waiting for {} sec".format(i))
+            time.sleep(i)
+
+    log.error("Updating template definitely failed")
 
 
 def main():
@@ -125,6 +164,14 @@ def main():
             max_retry=args.max_retry,
             nr_replicas=args.nr_replicas,
             index=args.index)
+
+    # template
+    if args.subparser == "template":
+        update_template(
+            client_host=args.client_host,
+            max_retry=args.max_retry,
+            template_path=args.template_path,
+            template_name=args.template_name)
 
 
 if __name__ == "__main__":
