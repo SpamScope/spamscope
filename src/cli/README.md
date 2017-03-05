@@ -35,7 +35,7 @@ usage: spamscope-topology submit [-h] [-g {debug,elasticsearch,redis,testing}]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -g {debug,elasticsearch,redis,testing}, --topology {debug,elasticsearch,redis,testing}
+  -g {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}, --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}
                         SpamScope topology.
   -w WORKERS, --workers WORKERS
                         Apache Storm workers for your topology.

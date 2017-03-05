@@ -100,10 +100,10 @@ SpamScope will check on it to decide if mail/attachment is already analyzed or n
 
 ## Usage
 SpamScope comes with four topologies:
-   - debug
-   - elasticsearch
-   - redis
-   - testing
+   - spamscope_debug
+   - spamscope_elasticsearch
+   - spamscope_redis
+   - spamscope_testing
 
 and a general configuration file `spamscope.example.yml` in `conf/` folder.
 
@@ -111,7 +111,7 @@ and a general configuration file `spamscope.example.yml` in `conf/` folder.
 If you want submit SpamScope topology use `spamscope-topology submit` tool. For more details `spamscope-topology submit -h`:
 
 ```
-$ spamscope-topology submit --topology {debug,elasticsearch,redis,testing}
+$ spamscope-topology submit --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}
 ```
 
 There are some options that you can use.
