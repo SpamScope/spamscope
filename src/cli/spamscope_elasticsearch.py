@@ -38,7 +38,7 @@ log.setLevel(logging.INFO)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter(
-    "%(asctime)s - %(funcName)s - %(levelname)s - %(message)s")
+    "[%(asctime)s] [%(levelname)s] [%(funcName)s] %(message)s")
 ch.setFormatter(formatter)
 log.addHandler(ch)
 
@@ -142,15 +142,16 @@ def update_template(client_host, max_retry, template_path, template_name):
     for i in range(1, max_retry):
         try:
             es.indices.put_template(name=template_name, body=body)
-            log.info("Updating template done")
+            log.info("Updating template {!r} done".format(template_name))
             return
 
         except (ConnectionError, NotFoundError):
             log.warning(
-                "Updating template failed. Waiting for {} sec".format(i))
+                "Updating template {!r} failed. Waiting for {} sec".format(
+                    template_name, i))
             time.sleep(i)
 
-    log.error("Updating template definitely failed")
+    log.error("Updating template {!r} definitely failed".format(template_name))
 
 
 def main():

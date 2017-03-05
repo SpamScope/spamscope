@@ -57,7 +57,8 @@ def get_args():
     submit.add_argument(
         "-g",
         "--topology",
-        choices=["debug", "elasticsearch", "redis", "testing"],
+        choices=["spamscope_debug", "spamscope_elasticsearch",
+                 "spamscope_redis", "spamscope_testing"],
         default="debug",
         help="SpamScope topology.",
         dest="topology")
@@ -124,9 +125,7 @@ def submit_topology(topology, nr_worker, tick, max_pending,
 
     args = shlex.split(command_line)
     proc = Popen(args, stderr=STDOUT)
-    outs, errs = proc.communicate()
-    print(outs)
-    print(errs)
+    _, _ = proc.communicate()
 
 
 def main():

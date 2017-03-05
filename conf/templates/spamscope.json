@@ -1,5 +1,5 @@
 {
-  "order": 10,
+  "order": 0,
   "template": "spamscope_*-*",
   "settings": {
     "analysis": {
