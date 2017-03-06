@@ -150,7 +150,7 @@ def search_words_in_text(text, keywords):
     """
 
     text = text.lower()
-    keywords = {k.lower() for k in keywords}
+    keywords = {six.text_type(k).lower() for k in keywords}
 
     for line in keywords:
         if all(True if w in text else False for w in line.split()):
@@ -179,9 +179,9 @@ def load_keywords_list(obj_paths, lower=True):
             raise ImproperlyConfigured("List {!r} not valid".format(k))
 
         if lower:
-            keywords |= {i.lower() for i in temp}
+            keywords |= {six.text_type(i).lower() for i in temp}
         else:
-            keywords |= set(temp)
+            keywords |= {six.text_type(i) for i in temp}
 
     return keywords
 
@@ -200,10 +200,13 @@ def load_keywords_dict(obj_paths, lower=True):
     if lower:
         keywords_lower = {}
         for k, v in keywords.iteritems():
-            keywords_lower[k] = {i.lower() for i in v}
+            keywords_lower[k] = {six.text_type(i).lower() for i in v}
         return keywords_lower
-
-    return keywords
+    else:
+        keywords_str = {}
+        for k, v in keywords.iteritems():
+            keywords_str[k] = {six.text_type(i) for i in v}
+        return keywords_str
 
 
 def reformat_output(mail=None, bolt=None, **kwargs):

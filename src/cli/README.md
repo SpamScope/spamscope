@@ -29,7 +29,8 @@ optional arguments:
 Submit options:
 
 ```
-usage: spamscope-topology submit [-h] [-g {debug,elasticsearch,redis,testing}]
+usage: spamscope-topology submit [-h]
+                                 [-g {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}]
                                  [-w WORKERS] [-k TICK] [-p MAX_PENDING]
                                  [-s SPOUT_SLEEP] [-t TIMEOUT]
 
