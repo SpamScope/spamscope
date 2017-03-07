@@ -62,7 +62,7 @@ def get_args():
     parser.add_argument(
         "-m",
         "--max-retry",
-        default=10,
+        default=5,
         type=int,
         help="Max retry for action",
         dest="max_retry")
@@ -117,7 +117,7 @@ def get_args():
 def update_nr_replicas(client_host, max_retry, nr_replicas, index):
     es = Elasticsearch(hosts=client_host)
 
-    for i in range(1, max_retry):
+    for i in range(max_retry, 0, -1):
         try:
             es.indices.put_settings(
                 body={"index": {"number_of_replicas": int(nr_replicas)}},
@@ -139,7 +139,7 @@ def update_template(client_host, max_retry, template_path, template_name):
     with open(template_path) as f:
         body = f.read()
 
-    for i in range(1, max_retry):
+    for i in range(max_retry, 0, -1):
         try:
             es.indices.put_template(name=template_name, body=body)
             log.info("Updating template {!r} done".format(template_name))

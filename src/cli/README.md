@@ -73,7 +73,7 @@ optional arguments:
   -c CLIENT_HOST, --client-host CLIENT_HOST
                         Elasticsearch client host (default: elasticsearch)
   -m MAX_RETRY, --max-retry MAX_RETRY
-                        Max retry for action (default: 10)
+                        Max retry for action (default: 5)
   -v, --version         show program's version number and exit
 ```
 
