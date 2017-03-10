@@ -64,8 +64,9 @@ class ThugAnalysis(ThugAPI):
 
     def run(self, attachment, **conf):
         results = []
-        local_file = write_payload(attachment["payload"],
-                                   attachment["extension"])
+        local_file = write_payload(
+            attachment["payload"], attachment["extension"],
+            attachment["content_transfer_encoding"])
 
         # Thug analysis
         for u in conf["user_agents"]:

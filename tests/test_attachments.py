@@ -27,9 +27,12 @@ base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
+mail_test_1 = os.path.join(base_path, 'samples', 'mail_test_1')
+mail_test_2 = os.path.join(base_path, 'samples', 'mail_test_2')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
 from src.modules.attachments.attachments import HashError, ContentTypeError
+from src.modules.utils import write_payload
 
 try:
     from collections import ChainMap
@@ -56,6 +59,33 @@ class TestAttachments(unittest.TestCase):
 
         p.parse_from_file(mail_thug)
         self.attachments_thug = p.attachments_list
+
+        p.parse_from_file(mail_test_1)
+        self.attachments_test_1 = p.attachments_list
+
+        p.parse_from_file(mail_test_2)
+        self.attachments_test_2 = p.attachments_list
+
+    def test_error_base64(self):
+        t = MailAttachments.withhashes(self.attachments_test_1)
+        t.run(filtercontenttypes=False, intelligence=False)
+        files = []
+
+        for i in t:
+            f = write_payload(i["payload"], i["extension"],
+                              i["content_transfer_encoding"])
+            files.append(f)
+
+        for i in files:
+            os.remove(i)
+
+    def test_error_extract_rar(self):
+        t = MailAttachments.withhashes(self.attachments_test_2)
+        t.run(filtercontenttypes=False, intelligence=False)
+        self.assertEqual(len(t), 2)
+        for i in t:
+            self.assertEqual(i["Content-Type"], "application/x-rar")
+            self.assertIn("files", i)
 
     def test_withhashes(self):
         t = MailAttachments.withhashes(self.attachments)

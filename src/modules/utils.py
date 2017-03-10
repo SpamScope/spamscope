@@ -64,12 +64,16 @@ class MailItem(object):
         return 0
 
 
-def write_payload(payload, extension):
+def write_payload(payload, extension, content_transfer_encoding="base64"):
     """This method writes the attachment payload on file system in temporary file.
 
     Args:
         payload (string): binary payload string in base64 to write on disk
         extension (string): file extension. Example '.js'
+        content_transfer_encoding (string): designed to specify an invertible
+                mapping between the "native" representation of a type of data
+                and a representation that can be readily exchanged using 7 bit
+                mail transport protocols
 
     Returns:
         Local file path of payload
@@ -78,7 +82,10 @@ def write_payload(payload, extension):
     temp = tempfile.mkstemp()[1] + extension
 
     with open(temp, 'wb') as f:
-        f.write(payload.decode('base64'))
+        if content_transfer_encoding == "base64":
+            payload = payload.decode("base64")
+
+        f.write(payload)
 
     return temp
 

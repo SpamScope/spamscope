@@ -27,10 +27,12 @@ except ImportError:
 import copy
 import logging
 import os
-import patoolib
 import shutil
-import six
 import tempfile
+
+import patoolib
+from patoolib.util import PatoolError
+import six
 
 from .exceptions import HashError, ContentTypeError
 from .post_processing import processors
@@ -235,29 +237,35 @@ class Attachments(UserList):
                 if flag:
                     i["files"] = []
                     temp_dir = tempfile.mkdtemp()
-                    patoolib.extract_archive(f, outdir=temp_dir, verbosity=-1)
 
-                    for path, subdirs, files in os.walk(temp_dir):
-                        for name in files:
-                            j = os.path.join(path, name)
+                    try:
+                        patoolib.extract_archive(
+                            f, outdir=temp_dir, verbosity=-1)
 
-                            with open(j, "rb") as a:
-                                t = {}
-                                payload = a.read()
-                                content_type = contenttype(payload)
-                                filename = os.path.basename(j)
+                    except PatoolError as e:
+                        log.warning(repr(e))
 
-                                t["filename"] = filename
-                                t["extension"] = extension(filename)
-                                t["size"] = len(payload)
-                                t["Content-Type"] = content_type
-                                t["payload"] = payload.encode("base64")
-                                t["md5"], t["sha1"], t["sha256"], \
-                                    t["sha512"], t["ssdeep"] = fingerprints(
-                                        payload)
-
-                                i["files"].append(t)
                     else:
+                        for path, subdirs, files in os.walk(temp_dir):
+                            for name in files:
+                                j = os.path.join(path, name)
+
+                                with open(j, "rb") as a:
+                                    t = {}
+                                    payload = a.read()
+                                    content_type = contenttype(payload)
+                                    filename = os.path.basename(j)
+
+                                    t["filename"] = filename
+                                    t["extension"] = extension(filename)
+                                    t["size"] = len(payload)
+                                    t["Content-Type"] = content_type
+                                    t["payload"] = payload.encode("base64")
+                                    t["md5"], t["sha1"], t["sha256"], \
+                                        t["sha512"], t["ssdeep"] = \
+                                        fingerprints(payload)
+                                    i["files"].append(t)
+                    finally:
                         try:
                             # Remove temp dir for archived files
                             shutil.rmtree(temp_dir)
