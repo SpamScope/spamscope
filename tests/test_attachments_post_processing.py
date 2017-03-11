@@ -74,12 +74,15 @@ class TestPostProcessing(unittest.TestCase):
             self.assertEqual(i['virustotal']['response_code'], 200)
             self.assertEqual(i['virustotal']['results']['sha1'],
                              '2a7cee8c214ac76ba6fdbc3031e73dbede95b803')
+            self.assertIsInstance(i["virustotal"]["results"]["scans"], list)
 
             for j in i["files"]:
                 self.assertIn('virustotal', j)
                 self.assertEqual(j['virustotal']['response_code'], 200)
                 self.assertEqual(j['virustotal']['results']['sha1'],
                                  'ed2e480e7ba7e37f77a85efbca4058d8c5f92664')
+                self.assertIsInstance(
+                    j["virustotal"]["results"]["scans"], list)
 
     def test_tika(self):
         """Test add Tika processing."""

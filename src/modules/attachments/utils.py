@@ -117,3 +117,33 @@ def contenttype(payload):
 def extension(filename):
     ext = os.path.splitext(filename)
     return ext[-1].lower()
+
+
+def reformat_virustotal(report):
+    """This function replace the VirusTotal report standard with a
+    new one. The new report has only detected antivirus with scans in list
+    and not in a dict (more readable in Elasticsearch)
+
+    Args:
+        report (dict): standard VirusTotal report
+
+    Returns:
+        This function changes the given report
+
+    """
+    if report:
+        scans = []
+
+        try:
+            for k, v in report["results"]["scans"].items():
+                if v["detected"]:
+                    v["antivirus"] = k
+                    scans.append(v)
+
+                v.pop("detected")
+
+        except KeyError:
+            pass
+
+        else:
+            report["results"]["scans"] = scans

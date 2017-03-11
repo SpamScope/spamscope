@@ -62,7 +62,7 @@ def get_args():
     parser.add_argument(
         "-m",
         "--max-retry",
-        default=5,
+        default=10,
         type=int,
         help="Max retry for action",
         dest="max_retry")
@@ -112,6 +112,10 @@ def get_args():
         dest="template_name")
 
     return parser.parse_args()
+
+
+def get_payload(client_host, index):
+    pass
 
 
 def update_nr_replicas(client_host, max_retry, nr_replicas, index):
