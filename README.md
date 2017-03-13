@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/SpamScope/spamscope.svg?branch=develop)](https://travis-ci.org/SpamScope/spamscope)
+
 ![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 
 
@@ -181,6 +183,7 @@ To have complete tests you should set the followings variables enviroment:
 
 ```
 $ export THUG_ENABLED=True
+$ export VIRUSTOTAL_ENABLED=True
 $ export VIRUSTOTAL_APIKEY=only_your_own_virustotal_api
 ```
 

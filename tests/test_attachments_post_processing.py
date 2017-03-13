@@ -39,6 +39,7 @@ except ImportError:
 
 DEFAULTS = {"TIKA_APP_PATH": "/opt/tika/tika-app-1.14.jar",
             "VIRUSTOTAL_APIKEY": "no_api_key",
+            "VIRUSTOTAL_ENABLED": "False",
             "THUG_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
@@ -57,6 +58,9 @@ class TestPostProcessing(unittest.TestCase):
         p.parse_from_file(mail_thug)
         self.attachments_thug = p.attachments_list
 
+    @unittest.skipIf(OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
+                     "VirusTotal test skipped: "
+                     "set env variable 'VIRUSTOTAL_ENABLED' to True")
     def test_virustotal(self):
         """Test add VirusTotal processing."""
 

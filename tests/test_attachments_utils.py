@@ -41,7 +41,9 @@ sample_txt = os.path.join(base_path, 'samples', 'test.txt')
 # Set environment variables to change defaults:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
-DEFAULTS = {"VIRUSTOTAL_APIKEY": "no_api_key"}
+DEFAULTS = {"VIRUSTOTAL_APIKEY": "no_api_key",
+            "VIRUSTOTAL_ENABLED": "False"}
+
 OPTIONS = ChainMap(os.environ, DEFAULTS)
 
 
@@ -127,6 +129,9 @@ class TestAttachmentsUtils(unittest.TestCase):
         ext = extension(no_ext)
         self.assertFalse(ext)
 
+    @unittest.skipIf(OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
+                     "VirusTotal test skipped: "
+                     "set env variable 'VIRUSTOTAL_ENABLED' to True")
     def test_reformat_virustotal(self):
         vt = VirusTotalPublicApi(OPTIONS["VIRUSTOTAL_APIKEY"])
 

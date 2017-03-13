@@ -44,6 +44,7 @@ except ImportError:
 
 DEFAULTS = {"TIKA_APP_PATH": "/opt/tika/tika-app-1.14.jar",
             "VIRUSTOTAL_APIKEY": "no_api_key",
+            "VIRUSTOTAL_ENABLED": "False",
             "THUG_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
@@ -255,9 +256,11 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(len(t), 1)
         self.assertEqual(len(t[0]["files"]), 0)
 
-    @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False",
+    @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False" and
+                     OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
                      "Complete post processing test skipped: "
-                     "set env variable 'THUG_ENABLED' to True")
+                     "set env variables 'THUG_ENABLED' and "
+                     "'VIRUSTOTAL_ENABLED' to True")
     def test_post_processing(self):
         t = MailAttachments.withhashes(self.attachments_thug)
         parameters = {

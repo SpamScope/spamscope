@@ -1,0 +1,33 @@
+sudo: required
+
+language: python
+
+python:
+    - "2.7"
+
+env:
+    - TIKA_APP_PATH=/tmp/tika-app-1.14.jar FAUP_PATH=/tmp/faup
+
+before_script:
+    - curl -o ${TIKA_APP_PATH} https://archive.apache.org/dist/tika/tika-app-1.14.jar
+
+before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar
+
+# command to install dependencies
+install: 
+    - pip install -r requirements.txt
+    - python setup.py install
+    - src/cli/faup.sh
+    - cd ${FAUP_PATH}/src/lib/bindings/python && python setup.py install && cd -
+
+# command to run tests
+script: 
+    - python tests/test_attachments.py
+    - python tests/test_attachments_post_processing.py
+    - python tests/test_attachments_utils.py
+    - python tests/test_bitmap.py
+    - python tests/test_utils.py
+    - spamscope-elasticsearch -h
+    - spamscope-topology -h
