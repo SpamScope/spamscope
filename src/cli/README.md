@@ -29,7 +29,8 @@ optional arguments:
 Submit options:
 
 ```
-usage: spamscope-topology submit [-h] [-g {debug,elasticsearch,redis,testing}]
+usage: spamscope-topology submit [-h]
+                                 [-g {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}]
                                  [-w WORKERS] [-k TICK] [-p MAX_PENDING]
                                  [-s SPOUT_SLEEP] [-t TIMEOUT]
 
@@ -58,14 +59,16 @@ General options:
 
 ```
 usage: spamscope-elasticsearch [-h] [-c CLIENT_HOST] [-m MAX_RETRY] [-v]
-                               {replicas,template} ...
+                               {replicas,template,get-payload} ...
 
 It manages SpamScope topologies
 
 positional arguments:
-  {replicas,template}   sub-commands
+  {replicas,template,get-payload}
+                        sub-commands
     replicas            Update the number of replicas
     template            Update/add template
+    get-payload         Get sample payload from Elasticsearch
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -101,4 +104,20 @@ optional arguments:
                         Path of template.
   -n TEMPLATE_NAME, --template-name TEMPLATE_NAME
                         Template name
+```
+
+Get payload options
+```
+usage: spamscope-elasticsearch get-payload [-h] [-i INDEX] -a HASH_VALUE -f
+                                           FILE_OUTPUT
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INDEX, --index INDEX
+                        A comma-separated list of index names; use _all or
+                        empty string to perform the operation on all indices.
+  -a HASH_VALUE, --hash-value HASH_VALUE
+                        Sample hash to get
+  -f FILE_OUTPUT, --file-output FILE_OUTPUT
+                        File output
 ```

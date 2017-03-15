@@ -64,12 +64,16 @@ class MailItem(object):
         return 0
 
 
-def write_payload(payload, extension):
+def write_payload(payload, extension, content_transfer_encoding="base64"):
     """This method writes the attachment payload on file system in temporary file.
 
     Args:
         payload (string): binary payload string in base64 to write on disk
         extension (string): file extension. Example '.js'
+        content_transfer_encoding (string): designed to specify an invertible
+                mapping between the "native" representation of a type of data
+                and a representation that can be readily exchanged using 7 bit
+                mail transport protocols
 
     Returns:
         Local file path of payload
@@ -78,7 +82,10 @@ def write_payload(payload, extension):
     temp = tempfile.mkstemp()[1] + extension
 
     with open(temp, 'wb') as f:
-        f.write(payload.decode('base64'))
+        if content_transfer_encoding == "base64":
+            payload = payload.decode("base64")
+
+        f.write(payload)
 
     return temp
 
@@ -150,7 +157,7 @@ def search_words_in_text(text, keywords):
     """
 
     text = text.lower()
-    keywords = {k.lower() for k in keywords}
+    keywords = {six.text_type(k).lower() for k in keywords}
 
     for line in keywords:
         if all(True if w in text else False for w in line.split()):
@@ -179,9 +186,9 @@ def load_keywords_list(obj_paths, lower=True):
             raise ImproperlyConfigured("List {!r} not valid".format(k))
 
         if lower:
-            keywords |= {i.lower() for i in temp}
+            keywords |= {six.text_type(i).lower() for i in temp}
         else:
-            keywords |= set(temp)
+            keywords |= {six.text_type(i) for i in temp}
 
     return keywords
 
@@ -200,10 +207,13 @@ def load_keywords_dict(obj_paths, lower=True):
     if lower:
         keywords_lower = {}
         for k, v in keywords.iteritems():
-            keywords_lower[k] = {i.lower() for i in v}
+            keywords_lower[k] = {six.text_type(i).lower() for i in v}
         return keywords_lower
-
-    return keywords
+    else:
+        keywords_str = {}
+        for k, v in keywords.iteritems():
+            keywords_str[k] = {six.text_type(i) for i in v}
+        return keywords_str
 
 
 def reformat_output(mail=None, bolt=None, **kwargs):

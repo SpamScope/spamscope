@@ -1,12 +1,23 @@
+[![Build Status](https://travis-ci.org/SpamScope/spamscope.svg?branch=develop)](https://travis-ci.org/SpamScope/spamscope)
+
 ![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 
 
 ## Overview
 SpamScope is an advanced spam analysis tool that use [Apache Storm](http://storm.apache.org/) with [streamparse](https://github.com/Parsely/streamparse) to process a stream of mails. 
 
-It's possible to analyze more than 5 milions of mails (without attachments processors) for day with a 4 cores server and 4 GB of RAM. 
+It's possible to analyze more than 5 milions of mails (without attachments post processors) for day with a 4 cores server and 4 GB of RAM. 
 
 ![Schema topology](docs/images/schema_topology.png?raw=true "Schema topology")
+
+### Why should I use SpamScope
+- It's very fast: the job is splitted in functionalities that work in parallel.
+- It's flexible: you can chose what SpamScope has to do.
+- It's distributed: SpamScope uses Apache Storm, free and open source distributed realtime computation system.
+- It makes JSON output that you can save where you want.
+- It's easy to setup: there are docker images and docker-compose ready for use.
+- It's integrated with Apache Tika, VirusTotal and Thug (for now).
+- It's free (for special functions you can contact me).
 
 ### Distributed
 SpamScope use Apache Storm that allows you to start small and scale horizontally as you grow. Simply add more worker.
@@ -19,6 +30,13 @@ You can build your custom output bolts and store your data in Elasticsearch, Mon
 
 ### Build your topology
 With streamparse tecnology you can build your topology in Python, add and/or remove spouts and bolts.
+
+### API
+For now SpamScope doesn't have its own API, because it isn't tied to any tecnology.
+If you use `Redis` as spout (input), you'll use Redis API to put mails in topology.
+If you use `Elasticsearch` as output, you'll use Elasticsearch API to get results.
+
+It's possible to develop a middleware API that it talks with input, output and changes the configuration, but now there isn't.
 
 ### Apache 2 Open Source License
 SpamScope can be downloaded, used, and modified free of charge. It is available under the Apache 2 license.
@@ -181,6 +199,7 @@ To have complete tests you should set the followings variables enviroment:
 
 ```
 $ export THUG_ENABLED=True
+$ export VIRUSTOTAL_ENABLED=True
 $ export VIRUSTOTAL_APIKEY=only_your_own_virustotal_api
 ```
 

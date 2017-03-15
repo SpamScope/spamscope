@@ -81,7 +81,6 @@ class TestSearchText(unittest.TestCase):
         keywords_1 = [
             "nomatch",
             "nomatch"]
-
         self.assertEqual(
             utils.search_words_in_text(text, keywords_1), False)
 
@@ -89,21 +88,26 @@ class TestSearchText(unittest.TestCase):
             "nomatch",
             "nomatch",
             "theophrastus rationibus"]
-
         self.assertEqual(
             utils.search_words_in_text(text, keywords_2), True)
 
-        keywords_2 = [
+        keywords_3 = [
             "nomatch",
             "theophrastus nomatch"]
-
         self.assertEqual(
-            utils.search_words_in_text(text, keywords_2), False)
+            utils.search_words_in_text(text, keywords_3), False)
 
-        keywords_2 = ["theophrastus quo vidit"]
-
+        keywords_4 = ["theophrastus quo vidit"]
         self.assertEqual(
-            utils.search_words_in_text(text, keywords_2), True)
+            utils.search_words_in_text(text, keywords_4), True)
+
+        keywords_5 = [12345678]
+        self.assertEqual(
+            utils.search_words_in_text(text, keywords_5), True)
+
+        keywords_6 = [11111, 44444]
+        self.assertEqual(
+            utils.search_words_in_text(text, keywords_6), True)
 
     def test_reformat_output_first(self):
 
@@ -211,6 +215,8 @@ class TestSearchText(unittest.TestCase):
         self.assertIsInstance(results, set)
         self.assertIn("fattura", results)
         self.assertIn("conferma", results)
+        self.assertIn("123456", results)
+        self.assertNotIn(123456, results)
 
         with self.assertRaises(ImproperlyConfigured):
             d = {"generic": "conf/keywords/targets.example.yml"}
@@ -225,6 +231,11 @@ class TestSearchText(unittest.TestCase):
         self.assertNotIn("banca tizio", results)
         self.assertIn("tizio", results["Banca Tizio"])
         self.assertIn("caio rossi", results["Banca Tizio"])
+        self.assertNotIn(12345, results["Banca Tizio"])
+        self.assertIn("12345", results["Banca Tizio"])
+        self.assertNotIn("123", results["Banca Tizio"])
+        self.assertNotIn(123, results["Banca Tizio"])
+        self.assertIn("123 456", results["Banca Tizio"])
 
         with self.assertRaises(ImproperlyConfigured):
             d = {"generic": "conf/keywords/subjects.example.yml"}
