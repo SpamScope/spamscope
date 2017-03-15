@@ -27,6 +27,9 @@ current = os.path.realpath(os.path.dirname(__file__))
 __version__ = runpy.run_path(
     os.path.join(current, "src", "options.py"))["__version__"]
 
+with open(os.path.join(current, 'requirements.txt')) as f:
+    requires = f.read().splitlines()
+
 
 setup(
     name="SpamScope",
@@ -41,6 +44,7 @@ setup(
     packages=find_packages(),
     platforms=["Linux"],
     keywords=["spam-analyzer", "email", "mail", "cli"],
+    # install_requires=requires,
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Intended Audience :: Developers",

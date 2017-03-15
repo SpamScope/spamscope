@@ -27,10 +27,13 @@ import time
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionError, NotFoundError
 
+from elasticsearch_queries import query_sample
+
 
 current = os.path.realpath(os.path.dirname(__file__))
 __version__ = runpy.run_path(
     os.path.join(current, "..", "options.py"))["__version__"]
+
 
 # Logger
 log = logging.getLogger(__name__)
@@ -111,11 +114,68 @@ def get_args():
         help="Template name",
         dest="template_name")
 
+    # Get payload args
+    get_payload = subparsers.add_parser(
+        "get-payload", help="Get sample payload from Elasticsearch")
+
+    get_payload.add_argument(
+        "-i",
+        "--index",
+        default="_all",
+        help=("A comma-separated list of index names; use _all "
+              "or empty string to perform the operation on all indices."),
+        dest="index")
+
+    get_payload.add_argument(
+        "-a",
+        "--hash-value",
+        required=True,
+        help="Sample hash to get",
+        dest="hash_value")
+
+    get_payload.add_argument(
+        "-f",
+        "--file-output",
+        required=True,
+        help="File output",
+        dest="file_output")
+
     return parser.parse_args()
 
 
-def get_payload(client_host, index):
-    pass
+def get_payload(client_host, index, hash_value, file_output):
+    es = Elasticsearch(hosts=client_host)
+    len_hashes = dict(
+        [(32, "md5"), (40, "sha1"), (64, "sha256"),
+         (128, "sha512")])
+    try:
+        hash_key = len_hashes[len(hash_value)]
+    except KeyError:
+        raise KeyError("invalid hash {!r}".format(hash_value))
+    else:
+        body = query_sample % {"hash_key": hash_key, "hash_value": hash_value}
+
+        r = es.search(
+            index=index,
+            body=body,
+            size=1)["hits"]["hits"][0]["_source"]
+
+        log.info("Filename: {!r}, Content-Type: {!r}, sha256: {!r}".format(
+            r["filename"], r["Content-Type"], r["sha256"]))
+
+        payload = r["payload"]
+        content_transfer_encoding = r["content_transfer_encoding"]
+        write_type = "w"
+
+        if content_transfer_encoding == "base64":
+            payload = payload.decode("base64")
+            write_type = "wb"
+
+        with open(file_output, write_type) as f:
+            f.write(payload)
+
+        log.info("Sample file {!r} saved on {!r}".format(
+            hash_value, file_output))
 
 
 def update_nr_replicas(client_host, max_retry, nr_replicas, index):
@@ -171,12 +231,20 @@ def main():
             index=args.index)
 
     # template
-    if args.subparser == "template":
+    elif args.subparser == "template":
         update_template(
             client_host=args.client_host,
             max_retry=args.max_retry,
             template_path=args.template_path,
             template_name=args.template_name)
+
+    # get_payload
+    elif args.subparser == "get-payload":
+        get_payload(
+            client_host=args.client_host,
+            index=args.index,
+            hash_value=args.hash_value,
+            file_output=args.file_output)
 
 
 if __name__ == "__main__":

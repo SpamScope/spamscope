@@ -256,7 +256,7 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(len(t), 1)
         self.assertEqual(len(t[0]["files"]), 0)
 
-    @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False" and
+    @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False" or
                      OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
                      "Complete post processing test skipped: "
                      "set env variables 'THUG_ENABLED' and "

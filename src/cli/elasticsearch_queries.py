@@ -17,15 +17,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from os.path import join
-
-__version__ = "1.4.4"
-__configuration_path__ = "/etc/spamscope"
-
-__defaults__ = {
-    "SPAMSCOPE_CONF_PATH": __configuration_path__,
-    "SPAMSCOPE_CONF_FILE": join(__configuration_path__, "spamscope.yml"),
-    "SPAMSCOPE_VER": __version__, }
-
-if __name__ == "__main__":
-    print(__version__)
+query_sample = """
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "is_filtered": "false"
+          }
+        },
+        {
+          "term": {
+            "%(hash_key)s": "%(hash_value)s"
+          }
+        }
+      ]
+    }
+  }
+}
+"""

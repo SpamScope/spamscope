@@ -261,6 +261,7 @@ class Attachments(UserList):
                                     t["size"] = len(payload)
                                     t["Content-Type"] = content_type
                                     t["payload"] = payload.encode("base64")
+                                    t["is_filtered"] = False,
                                     t["md5"], t["sha1"], t["sha256"], \
                                         t["sha512"], t["ssdeep"] = \
                                         fingerprints(payload)
