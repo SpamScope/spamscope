@@ -80,11 +80,13 @@ def write_payload(payload, extension, content_transfer_encoding="base64"):
     """
 
     temp = tempfile.mkstemp()[1] + extension
+    write_type = "w"
 
-    with open(temp, 'wb') as f:
-        if content_transfer_encoding == "base64":
-            payload = payload.decode("base64")
+    if content_transfer_encoding == "base64":
+        payload = payload.decode("base64")
+        write_type = "wb"
 
+    with open(temp, write_type) as f:
         f.write(payload)
 
     return temp
