@@ -21,7 +21,7 @@ class OutputRedisTopology(Topology):
     attachments = Attachments.spec(
         name="attachments",
         inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
-        par=2)
+        par=4)
 
     urls_body = UrlsHandlerBody.spec(
         name="urls-handler-body",

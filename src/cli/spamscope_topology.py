@@ -98,7 +98,7 @@ def get_args():
     submit.add_argument(
         "-t",
         "--timeout",
-        default=600,
+        default=720,
         type=int,
         help=("How long (in s) between heartbeats until supervisor considers "
               "that worker dead."),
