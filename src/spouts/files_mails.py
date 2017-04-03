@@ -92,23 +92,23 @@ class FilesMailSpout(AbstractSpout):
 
     def next_tuple(self):
 
+        # After reload.mails mails put new items in priority queue
+        if (self._count % self.conf["reload.mails"]):
+            self._count += 1
+
+        # put new mails in priority queue
+        else:
+            # Reload general spout conf
+            self._conf_loader()
+
+            # Reload new mails
+            self._load_mails()
+            self._count = 1
+
         # If queue is not empty
         if not self._queue.empty():
-
-            # After reload.mails mails put new items in priority queue
-            if (self._count % self.conf["reload.mails"]):
-                self._count += 1
-
-            # put new mails in priority queue
-            else:
-                # Reload general spout conf
-                self._conf_loader()
-
-                # Reload new mails
-                self._load_mails()
-                self._count = 1
-
             mail = self._queue.get(block=True)
+
             self.emit([
                 mail.filename,
                 mail.mail_server,
