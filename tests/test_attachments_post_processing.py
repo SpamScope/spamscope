@@ -38,8 +38,8 @@ except ImportError:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
 DEFAULTS = {"TIKA_APP_PATH": "/opt/tika/tika-app-1.14.jar",
-            "VIRUSTOTAL_APIKEY": "no_api_key",
             "VIRUSTOTAL_ENABLED": "False",
+            "ZEMANA_ENABLED": "False",
             "THUG_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
@@ -87,6 +87,36 @@ class TestPostProcessing(unittest.TestCase):
                                  'ed2e480e7ba7e37f77a85efbca4058d8c5f92664')
                 self.assertIsInstance(
                     j["virustotal"]["results"]["scans"], list)
+
+    @unittest.skipIf(OPTIONS["ZEMANA_ENABLED"].capitalize() == "False",
+                     "Zemana test skipped: "
+                     "set env variable 'ZEMANA_ENABLED' to True")
+    def test_zemana(self):
+        """Test add Zemana processing."""
+
+        from src.modules.attachments import zemana
+
+        conf = {"enabled": True,
+                "PartnerId": OPTIONS["ZEMANA_PARTNERID"],
+                "UserId": OPTIONS["ZEMANA_USERID"],
+                "ApiKey": OPTIONS["ZEMANA_APIKEY"],
+                "useragent": "SpamScope"}
+        attachments = MailAttachments.withhashes(self.attachments)
+        attachments(intelligence=False, filtercontenttypes=False)
+        zemana(conf, attachments)
+
+        # Zemana analysis
+        for i in attachments:
+            self.assertIn("zemana", i)
+            self.assertIn("type", i["zemana"])
+            self.assertIn("aa", i["zemana"])
+            self.assertIsInstance(i["zemana"]["aa"], list)
+
+            for j in i["files"]:
+                self.assertIn("zemana", j)
+                self.assertIn("type", j["zemana"])
+                self.assertIn("aa", j["zemana"])
+                self.assertIsInstance(j["zemana"]["aa"], list)
 
     def test_tika(self):
         """Test add Tika processing."""

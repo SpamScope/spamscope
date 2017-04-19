@@ -122,6 +122,14 @@ attachments:
 
         referer: http://www.google.com/
 
+    zemana:
+        enabled: False
+
+        PartnerId: xxxxx
+        UserId: xxxxx
+        ApiKey: xxxxx
+        useragent: SpamScope
+
 
 # Urls handler body
 urls-handler-body:
