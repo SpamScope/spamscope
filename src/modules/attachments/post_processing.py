@@ -155,3 +155,41 @@ def thug(conf, attachments):
                 for i in a.get("files", []):
                     if i["extension"] in conf["extensions"]:
                         i["thug"] = thug.run(i, **conf)
+
+
+@register(active=True)
+def zemana(conf, attachments):
+    """This method updates the attachments results
+    with Zemana AntiMalware reports.
+
+    Args:
+        attachments (list): all attachments of email
+
+    Returns:
+        This method updates the attachments list given
+    """
+
+    if conf["enabled"]:
+        try:
+            from zemana import Zemana
+        except ImportError:
+            raise ImportError("Zemana library not found. You should be Zemana "
+                              "customer (https://www.zemana.com/)")
+
+        z = Zemana(int(conf["PartnerId"]), conf["UserId"],
+                   conf["ApiKey"], conf["useragent"])
+
+        for a in attachments:
+            if not a.get("is_filtered", False):
+                result = z.query(a["md5"])
+
+                if result.json:
+                    a["zemana"] = result.json
+                    a["zemana"]["type"] = result.type
+
+                for i in a.get("files", []):
+                    i_result = z.query(i["md5"])
+
+                    if i_result.json:
+                        i["zemana"] = i_result.json
+                        i["zemana"]["type"] = i_result.type

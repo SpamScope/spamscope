@@ -16,4 +16,4 @@ limitations under the License.
 
 from .utils import *
 from .attachments import Attachments as MailAttachments
-from .post_processing import processors, tika, virustotal, thug
+from .post_processing import processors, tika, virustotal, thug, zemana

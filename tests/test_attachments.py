@@ -43,8 +43,8 @@ except ImportError:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
 DEFAULTS = {"TIKA_APP_PATH": "/opt/tika/tika-app-1.14.jar",
-            "VIRUSTOTAL_APIKEY": "no_api_key",
             "VIRUSTOTAL_ENABLED": "False",
+            "ZEMANA_ENABLED": "False",
             "THUG_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
@@ -257,10 +257,11 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(len(t[0]["files"]), 0)
 
     @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False" or
-                     OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
+                     OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False" or
+                     OPTIONS["ZEMANA_ENABLED"].capitalize() == "False",
                      "Complete post processing test skipped: "
-                     "set env variables 'THUG_ENABLED' and "
-                     "'VIRUSTOTAL_ENABLED' to True")
+                     "set env variables 'THUG_ENABLED', "
+                     "'VIRUSTOTAL_ENABLED' and 'ZEMANA_ENABLED' to True")
     def test_post_processing(self):
         t = MailAttachments.withhashes(self.attachments_thug)
         parameters = {
@@ -273,17 +274,24 @@ class TestAttachments(unittest.TestCase):
             "thug": {"enabled": True,
                      "extensions": [".html", ".js", ".jse"],
                      "user_agents": ["win7ie90", "winxpie80"],
-                     "referer": "http://www.google.com/"}}
+                     "referer": "http://www.google.com/"},
+            "zemana": {"enabled": True,
+                       "PartnerId": OPTIONS["ZEMANA_PARTNERID"],
+                       "UserId": OPTIONS["ZEMANA_USERID"],
+                       "ApiKey": OPTIONS["ZEMANA_APIKEY"],
+                       "useragent": "SpamScope"}}
 
         t.reload(**parameters)
         t.run(filtercontenttypes=False)
         for i in t:
             self.assertIn("tika", i)
             self.assertIn("virustotal", i)
+            self.assertIn("zemana", i)
             self.assertNotIn("thug", i)
 
             for j in i.get("files", []):
                 self.assertIn("virustotal", j)
+                self.assertIn("zemana", j)
                 self.assertIn("thug", j)
 
 
