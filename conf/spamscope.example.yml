@@ -71,6 +71,15 @@ tokenizer:
     maxlen_attachments: 1000000
 
 
+network:
+    shodan.io:
+        enabled: False
+
+    virustotal:
+        enabled: False
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
 # Attachments bolt configuration
 attachments:
     content_types_blacklist:
