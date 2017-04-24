@@ -20,6 +20,11 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from modules import AbstractBolt, reformat_output, Redis
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 
 class OutputRedis(AbstractBolt):
     """Output tokenized mails on Redis servers. """
@@ -68,8 +73,11 @@ class OutputRedis(AbstractBolt):
         mail, attachments = reformat_output(
             raw_mail, self.component_name)
 
+        mail = json.dumps(mail, ensure_ascii=False)
         self._mails.append(mail)
-        self._attachments += attachments
+
+        for i in attachments:
+            self._attachments.append(json.dumps(i, ensure_ascii=False))
 
         # Flush
         if self._count == self._flush_size:
