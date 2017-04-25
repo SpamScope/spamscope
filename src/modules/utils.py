@@ -290,11 +290,12 @@ def reformat_output(mail=None, bolt=None, **kwargs):
 
                 attachments.append(f)
 
-                # Remove from archived payload, virustotal and thug
+                # Remove from archived payload and attachments post processing
                 # now in root
                 j.pop("payload", None)
                 j.pop("virustotal", None)
                 j.pop("thug", None)
+                j.pop("zemana", None)
 
             attachments.append(i)
 
@@ -305,11 +306,13 @@ def reformat_output(mail=None, bolt=None, **kwargs):
             i.pop("tika", None)
             i.pop("virustotal", None)
             i.pop("thug", None)
+            i.pop("zemana", None)
 
             for j in i.get("files", []):
                 j.pop("payload", None)
                 j.pop("virustotal", None)
                 j.pop("thug", None)
+                j.pop("zemana", None)
 
         # Prepair mail for bulk
         if bolt == "output-elasticsearch":
