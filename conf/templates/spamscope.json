@@ -1,5 +1,6 @@
 {
   "order": 0,
+  "version": 2,
   "template": "spamscope_*-*",
   "settings": {
     "analysis": {
@@ -59,7 +60,7 @@
           "headers": {
             "mapping": {
               "index": "analyzed",
-              "type": "text",
+              "type": "string",
               "analyzer": "header"
             },
             "match_pattern": "regex",
@@ -70,7 +71,7 @@
           "body": {
             "mapping": {
               "index": "analyzed",
-              "type": "text",
+              "type": "string",
               "analyzer": "html_body"
             },
             "match": "body"
@@ -80,7 +81,7 @@
           "path_mail": {
             "mapping": {
               "index": "analyzed",
-              "type": "text",
+              "type": "string",
               "analyzer": "path_pattern"
             },
             "match": "path_mail"
@@ -107,10 +108,10 @@
           }
         },
         {
-          "all_text": {
+          "all_string": {
             "mapping": {
               "index": "analyzed",
-              "type": "text",
+              "type": "string",
               "fields": {
                 "raw": {
                   "ignore_above": 256,
@@ -120,10 +121,39 @@
                 }
               }
             },
-            "match_mapping_type": "text"
+            "match_mapping_type": "string"
           }
         }
-      ]
+      ],
+      "_all": {
+        "norms": false,
+        "enabled": true
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "geoip": {
+          "dynamic": true,
+          "properties": {
+            "ip": {
+              "type": "ip"
+            },
+            "latitude": {
+              "type": "half_float"
+            },
+            "location": {
+              "type": "geo_point"
+            },
+            "longitude": {
+              "type": "half_float"
+            }
+          }
+        },
+        "@version": {
+          "type": "keyword"
+        }
+      }
     }
   }
 }
