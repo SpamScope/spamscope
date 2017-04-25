@@ -200,9 +200,12 @@ To have complete tests you should set the followings variables enviroment:
 ```
 $ export THUG_ENABLED=True
 $ export VIRUSTOTAL_ENABLED=True
-$ export VIRUSTOTAL_APIKEY=only_your_own_virustotal_api
+$ export VIRUSTOTAL_APIKEY="your key"
+$ export ZEMANA_ENABLED=True
+$ export ZEMANA_APIKEY="your key"
+$ export ZEMANA_PARTNERID="your partner id"
+$ export ZEMANA_USERID="your userid" 
 ```
-
 
 
 ## Docker image
