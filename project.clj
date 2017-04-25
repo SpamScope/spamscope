@@ -1,4 +1,4 @@
-(defproject spamscope "1.4.8-SNAPSHOT"
+(defproject spamscope "1.4.9-SNAPSHOT"
   :resource-paths ["_resources"]
   :target-path "_build"
   :min-lein-version "2.0.0"
