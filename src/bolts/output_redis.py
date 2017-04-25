@@ -18,6 +18,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+from collections import Counter
 from modules import AbstractBolt, reformat_output, Redis
 
 try:
@@ -38,7 +39,7 @@ class OutputRedis(AbstractBolt):
         # Init
         self._mails = []
         self._attachments = []
-        self._count = 1
+        self._counter = Counter(['mails', 'attachments'])
 
     def _load_settings(self):
         # Redis parameters
@@ -57,14 +58,17 @@ class OutputRedis(AbstractBolt):
             reconnect_interval=servers["reconnect_interval"],
             max_retry=servers["max_retry"])
 
-    def flush(self):
+    def flush_mails(self):
         self._redis_client.push_messages(
             queue=self._queue_mails, messages=self._mails)
+        self._mails = []
+        self._counter["mails"] = 0
+
+    def flush_attachments(self):
         self._redis_client.push_messages(
             queue=self._queue_attachments, messages=self._attachments)
-        self._mails = []
         self._attachments = []
-        self._count = 1
+        self._counter["attachments"] = 0
 
     def process(self, tup):
         raw_mail = tup.values[1]
@@ -73,25 +77,35 @@ class OutputRedis(AbstractBolt):
         mail, attachments = reformat_output(
             raw_mail, self.component_name)
 
-        mail = json.dumps(mail, ensure_ascii=False)
-        self._mails.append(mail)
+        # Mails
+        if mail:
+            self._mails.append(json.dumps(mail, ensure_ascii=False))
 
+            if self._counter["mails"] == self._flush_size:
+                self.flush_mails()
+            else:
+                self._counter["mails"] += 1
+
+        # Attachments
         for i in attachments:
             self._attachments.append(json.dumps(i, ensure_ascii=False))
 
-        # Flush
-        if self._count == self._flush_size:
-            self.flush()
-        else:
-            self._count += 1
+            if self._counter["attachments"] == self._flush_size:
+                self.flush_attachments()
+            else:
+                self._counter["attachments"] += 1
 
     def process_tick(self, freq):
         """Every freq seconds flush messages. """
         super(OutputRedis, self).process_tick(freq)
 
-        if self._mails or self._attachments:
-            self.log("Flush mails/attachments in Redis server after tick")
-            self.flush()
+        if self._mails:
+            self.log("Flush mails in Redis server after tick")
+            self.flush_mails()
+
+        if self._attachments:
+            self.log("Flush attachments in Redis server after tick")
+            self.flush_attachments()
 
         # Reload settings
         self._load_settings()
