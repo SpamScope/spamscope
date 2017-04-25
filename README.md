@@ -208,7 +208,7 @@ $ export ZEMANA_USERID="your userid"
 ```
 
 
-## Docker image
+## Docker images
 It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
  - [Root](https://hub.docker.com/r/fmantuano/spamscope-root/)
