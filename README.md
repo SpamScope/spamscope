@@ -219,3 +219,5 @@ It's possible to use complete Docker images with Apache Storm and SpamScope. Tak
 ![SpamScope](docs/images/Docker01.png?raw=true "SpamScope")
 
 ![SpamScope Topology](docs/images/Docker02.png?raw=true "SpamScope Topology")
+
+![SpamScope Map](docs/images/map.png?raw=true "SpamScope Map")
