@@ -89,10 +89,6 @@ class AbstractSpout(Spout, AbstractComponentMixin):
     def initialize(self, stormconf, context):
         self._conf_loader()
 
-    def process_tick(self, freq):
-        """Every freq seconds you reload configuration """
-        self._conf_loader()
-
 
 class AbstractUrlsHandlerBolt(AbstractBolt):
 
