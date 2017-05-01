@@ -19,6 +19,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from modules import AbstractBolt
+from modules.networks import processors
 
 
 class Network(AbstractBolt):
@@ -32,7 +33,14 @@ class Network(AbstractBolt):
         ipaddress = tup.values[1]
 
         try:
-            network = ipaddress
+            results = {}
+
+            for p in processors:
+                try:
+                    p(self.conf[p.__name__], ipaddress, results)
+                except KeyError:
+                    self.log("KeyError: {!r} doesn't exist in conf".format(
+                        p.__name__), "error")
 
         except Exception as e:
             self.log("Failed process network for mail: {}".format(
@@ -40,4 +48,4 @@ class Network(AbstractBolt):
             self.raise_exception(e, tup)
 
         else:
-            self.emit([sha256_random, network])
+            self.emit([sha256_random, results])

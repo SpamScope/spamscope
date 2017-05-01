@@ -319,3 +319,27 @@ def reformat_output(mail=None, bolt=None, **kwargs):
             mail["_type"] = kwargs["elastic_type_mail"]
 
         return mail, attachments
+
+
+def register(processors, active=True):
+    """Add processor to set of processors.
+    From the best Python book Fluent Python (https://github.com/fluentpython).
+    Thanks a lot Luciano Ramalho.
+
+    Args:
+        processors (set): where store the active functions
+        active (bool): if True adds the function, viceversa removes it
+
+    Returns:
+        decorator
+    """
+
+    def decorate(func):
+        if active:
+            processors.add(func)
+        else:
+            processors.discard(func)
+
+        return func
+
+    return decorate
