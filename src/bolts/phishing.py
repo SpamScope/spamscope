@@ -62,12 +62,13 @@ class Phishing(AbstractBolt):
         self.log("Phishing targets keywords reloaded")
 
     def _search_phishing(self, greedy_data):
+        with_urls = False
 
         # If mail is filtered don't check for phishing
         is_filtered = greedy_data["tokenizer"][2]
 
         if is_filtered:
-            return False, False
+            return False, False, False
 
         # Reset phishing bitmap
         self._pb.reset_score()
@@ -83,8 +84,9 @@ class Phishing(AbstractBolt):
         urls_body = greedy_data["urls-handler-body"][2]
         urls_attachments = greedy_data["urls-handler-attachments"][2]
 
-        # TODO: if an attachment is filtered the score is not complete
-        # more different mails can have same attachment
+        # TODO: if an attachment is filtered, the score is not complete
+        # more different mails can have the same attachment
+        # more different attachments can have the same mail
         attachments = MailAttachments(greedy_data["attachments"][2])
 
         urls = (
@@ -110,6 +112,7 @@ class Phishing(AbstractBolt):
         # Target not added because urls come already analyzed text
         for k, v in urls:
             if k:
+                with_urls = True
                 if any(check_urls(k, i) for i in self._t_keys.values()):
                     self._pb.set_property_score(v)
 
@@ -117,7 +120,7 @@ class Phishing(AbstractBolt):
         if swt(subject, self._s_keys):
             self._pb.set_property_score("mail_subject")
 
-        return self._pb.score, list(targets)
+        return self._pb.score, list(targets), with_urls
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
@@ -135,10 +138,15 @@ class Phishing(AbstractBolt):
         if not diff:
             with_phishing = False
 
-            score, targets = self._search_phishing(
+            score, targets, with_urls = self._search_phishing(
                 self._mails.pop(sha256_random))
 
-            if score:
+            # There is phishing only if there is also urls
+            # Mail can have target without phishing
+            if score and with_urls:
                 with_phishing = True
+            else:
+                with_phishing = False
+                score = 0
 
             self.emit([sha256_random, with_phishing, score, targets])

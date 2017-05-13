@@ -64,9 +64,17 @@ class ThugAnalysis(ThugAPI):
 
     def run(self, attachment, **conf):
         results = []
-        local_file = write_payload(
-            attachment["payload"], attachment["extension"],
-            attachment["content_transfer_encoding"])
+
+        try:
+            local_file = write_payload(
+                attachment["payload"], attachment["extension"],
+                attachment["content_transfer_encoding"])
+        except KeyError:
+            # Path
+            # If file is in archive it doesn't have content_transfer_encoding
+            # keyword. In these cases content_transfer_encoding is base64
+            local_file = write_payload(
+                attachment["payload"], attachment["extension"])
 
         # Thug analysis
         for u in conf["user_agents"]:
