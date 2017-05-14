@@ -149,7 +149,7 @@ class Tokenizer(AbstractBolt):
             self._network_analyzed.append(mail["sender_ip"])
 
         # Emit network
-        self.emit([sha256_rand, mail["network"], is_filtered],
+        self.emit([sha256_rand, mail["sender_ip"], is_filtered],
                   stream="network")
 
         # If filter mails is enabled

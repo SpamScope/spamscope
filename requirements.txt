@@ -7,6 +7,7 @@ patool==1.12
 pyparsing==2.2.0
 python-magic==0.4.12
 redis==2.10.5
+shodan==1.6.5
 simplejson==3.10.0
 six==1.10.0
 ssdeep==3.2

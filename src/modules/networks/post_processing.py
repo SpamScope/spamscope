@@ -18,6 +18,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+import logging
 
 try:
     from modules import register
@@ -26,6 +27,9 @@ except ImportError:
 
 
 processors = set()
+
+
+log = logging.getLogger(__name__)
 
 
 """
@@ -57,7 +61,7 @@ def shodan(conf, ipaddress, results):
     with the Tika reports.
 
     Args:
-        attachments (list): all attachments of email
+        conf (dict): dict of configuration
         ipaddress (string): ip address to analyze
         results (dict): dict where will put the results
 
@@ -66,7 +70,16 @@ def shodan(conf, ipaddress, results):
     """
 
     if conf["enabled"]:
-        pass
+        import shodan
+        api = shodan.Shodan(conf["api_key"])
+
+        try:
+            report = api.host(ipaddress)
+        except shodan.APIError:
+            log.exception("Shodan API error")
+        else:
+            if report:
+                results["shodan"] = report
 
 
 @register(processors, active=True)
@@ -75,7 +88,7 @@ def virustotal(conf, ipaddress, results):
     with the Virustotal reports.
 
     Args:
-        attachments (list): all attachments of email
+        conf (dict): dict of configuration
         ipaddress (string): ip address to analyze
         results (dict): dict where will put the results
 
@@ -84,4 +97,9 @@ def virustotal(conf, ipaddress, results):
     """
 
     if conf["enabled"]:
-        pass
+        from virus_total_apis import PublicApi as VirusTotalPublicApi
+        vt = VirusTotalPublicApi(conf["api_key"])
+        report = vt.get_ip_report(ipaddress)
+
+        if report:
+            results["virustotal"] = report

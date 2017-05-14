@@ -34,7 +34,7 @@ class Network(AbstractBolt):
         try:
             results = {}
 
-            if not is_filtered:
+            if not is_filtered and ipaddress:
                 for p in processors:
                     try:
                         p(self.conf[p.__name__], ipaddress, results)

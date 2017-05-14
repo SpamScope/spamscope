@@ -43,7 +43,6 @@ except ImportError:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
 DEFAULTS = {"TIKA_APP_PATH": "/opt/tika/tika-app-1.14.jar",
-            "VIRUSTOTAL_APIKEY": "no_api_key",
             "VIRUSTOTAL_ENABLED": "False",
             "THUG_ENABLED": "False"}
 

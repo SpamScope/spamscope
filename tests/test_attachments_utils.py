@@ -41,8 +41,7 @@ sample_txt = os.path.join(base_path, 'samples', 'test.txt')
 # Set environment variables to change defaults:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
-DEFAULTS = {"VIRUSTOTAL_APIKEY": "no_api_key",
-            "VIRUSTOTAL_ENABLED": "False"}
+DEFAULTS = {"VIRUSTOTAL_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
 
