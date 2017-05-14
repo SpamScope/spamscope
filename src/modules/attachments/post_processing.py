@@ -149,7 +149,7 @@ def thug(conf, attachments):
                         i["thug"] = thug.run(i, **conf)
 
 
-@register(active=True)
+@register(processors, active=True)
 def zemana(conf, attachments):
     """This method updates the attachments results
     with Zemana AntiMalware reports.
