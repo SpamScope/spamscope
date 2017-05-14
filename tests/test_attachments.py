@@ -220,6 +220,16 @@ class TestAttachments(unittest.TestCase):
         t.popcontenttype("application/zip")
         self.assertEqual(len(t), 0)
 
+        # Test path when attach is filtered
+        t = MailAttachments.withhashes(self.attachments)
+        t(filtercontenttypes=False, intelligence=False)
+        check_list = deque(maxlen=10)
+        md5 = "1e38e543279912d98cbfdc7b275a415e"
+        check_list.append(md5)
+        t.filter(check_list, hash_type="md5")
+        t.popcontenttype("application/zip")
+        self.assertEqual(len(t), 0)
+
         t = MailAttachments.withhashes(self.attachments)
         t(filtercontenttypes=False, intelligence=False)
         self.assertEqual(len(t[0]["files"]), 1)

@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
 Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
@@ -17,13 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
-from bolts import OutputRedis
-from .abstracts import AbstractTopology
-
-
-class OutputRedisTopology(AbstractTopology):
-
-    output_redis = OutputRedis.spec(
-        name="output-redis",
-        inputs=[AbstractTopology.json])
+from .post_processing import processors, shodan, virustotal

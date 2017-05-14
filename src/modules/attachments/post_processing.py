@@ -19,16 +19,22 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+try:
+    from modules import register
+except ImportError:
+    from ...modules import register
+
+
 processors = set()
 
 
 """
-This module conteins all post processors for mail attachments
+This module contains all post processors for mail attachments
 (i.e.: VirusTotal, Thug, etc.).
 
 The skeleton of function must be like this:
 
-    @register(active=True)
+    @register(processors, active=True)
     def processor(conf, attachments):
         if conf["enabled"]:
             from module_x import y # import custom object for this processor
@@ -49,30 +55,14 @@ You don't need anything else.
 """
 
 
-def register(active=True):
-    """Add processor to set of processors.
-    From the best Python book Fluent Python (https://github.com/fluentpython).
-    Thanks a lot Luciano Ramalho.
-    """
-
-    def decorate(func):
-        if active:
-            processors.add(func)
-        else:
-            processors.discard(func)
-
-        return func
-
-    return decorate
-
-
-@register(active=True)
+@register(processors, active=True)
 def tika(conf, attachments):
     """This method updates the attachments results
     with the Tika reports.
 
     Args:
         attachments (list): all attachments of email
+        conf (dict): conf of this post processor
 
     Returns:
         This method updates the attachments list given
@@ -97,13 +87,14 @@ def tika(conf, attachments):
                         payload=payload, convert_to_obj=True)
 
 
-@register(active=True)
+@register(processors, active=True)
 def virustotal(conf, attachments):
     """This method updates the attachments results
     with the Virustotal reports.
 
     Args:
         attachments (list): all attachments of email
+        conf (dict): conf of this post processor
 
     Returns:
         This method updates the attachments list given
@@ -131,13 +122,14 @@ def virustotal(conf, attachments):
                         i["virustotal"] = i_result
 
 
-@register(active=True)
+@register(processors, active=True)
 def thug(conf, attachments):
     """This method updates the attachments results
     with the Thug reports.
 
     Args:
         attachments (list): all attachments of email
+        conf (dict): conf of this post processor
 
     Returns:
         This method updates the attachments list given
