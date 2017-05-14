@@ -43,6 +43,8 @@ class Tokenizer(AbstractBolt):
     outputs = [
         Stream(fields=['sha256_random', 'mail', 'is_filtered'], name='mail'),
         Stream(fields=['sha256_random', 'body', 'is_filtered'], name='body'),
+        Stream(fields=['sha256_random', 'network', 'is_filtered'],
+               name='network'),
         Stream(fields=['sha256_random', 'with_attachments', 'attachments'],
                name='attachments')]
 
@@ -51,17 +53,23 @@ class Tokenizer(AbstractBolt):
 
         self._parser = MailParser()
         self._mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
+        self._network_analyzed = deque(maxlen=self.conf["maxlen_network"])
         self._attachments_analyzed = deque(
             maxlen=self.conf["maxlen_attachments"])
         self._load_filters()
 
     def _load_filters(self):
         self._filter_mails_enabled = self.conf["filter_mails"]
+        self._filter_network_enabled = self.conf["filter_network"]
         self._filter_attachments_enabled = self.conf["filter_attachments"]
 
     @property
     def filter_mails_enabled(self):
         return self._filter_mails_enabled
+
+    @property
+    def filter_network_enabled(self):
+        return self._filter_network_enabled
 
     @property
     def filter_attachments_enabled(self):
@@ -130,6 +138,19 @@ class Tokenizer(AbstractBolt):
         with_attachments = False
         attachments = []
         body = self.parser.body
+
+        # If filter network is enabled
+        is_filtered = False
+        if self.filter_network_enabled:
+            if mail["sender_ip"] in self._network_analyzed:
+                is_filtered = True
+
+            # Update databese mail analyzed
+            self._network_analyzed.append(mail["sender_ip"])
+
+        # Emit network
+        self.emit([sha256_rand, mail["network"], is_filtered],
+                  stream="network")
 
         # If filter mails is enabled
         is_filtered = False

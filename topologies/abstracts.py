@@ -1,15 +1,36 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+
+from abc import ABCMeta
 
 from streamparse import Grouping, Topology
-from bolts import (Attachments, Forms, JsonMaker, OutputElasticsearch,
+from bolts import (Attachments, Forms, JsonMaker,
                    Phishing, Tokenizer, UrlsHandlerAttachments,
                    UrlsHandlerBody, Network)
 from spouts import FilesMailSpout
 
 
-class OutputTestingTopology(Topology):
+class AbstractTopology(Topology):
+
+    __metaclass__ = ABCMeta
+
     files_spout = FilesMailSpout.spec(
         name="files-mails")
 
@@ -44,7 +65,7 @@ class OutputTestingTopology(Topology):
         inputs={tokenizer['body']: Grouping.fields('sha256_random')})
 
     network = Network.spec(
-        name="forms",
+        name="network",
         inputs={tokenizer['network']: Grouping.fields('sha256_random')})
 
     json = JsonMaker.spec(
@@ -57,6 +78,3 @@ class OutputTestingTopology(Topology):
             network: Grouping.fields('sha256_random'),
             urls_body: Grouping.fields('sha256_random'),
             urls_attachments: Grouping.fields('sha256_random')})
-
-    output_elasticsearch = OutputElasticsearch.spec(
-        name="output-elasticsearch", inputs=[json], par=1)

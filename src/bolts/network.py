@@ -17,30 +17,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+
 from __future__ import absolute_import, print_function, unicode_literals
 from modules import AbstractBolt
 from modules.networks import processors
 
 
 class Network(AbstractBolt):
-    outputs = ['sha256_random', 'network']
-
-    def initialize(self, stormconf, context):
-        super(Network, self).initialize(stormconf, context)
+    outputs = ['sha256_random', 'network', 'is_filtered']
 
     def process(self, tup):
         sha256_random = tup.values[0]
         ipaddress = tup.values[1]
+        is_filtered = tup.values[2]
 
         try:
             results = {}
 
-            for p in processors:
-                try:
-                    p(self.conf[p.__name__], ipaddress, results)
-                except KeyError:
-                    self.log("KeyError: {!r} doesn't exist in conf".format(
-                        p.__name__), "error")
+            if not is_filtered:
+                for p in processors:
+                    try:
+                        p(self.conf[p.__name__], ipaddress, results)
+                    except KeyError:
+                        self.log("KeyError: {!r} doesn't exist in conf".format(
+                            p.__name__), "error")
 
         except Exception as e:
             self.log("Failed process network for mail: {}".format(

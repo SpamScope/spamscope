@@ -70,6 +70,12 @@ tokenizer:
     # Max number of hashes saved for filter function
     maxlen_attachments: 1000000
 
+    # If True the same ip address is filtered and not analyzed.
+    filter_network: True
+
+    # Max number of hashes saved for filter function
+    maxlen_network: 1000000
+
 
 # Network bolt configuration
 network:
