@@ -98,7 +98,10 @@ Thug is a Python low-interaction honeyclient aimed at mimicing the behavior of a
 You can see a complete SpamScope report with Thug analysis [here](https://goo.gl/Y4kWCv).
 
 ### VirusTotal (optional)
-It's possible add to results (for mail attachments) VirusTotal report. You need a private API key.
+It's possible add to results (for mail attachments and sender ip address) the VirusTotal report. You need a private API key.
+
+### Shodan (optional)
+It's possible add to results the Shodan report for sender ip address. You need a private API key.
 
 ### Elasticsearch (optional)
 It's possible to store the results in Elasticsearch. In this case you should install `elasticsearch` package.
@@ -205,6 +208,8 @@ $ export ZEMANA_ENABLED=True
 $ export ZEMANA_APIKEY="your key"
 $ export ZEMANA_PARTNERID="your partner id"
 $ export ZEMANA_USERID="your userid" 
+$ export SHODAN_ENABLED=True
+$ export SHODAN_APIKEY="your key"
 ```
 
 
