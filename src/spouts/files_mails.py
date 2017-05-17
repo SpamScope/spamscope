@@ -92,7 +92,8 @@ class FilesMailSpout(AbstractSpout):
 
     def next_tuple(self):
 
-        # After reload.mails mails put new items in priority queue
+        # After reload.mails next_tuple reload spout config
+        # About reload.mails * waiting_sleep seconds
         if (self._count % self.conf["reload.mails"]):
             self._count += 1
 

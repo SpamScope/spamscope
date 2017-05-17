@@ -24,3 +24,4 @@ from .phishing import Phishing
 from .tokenizer import Tokenizer
 from .urls_handler_attachments import UrlsHandlerAttachments
 from .urls_handler_body import UrlsHandlerBody
+from .network import Network

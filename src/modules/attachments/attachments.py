@@ -155,6 +155,15 @@ class Attachments(UserList):
                     for j in inner_remove:
                         i["files"].remove(j)
 
+            # Patch
+            # If attach is filtered and content_type in whitelist
+            # you should remove sample from results.
+            # You can't use Content-Type because we don't have payload, so
+            # we use mail_content_type
+            elif (i.get("is_filtered") and
+                  i["mail_content_type"].lower() == content_type):
+                remove.append(i)
+
         else:
             # Remove
             for i in remove:

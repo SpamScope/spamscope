@@ -163,8 +163,13 @@ def get_payload(client_host, index, hash_value, file_output):
         log.info("Filename: {!r}, Content-Type: {!r}, sha256: {!r}".format(
             r["filename"], r["Content-Type"], r["sha256"]))
 
+        try:
+            content_transfer_encoding = r["content_transfer_encoding"]
+        except KeyError:
+            # All archived files have base64 payload
+            content_transfer_encoding = "base64"
+
         payload = r["payload"]
-        content_transfer_encoding = r["content_transfer_encoding"]
         write_type = "w"
 
         if content_transfer_encoding == "base64":

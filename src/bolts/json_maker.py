@@ -49,10 +49,14 @@ class JsonMaker(Bolt):
         mail["is_filtered"] = greedy_data["tokenizer"][2]
 
         # Attachments
-        mail["with_attachments"] = greedy_data["attachments"][1]
+        # with_raw_attachments: the mail has attachments
+        # with_attachments: the mail has not filtered attachments
+        mail["with_raw_attachments"] = greedy_data["attachments"][1]
+        attachments = greedy_data["attachments"][2]
 
-        if mail["with_attachments"]:
-            mail["attachments"] = greedy_data["attachments"][2]
+        if attachments:
+            mail["with_attachments"] = True
+            mail["attachments"] = attachments
 
         # Urls in attachments:
         # Add urls attachments because you can have more differents attachments
@@ -63,6 +67,11 @@ class JsonMaker(Bolt):
         if mail["with_urls_attachments"]:
             urls = greedy_data["urls-handler-attachments"][2]
             mail["urls_attachments"] = reformat_urls(urls)
+
+        # Network
+        network = greedy_data["network"][1]
+        if network:
+            mail["network"] = network
 
         # Add intelligence output only if mail is not filtered
         if not mail["is_filtered"]:
