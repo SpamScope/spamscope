@@ -57,6 +57,8 @@ class JsonMaker(Bolt):
         if attachments:
             mail["with_attachments"] = True
             mail["attachments"] = attachments
+        else:
+            mail["with_attachments"] = False
 
         # Urls in attachments:
         # Add urls attachments because you can have more differents attachments

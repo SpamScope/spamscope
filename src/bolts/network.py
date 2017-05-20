@@ -48,4 +48,4 @@ class Network(AbstractBolt):
             self.raise_exception(e, tup)
 
         else:
-            self.emit([sha256_random, results])
+            self.emit([sha256_random, results, is_filtered])
