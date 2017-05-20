@@ -21,7 +21,7 @@ limitations under the License.
 from streamparse import Grouping, Topology
 from bolts import (Attachments, Forms, JsonMaker,
                    Phishing, Tokenizer, UrlsHandlerAttachments,
-                   UrlsHandlerBody, Network, OutputElasticsearch)
+                   UrlsHandlerBody, Network, OutputRedis)
 from spouts import FilesMailSpout
 
 
@@ -75,7 +75,7 @@ class OutputTestingTopology(Topology):
             urls_body: Grouping.fields('sha256_random'),
             urls_attachments: Grouping.fields('sha256_random')})
 
-    output_elasticsearch = OutputElasticsearch.spec(
-        name="output-elasticsearch",
+    output_redis = OutputRedis.spec(
+        name="output-redis",
         inputs=[json],
         par=1)

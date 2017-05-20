@@ -153,6 +153,7 @@ class TestAttachments(unittest.TestCase):
         t(filtercontenttypes=False, intelligence=False)
 
         for i in t:
+            self.assertIn("analisys_date", i)
             self.assertIn("extension", i)
             self.assertIn("size", i)
             self.assertIn("Content-Type", i)
@@ -164,6 +165,7 @@ class TestAttachments(unittest.TestCase):
             self.assertEqual(len(i["files"]), 1)
 
             for j in i["files"]:
+                self.assertIn("analisys_date", j)
                 self.assertIn("filename", j)
                 self.assertIn("extension", j)
                 self.assertIn("size", j)
