@@ -31,23 +31,14 @@ class Network(AbstractBolt):
         ipaddress = tup.values[1]
         is_filtered = tup.values[2]
 
-        try:
-            results = {}
+        results = {}
 
-            if not is_filtered and ipaddress:
-                for p in processors:
-                    try:
-                        p(self.conf[p.__name__], ipaddress, results)
-                    except KeyError:
-                        self.log("KeyError: {!r} doesn't exist in conf".format(
-                            p.__name__), "error")
+        if not is_filtered and ipaddress:
+            for p in processors:
+                try:
+                    p(self.conf[p.__name__], ipaddress, results)
+                except KeyError:
+                    self.log("KeyError: {!r} doesn't exist in conf".format(
+                        p.__name__), "error")
 
-        except Exception as e:
-            self.log("Failed processing ip address {!r} for mail {!r}."
-                     "Raw mail moved in failed folder.".format(
-                         ipaddress, sha256_random), "error")
-            self.raise_exception(e, tup)
-            self.fail(tup)
-
-        else:
-            self.emit([sha256_random, results, is_filtered])
+        self.emit([sha256_random, results, is_filtered])
