@@ -80,6 +80,7 @@ class Attachments(AbstractBolt):
             self.log("Failed process attachments for mail: {}".format(
                 sha256_random), "error")
             self.raise_exception(e, tup)
+            self.fail(tup)
 
         else:
             self.emit([sha256_random, with_attachments, list(self.attach)])

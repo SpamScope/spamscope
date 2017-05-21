@@ -62,7 +62,8 @@ class OutputDebugTopology(Topology):
 
     network = Network.spec(
         name="network",
-        inputs={tokenizer['network']: Grouping.fields('sha256_random')})
+        inputs={tokenizer['network']: Grouping.fields('sha256_random')},
+        par=2)
 
     json = JsonMaker.spec(
         name="json",

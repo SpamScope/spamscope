@@ -43,9 +43,11 @@ class Network(AbstractBolt):
                             p.__name__), "error")
 
         except Exception as e:
-            self.log("Failed process network for mail: {}".format(
-                sha256_random), "error")
+            self.log("Failed processing ip address {!r} for mail {!r}."
+                     "Raw mail moved in failed folder.".format(
+                         ipaddress, sha256_random), "error")
             self.raise_exception(e, tup)
+            self.fail(tup)
 
         else:
             self.emit([sha256_random, results, is_filtered])

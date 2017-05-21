@@ -55,8 +55,8 @@ You don't need anything else.
 """
 
 
-@register(processors, active=False)
-# Disabled: to solve issue https://github.com/Parsely/streamparse/issues/368
+@register(processors, active=True)
+# TODO: to solve issue https://github.com/Parsely/streamparse/issues/368
 def shodan(conf, ipaddress, results):
     """This method updates the attachments results
     with the Tika reports.
