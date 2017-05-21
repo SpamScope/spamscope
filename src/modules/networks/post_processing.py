@@ -55,7 +55,7 @@ You don't need anything else.
 """
 
 
-@register(processors, active=True)
+@register(processors, active=False)
 # TODO: to solve issue https://github.com/Parsely/streamparse/issues/368
 def shodan(conf, ipaddress, results):
     """This method updates the attachments results
