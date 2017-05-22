@@ -25,6 +25,7 @@ except ImportError:
     from collections import UserList
 
 import copy
+import datetime
 import logging
 import os
 import shutil
@@ -232,6 +233,8 @@ class Attachments(UserList):
         file size, content type, if is a archive and archived files.
         """
         for i in self:
+            i["analisys_date"] = datetime.datetime.utcnow().isoformat()
+
             if not i.get("is_filtered", False):
                 payload, size, ext = Attachments._metadata(i)
                 content_type = contenttype(payload)
@@ -265,6 +268,8 @@ class Attachments(UserList):
                                     content_type = contenttype(payload)
                                     filename = os.path.basename(j)
 
+                                    t["analisys_date"] = \
+                                        datetime.datetime.utcnow().isoformat()
                                     t["filename"] = filename
                                     t["extension"] = extension(filename)
                                     t["size"] = len(payload)

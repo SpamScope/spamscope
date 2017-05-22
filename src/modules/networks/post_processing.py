@@ -21,6 +21,11 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 
 try:
+    import simplejson as json
+except ImportError:
+    import json
+
+try:
     from modules import register
 except ImportError:
     from ...modules import register
@@ -55,7 +60,8 @@ You don't need anything else.
 """
 
 
-@register(processors, active=True)
+@register(processors, active=False)
+# TODO: to solve issue https://github.com/Parsely/streamparse/issues/368
 def shodan(conf, ipaddress, results):
     """This method updates the attachments results
     with the Tika reports.
@@ -75,8 +81,12 @@ def shodan(conf, ipaddress, results):
 
         try:
             report = api.host(ipaddress)
+            json.dumps(report, ensure_ascii=False)
         except shodan.APIError:
-            log.exception("Shodan API error")
+            return
+        except TypeError:
+            log.error("JSON TypeError in Shodan report for ip {!r}".format(
+                ipaddress))
         else:
             if report:
                 results["shodan"] = report
@@ -99,7 +109,17 @@ def virustotal(conf, ipaddress, results):
     if conf["enabled"]:
         from virus_total_apis import PublicApi as VirusTotalPublicApi
         vt = VirusTotalPublicApi(conf["api_key"])
-        report = vt.get_ip_report(ipaddress)
 
-        if report:
-            results["virustotal"] = report
+        # Error: {u'virustotal': {'error': SSLError(SSLEOFError(8, u'EOF
+        # occurred in violation of protocol (_ssl.c:590)'),)}}')
+        # TypeError: SSLError(SSLEOFError(8, u'EOF occurred in violation of
+        # protocol (_ssl.c:590)'),) is not JSON serializable')
+        try:
+            report = vt.get_ip_report(ipaddress)
+            json.dumps(report, ensure_ascii=False)
+        except TypeError:
+            log.error("TypeError in VirusTotal report for ip {!r}".format(
+                ipaddress))
+        else:
+            if report:
+                results["virustotal"] = report

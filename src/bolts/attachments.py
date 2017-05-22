@@ -65,21 +65,15 @@ class Attachments(AbstractBolt):
         sha256_random = tup.values[0]
         with_attachments = tup.values[1]
 
-        try:
-            # Remove all values
-            self.attach.removeall()
+        # Remove all values
+        self.attach.removeall()
 
-            # Add the new values
-            self.attach.extend(tup.values[2])
+        # Add the new values
+        self.attach.extend(tup.values[2])
 
-            # Run analysis
-            # self.attach.run() == self.attach()
-            self.attach.run()
+        # Run analysis
+        # self.attach.run() == self.attach()
+        self.attach.run()
 
-        except Exception as e:
-            self.log("Failed process attachments for mail: {}".format(
-                sha256_random), "error")
-            self.raise_exception(e, tup)
-
-        else:
-            self.emit([sha256_random, with_attachments, list(self.attach)])
+        # emit
+        self.emit([sha256_random, with_attachments, list(self.attach)])

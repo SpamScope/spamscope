@@ -154,5 +154,5 @@ class FilesMailSpout(AbstractSpout):
             pass
 
         finally:
-            self.log("Mail {!r} failed".format(tup_id))
+            self.log("Mail {!r} failed. Check it".format(tup_id))
             self.ack(tup_id)
