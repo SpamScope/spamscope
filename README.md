@@ -56,7 +56,7 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
 ## Authors
 
 ### Main Author
- Fedele Mantuano (**Twitter**: [@fedelemantuano](https://twitter.com/fedelemantuano))
+ Fedele Mantuano (**LinkedIn**: [Fedele Mantuano](https://www.linkedin.com/in/fmantuano/))
 
 
 
