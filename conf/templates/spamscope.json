@@ -39,7 +39,6 @@
         {
           "hashes": {
             "mapping": {
-              "index": "not_analyzed",
               "type": "keyword",
               "eager_global_ordinals": true
             },
@@ -59,8 +58,7 @@
         {
           "headers": {
             "mapping": {
-              "index": "analyzed",
-              "type": "string",
+              "type": "text",
               "analyzer": "header"
             },
             "match_pattern": "regex",
@@ -70,8 +68,7 @@
         {
           "body": {
             "mapping": {
-              "index": "analyzed",
-              "type": "string",
+              "type": "text",
               "analyzer": "html_body"
             },
             "match": "body"
@@ -80,8 +77,7 @@
         {
           "path_mail": {
             "mapping": {
-              "index": "analyzed",
-              "type": "string",
+              "type": "text",
               "analyzer": "path_pattern"
             },
             "match": "path_mail"
@@ -99,7 +95,6 @@
         {
           "all_not_analyzed": {
             "mapping": {
-              "index": "not_analyzed",
               "type": "keyword",
               "eager_global_ordinals": true
             },
@@ -110,18 +105,16 @@
         {
           "all_string": {
             "mapping": {
-              "index": "analyzed",
-              "type": "string",
+              "type": "text",
               "fields": {
                 "raw": {
                   "ignore_above": 256,
-                  "index": "not_analyzed",
                   "type": "keyword",
                   "eager_global_ordinals": true
                 }
               }
             },
-            "match_mapping_type": "string"
+            "match_mapping_type": "text"
           }
         }
       ],

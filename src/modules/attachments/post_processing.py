@@ -18,6 +18,7 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+import logging
 
 try:
     from modules import register
@@ -26,6 +27,9 @@ except ImportError:
 
 
 processors = set()
+
+
+log = logging.getLogger(__name__)
 
 
 """
@@ -168,20 +172,32 @@ def zemana(conf, attachments):
             raise ImportError("Zemana library not found. You should be Zemana "
                               "customer (https://www.zemana.com/)")
 
+        from requests.exceptions import HTTPError
+
         z = Zemana(int(conf["PartnerId"]), conf["UserId"],
                    conf["ApiKey"], conf["useragent"])
 
         for a in attachments:
             if not a.get("is_filtered", False):
-                result = z.query(a["md5"])
+                try:
+                    result = z.query(a["md5"])
+                except HTTPError:
+                    log.exception(
+                        "HTTPError in Zemana query for md5 {!r}".format(
+                            a["md5"]))
 
-                if result.json:
+                if result:
                     a["zemana"] = result.json
                     a["zemana"]["type"] = result.type
 
                 for i in a.get("files", []):
-                    i_result = z.query(i["md5"])
+                    try:
+                        i_result = z.query(i["md5"])
+                    except HTTPError:
+                        log.exception(
+                            "HTTPError in Zemana query for md5 {!r}".format(
+                                i["md5"]))
 
-                    if i_result.json:
+                    if i_result:
                         i["zemana"] = i_result.json
                         i["zemana"]["type"] = i_result.type
