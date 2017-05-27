@@ -1,19 +1,28 @@
 sudo: required
 
+services:
+    - docker
+
 language: python
 
 python:
     - "2.7"
 
 env:
-    - TIKA_APP_PATH=/tmp/tika-app-1.14.jar FAUP_PATH=/tmp/faup
+    - TIKA_APP_PATH=/tmp/tika-app-1.14.jar FAUP_PATH=/tmp/faup DOCKER_ROOT_PATH=/tmp/docker-root
 
-before_script:
-    - curl -o ${TIKA_APP_PATH} https://archive.apache.org/dist/tika/tika-app-1.14.jar
+branches:
+    only:
+        - master
+        - develop
 
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar
+    - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH
+    - cd $DOCKER_ROOT_PATH && docker build -t $DOCKER_USERNAME/spamscope-root . && cd -
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done'
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V'
 
 # command to install dependencies
 install: 
@@ -22,12 +31,28 @@ install:
     - src/cli/faup.sh
     - cd ${FAUP_PATH}/src/lib/bindings/python && python setup.py install && cd -
 
+before_script:
+    - curl -o ${TIKA_APP_PATH} https://archive.apache.org/dist/tika/tika-app-1.14.jar
+
 # command to run tests
 script: 
+    # Unittests
     - python tests/test_attachments.py
     - python tests/test_attachments_post_processing.py
     - python tests/test_attachments_utils.py
     - python tests/test_bitmap.py
     - python tests/test_utils.py
+
+    # cli help
     - spamscope-elasticsearch -h
     - spamscope-topology -h
+
+after_success:
+    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker push $DOCKER_USERNAME/spamscope-root;
+      fi
+    - if [ "$TRAVIS_BRANCH" == "develop" ]; then
+        docker tag develop fmantuano/spamscope-root;
+        docker push $DOCKER_USERNAME/spamscope-root;
+      fi
