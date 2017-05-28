@@ -9,7 +9,11 @@ python:
     - "2.7"
 
 env:
-    - TIKA_APP_PATH=/tmp/tika-app-1.14.jar FAUP_PATH=/tmp/faup DOCKER_ROOT_PATH=/tmp/docker-root DOCKER_ELASTICSEARCH_PATH=/tmp/docker-elasticsearch
+    - TIKA_APP_PATH=/tmp/tika-app-1.14.jar 
+      FAUP_PATH=/tmp/faup 
+      ZEMANA_PATH=/tmp/zemana 
+      DOCKER_ROOT_PATH=/tmp/docker-root 
+      DOCKER_ELASTICSEARCH_PATH=/tmp/docker-elasticsearch
 
 branches:
     only:
@@ -21,14 +25,20 @@ before_install:
     - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar
     
     # Build latest images spamscope-root, spamscope-elasticsearch
+    
+    # clone dockerfile repositories
     - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH
+    - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
+
+    # make images
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
         cd $DOCKER_ROOT_PATH;
         docker build -t $DOCKER_USERNAME/spamscope-root .;
         cd -;
         docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done';
         docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V';
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-topology -v';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-elasticsearch -v';
         cd $DOCKER_ELASTICSEARCH_PATH; 
         docker build -t $DOCKER_USERNAME/spamscope-elasticsearch .;
         cd -;
@@ -39,7 +49,8 @@ before_install:
         cd -;
         docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done';
         docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'thug -V';
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-topology -v';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-elasticsearch -v';
         cd $DOCKER_ELASTICSEARCH_PATH;
         docker build -t $DOCKER_USERNAME/spamscope-elasticsearch:develop .;
         cd -;
@@ -47,8 +58,9 @@ before_install:
 
 # command to install dependencies
 install: 
-    - pip install -r requirements.txt
-    - python setup.py install
+    - pip install -r requirements.txt && python setup.py install
+    - git clone https://$BITBUCKET_USER:$BITBUCKET_ROBOT_KEY@bitbucket.org/$BITBUCKET_USER/zemana-api.git $ZEMANA_PATH;
+      cd $ZEMANA_PATH && python setup.py install && cd -
     - src/cli/faup.sh
     - cd ${FAUP_PATH}/src/lib/bindings/python && python setup.py install && cd -
 
