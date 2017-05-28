@@ -19,12 +19,31 @@ branches:
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar
+    
+    # Build latest images spamscope-root, spamscope-elasticsearch
     - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH
-    - cd $DOCKER_ROOT_PATH && docker build -t $DOCKER_USERNAME/spamscope-root . && cd -
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done'
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V'
-    - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH
-    - cd $DOCKER_ELASTICSEARCH_PATH && docker build -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -
+    - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        cd $DOCKER_ROOT_PATH;
+        docker build -t $DOCKER_USERNAME/spamscope-root .;
+        cd -;
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V';
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
+        cd $DOCKER_ELASTICSEARCH_PATH; 
+        docker build -t $DOCKER_USERNAME/spamscope-elasticsearch .;
+        cd -;
+      fi
+    - if [ "$TRAVIS_BRANCH" == "develop" ]; then
+        cd $DOCKER_ROOT_PATH;
+        docker build -t $DOCKER_USERNAME/spamscope-root:develop .;
+        cd -;
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'thug -V';
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
+        cd $DOCKER_ELASTICSEARCH_PATH;
+        docker build -t $DOCKER_USERNAME/spamscope-elasticsearch:develop .;
+        cd -;
+      fi
 
 # command to install dependencies
 install: 
@@ -59,3 +78,8 @@ after_success:
       docker push $DOCKER_USERNAME/spamscope-root:develop;
       docker push $DOCKER_USERNAME/spamscope-elasticsearch:develop;
       fi
+
+notifications:
+    slack:
+        rooms:
+            - spamscope:$SLACK_KEY#developer
