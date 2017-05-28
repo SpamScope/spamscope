@@ -9,7 +9,7 @@ python:
     - "2.7"
 
 env:
-    - TIKA_APP_PATH=/tmp/tika-app-1.14.jar FAUP_PATH=/tmp/faup DOCKER_ROOT_PATH=/tmp/docker-root
+    - TIKA_APP_PATH=/tmp/tika-app-1.14.jar FAUP_PATH=/tmp/faup DOCKER_ROOT_PATH=/tmp/docker-root DOCKER_ELASTICSEARCH_PATH=/tmp/docker-elasticsearch
 
 branches:
     only:
@@ -23,6 +23,8 @@ before_install:
     - cd $DOCKER_ROOT_PATH && docker build -t $DOCKER_USERNAME/spamscope-root . && cd -
     - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done'
     - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V'
+    - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH
+    - cd $DOCKER_ELASTICSEARCH_PATH && docker build -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -
 
 # command to install dependencies
 install: 
@@ -51,8 +53,9 @@ after_success:
     - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
         docker push $DOCKER_USERNAME/spamscope-root;
+        docker push $DOCKER_USERNAME/spamscope-elasticsearch;
       fi
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
-        docker tag develop fmantuano/spamscope-root;
-        docker push $DOCKER_USERNAME/spamscope-root;
+      docker push $DOCKER_USERNAME/spamscope-root:develop;
+      docker push $DOCKER_USERNAME/spamscope-elasticsearch:develop;
       fi
