@@ -24,6 +24,7 @@ try:
 except ImportError:
     from collections import UserList
 
+import base64
 import copy
 import datetime
 import logging
@@ -116,13 +117,13 @@ class Attachments(UserList):
 
                 if not i.get("is_archive"):
                     if i["content_transfer_encoding"] == "base64":
-                        text += i["payload"].decode("base64") + "\n"
+                        text += base64.b64decode(i["payload"]) + "\n"
                     else:
                         text += i["payload"] + "\n"
                     continue
 
                 for j in i.get("files", []):
-                    text += j["payload"].decode("base64") + "\n"
+                    text += base64.b64decode(j["payload"]) + "\n"
 
             except UnicodeDecodeError:
                 # This exception happens with binary payloads
@@ -220,7 +221,12 @@ class Attachments(UserList):
     def _metadata(raw_dict):
         """ Return payload, file size and extension of raw data. """
         if raw_dict["content_transfer_encoding"] == "base64":
-            payload = raw_dict["payload"].decode("base64")
+            try:
+                payload = base64.b64decode(raw_dict["payload"])
+            except TypeError, e:
+                # https://gist.github.com/perrygeo/ee7c65bb1541ff6ac770
+                payload = base64.b64decode(raw_dict["payload"] + "===")
+                raw_dict.setdefault("errors", []).append(e)
         else:
             payload = raw_dict["payload"]
 
@@ -300,7 +306,12 @@ class Attachments(UserList):
 
         for i in r:
             if i.get("content_transfer_encoding") == "base64":
-                payload = i["payload"].decode("base64")
+                try:
+                    payload = base64.b64decode(i["payload"])
+                except TypeError, e:
+                    payload = base64.b64decode(i["payload"] + "===")
+                    i.setdefault("errors", []).append(e)
+
             else:
                 payload = i["payload"]
 

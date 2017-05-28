@@ -29,6 +29,7 @@ mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_1 = os.path.join(base_path, 'samples', 'mail_test_1')
 mail_test_2 = os.path.join(base_path, 'samples', 'mail_test_2')
+mail_test_3 = os.path.join(base_path, 'samples', 'mail_test_3')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
 from src.modules.attachments.attachments import HashError, ContentTypeError
@@ -66,6 +67,9 @@ class TestAttachments(unittest.TestCase):
 
         p.parse_from_file(mail_test_2)
         self.attachments_test_2 = p.attachments_list
+
+        p.parse_from_file(mail_test_3)
+        self.attachments_test_3 = p.attachments_list
 
     def test_error_base64(self):
         t = MailAttachments.withhashes(self.attachments_test_1)
@@ -305,6 +309,23 @@ class TestAttachments(unittest.TestCase):
                 self.assertIn("virustotal", j)
                 self.assertIn("zemana", j)
                 self.assertIn("thug", j)
+
+    def test_incorrect_padding(self):
+        t = MailAttachments.withhashes(self.attachments_test_3)
+        self.assertIsInstance(t, MailAttachments)
+        self.assertEqual(len(t), 1)
+
+        for i in t:
+            self.assertIn("errors", i)
+            self.assertIn("md5", i)
+            self.assertIn("sha1", i)
+            self.assertIn("sha256", i)
+            self.assertIn("sha512", i)
+            self.assertIn("ssdeep", i)
+            self.assertIn("filename", i)
+            self.assertIn("payload", i)
+            self.assertIn("mail_content_type", i)
+            self.assertIn("content_transfer_encoding", i)
 
 
 if __name__ == '__main__':
