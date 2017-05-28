@@ -316,6 +316,7 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(len(t), 1)
 
         for i in t:
+            self.assertIn("errors", i)
             self.assertIn("md5", i)
             self.assertIn("sha1", i)
             self.assertIn("sha256", i)

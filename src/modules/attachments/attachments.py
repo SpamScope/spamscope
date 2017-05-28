@@ -223,9 +223,10 @@ class Attachments(UserList):
         if raw_dict["content_transfer_encoding"] == "base64":
             try:
                 payload = base64.b64decode(raw_dict["payload"])
-            except TypeError:
+            except TypeError, e:
                 # https://gist.github.com/perrygeo/ee7c65bb1541ff6ac770
                 payload = base64.b64decode(raw_dict["payload"] + "===")
+                raw_dict.setdefault("errors", []).append(e)
         else:
             payload = raw_dict["payload"]
 
@@ -307,8 +308,9 @@ class Attachments(UserList):
             if i.get("content_transfer_encoding") == "base64":
                 try:
                     payload = base64.b64decode(i["payload"])
-                except TypeError:
+                except TypeError, e:
                     payload = base64.b64decode(i["payload"] + "===")
+                    i.setdefault("errors", []).append(e)
 
             else:
                 payload = i["payload"]
