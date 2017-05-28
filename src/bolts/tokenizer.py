@@ -174,7 +174,19 @@ class Tokenizer(AbstractBolt):
 
         if raw_attach:
             with_attachments = True
-            attachments = MailAttachments.withhashes(raw_attach)
+
+            try:
+                attachments = MailAttachments.withhashes(raw_attach)
+            except TypeError, e:
+                # TypeError: Incorrect padding base64 decode
+                self.log("Tuple failed for {!r}, in mail {!r}".format(
+                    repr(e), sha256_rand), "error")
+                self.fail(tup)
+            except UnicodeDecodeError, e:
+                # UnicodeDecodeError: 'ascii' codec can't decode byte
+                self.log("Tuple failed for {!r}, in mail {!r}".format(
+                    repr(e), sha256_rand), "error")
+                self.fail(tup)
 
             # If filter attachments is enabled
             if self.filter_attachments_enabled:

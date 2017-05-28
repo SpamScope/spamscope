@@ -226,7 +226,7 @@ class Attachments(UserList):
             except TypeError, e:
                 # https://gist.github.com/perrygeo/ee7c65bb1541ff6ac770
                 payload = base64.b64decode(raw_dict["payload"] + "===")
-                raw_dict.setdefault("errors", []).append(e)
+                raw_dict.setdefault("errors", []).append(repr(e))
         else:
             payload = raw_dict["payload"]
 
@@ -310,7 +310,7 @@ class Attachments(UserList):
                     payload = base64.b64decode(i["payload"])
                 except TypeError, e:
                     payload = base64.b64decode(i["payload"] + "===")
-                    i.setdefault("errors", []).append(e)
+                    i.setdefault("errors", []).append(repr(e))
 
             else:
                 payload = i["payload"]
