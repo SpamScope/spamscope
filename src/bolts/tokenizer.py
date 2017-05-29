@@ -134,52 +134,60 @@ class Tokenizer(AbstractBolt):
         self._load_filters()
 
     def process(self, tup):
-        sha256_rand, mail = self._make_mail(tup)
-        with_attachments = False
-        attachments = []
-        body = self.parser.body
+        try:
+            sha256_rand, mail = self._make_mail(tup)
+            with_attachments = False
+            attachments = []
+            body = self.parser.body
 
-        # If filter network is enabled
-        is_filtered = False
-        if self.filter_network_enabled:
-            if mail["sender_ip"] in self._network_analyzed:
-                is_filtered = True
+            # If filter network is enabled
+            is_filtered = False
+            if self.filter_network_enabled:
+                if mail["sender_ip"] in self._network_analyzed:
+                    is_filtered = True
 
-            # Update databese mail analyzed
-            self._network_analyzed.append(mail["sender_ip"])
+                # Update databese mail analyzed
+                self._network_analyzed.append(mail["sender_ip"])
 
-        # Emit network
-        self.emit([sha256_rand, mail["sender_ip"], is_filtered],
-                  stream="network")
+            # If filter mails is enabled
+            is_filtered = False
+            if self.filter_mails_enabled:
+                if mail["sha1"] in self._mails_analyzed:
+                    mail.pop("body", None)
+                    body = six.text_type()
+                    is_filtered = True
 
-        # If filter mails is enabled
-        is_filtered = False
-        if self.filter_mails_enabled:
-            if mail["sha1"] in self._mails_analyzed:
-                mail.pop("body", None)
-                body = six.text_type()
-                is_filtered = True
+                # Update databese mail analyzed
+                self._mails_analyzed.append(mail["sha1"])
 
-            # Update databese mail analyzed
-            self._mails_analyzed.append(mail["sha1"])
+            # Emit only attachments
+            raw_attach = self.parser.attachments_list
 
-        # Emit mail
-        self.emit([sha256_rand, mail, is_filtered], stream="mail")
+            if raw_attach:
+                with_attachments = True
+                attachments = MailAttachments.withhashes(raw_attach)
 
-        # Emit body
-        self.emit([sha256_rand, body, is_filtered], stream="body")
+                # If filter attachments is enabled
+                if self.filter_attachments_enabled:
+                    hashes = attachments.filter(self._attachments_analyzed)
+                    self._attachments_analyzed.extend(hashes)
 
-        # Emit only attachments
-        raw_attach = self.parser.attachments_list
+        except TypeError:
+            pass
 
-        if raw_attach:
-            with_attachments = True
-            attachments = MailAttachments.withhashes(raw_attach)
+        except UnicodeDecodeError:
+            pass
 
-            # If filter attachments is enabled
-            if self.filter_attachments_enabled:
-                hashes = attachments.filter(self._attachments_analyzed)
-                self._attachments_analyzed.extend(hashes)
+        else:
+            # Emit network
+            self.emit([sha256_rand, mail["sender_ip"], is_filtered],
+                      stream="network")
 
-        self.emit([sha256_rand, with_attachments, list(attachments)],
-                  stream="attachments")
+            # Emit mail
+            self.emit([sha256_rand, mail, is_filtered], stream="mail")
+
+            # Emit body
+            self.emit([sha256_rand, body, is_filtered], stream="body")
+
+            self.emit([sha256_rand, with_attachments, list(attachments)],
+                      stream="attachments")

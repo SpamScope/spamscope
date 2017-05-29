@@ -20,22 +20,28 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
 from lxml import html
+from lxml.etree import ParserError
 
 
 class Forms(Bolt):
     outputs = ['sha256_random', 'with_form']
 
     def process(self, tup):
-        sha256_random = tup.values[0]
-        body = tup.values[1]
-        is_filtered = tup.values[2]
-        with_form = False
+        try:
+            sha256_random = tup.values[0]
+            body = tup.values[1]
+            is_filtered = tup.values[2]
+            with_form = False
 
-        if not is_filtered and body.strip():
-            tree = html.fromstring(body)
-            results = tree.xpath('//form')
-            if results:
-                with_form = True
-                self.log("Forms for mail {!r}".format(sha256_random))
+            if not is_filtered and body.strip():
+                tree = html.fromstring(body)
+                results = tree.xpath('//form')
+                if results:
+                    with_form = True
+                    self.log("Forms for mail {!r}".format(sha256_random))
 
-        self.emit([sha256_random, with_form])
+        except ParserError:
+            pass
+
+        else:
+            self.emit([sha256_random, with_form])
