@@ -77,8 +77,8 @@ class Attachments(AbstractBolt):
             # self.attach.run() == self.attach()
             self.attach.run()
 
-        except Error:
-            pass
+        except Error, e:
+            self.raise_exception(e, tup)
 
         else:
             # emit

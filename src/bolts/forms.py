@@ -40,8 +40,8 @@ class Forms(Bolt):
                     with_form = True
                     self.log("Forms for mail {!r}".format(sha256_random))
 
-        except ParserError:
-            pass
+        except ParserError, e:
+            self.raise_exception(e, tup)
 
         else:
             self.emit([sha256_random, with_form])
