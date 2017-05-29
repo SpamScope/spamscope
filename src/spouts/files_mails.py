@@ -150,9 +150,12 @@ class FilesMailSpout(AbstractSpout):
         try:
             shutil.move(tup_id, self._where_failed)
 
+            # Remove from tail analyzed mail
+            self._queue.task_done()
+            self._queue_tail.remove(tup_id)
+
         except IOError:
             pass
 
         finally:
             self.log("Mail {!r} failed. Check it".format(tup_id))
-            self.ack(tup_id)

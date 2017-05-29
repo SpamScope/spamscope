@@ -21,6 +21,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import copy
 from modules import AbstractBolt, load_keywords_list
 from modules.attachments import MailAttachments
+from binascii import Error
 
 
 class Attachments(AbstractBolt):
@@ -62,18 +63,23 @@ class Attachments(AbstractBolt):
         self._load_settings()
 
     def process(self, tup):
-        sha256_random = tup.values[0]
-        with_attachments = tup.values[1]
+        try:
+            sha256_random = tup.values[0]
+            with_attachments = tup.values[1]
 
-        # Remove all values
-        self.attach.removeall()
+            # Remove all values
+            self.attach.removeall()
 
-        # Add the new values
-        self.attach.extend(tup.values[2])
+            # Add the new values
+            self.attach.extend(tup.values[2])
 
-        # Run analysis
-        # self.attach.run() == self.attach()
-        self.attach.run()
+            # Run analysis
+            # self.attach.run() == self.attach()
+            self.attach.run()
 
-        # emit
-        self.emit([sha256_random, with_attachments, list(self.attach)])
+        except Error:
+            pass
+
+        else:
+            # emit
+            self.emit([sha256_random, with_attachments, list(self.attach)])
