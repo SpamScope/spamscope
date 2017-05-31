@@ -15,23 +15,16 @@ env:
       DOCKER_ROOT_PATH=/tmp/docker-root 
       DOCKER_ELASTICSEARCH_PATH=/tmp/docker-elasticsearch
 
-branches:
-    only:
-        - master
-        - develop
-
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar
     
     # Build latest images spamscope-root, spamscope-elasticsearch
-    
-    # clone dockerfile repositories
-    - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH
-    - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
 
     # make images
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH;
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ROOT_PATH;
         docker build -t $DOCKER_USERNAME/spamscope-root .;
         cd -;
@@ -44,6 +37,8 @@ before_install:
         cd -;
       fi
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH;
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ROOT_PATH;
         docker build -t $DOCKER_USERNAME/spamscope-root:develop .;
         cd -;
@@ -80,18 +75,20 @@ script:
     - spamscope-elasticsearch -h
     - spamscope-topology -h
 
+    # timing
+    - cd tests && python timing_test_search_keywords.py && cd -
+
 after_success:
-    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push $DOCKER_USERNAME/spamscope-root;
         docker push $DOCKER_USERNAME/spamscope-elasticsearch;
       fi
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
-      docker push $DOCKER_USERNAME/spamscope-root:develop;
-      docker push $DOCKER_USERNAME/spamscope-elasticsearch:develop;
+        docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        docker push $DOCKER_USERNAME/spamscope-root:develop;
+        docker push $DOCKER_USERNAME/spamscope-elasticsearch:develop;
       fi
 
 notifications:
-    slack:
-        rooms:
-            - spamscope:$SLACK_KEY#developer
+    slack: spamscope:$SLACK_KEY

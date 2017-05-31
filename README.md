@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SpamScope/spamscope.svg?branch=develop)](https://travis-ci.org/SpamScope/spamscope)
+[![Build Status](https://travis-ci.org/SpamScope/spamscope.svg?branch=master)](https://travis-ci.org/SpamScope/spamscope)
 
 ![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 

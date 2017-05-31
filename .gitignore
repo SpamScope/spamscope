@@ -1,6 +1,7 @@
 *.pyc
 .*.swp
 .DS_Store
+.coverage
 .env
 .ropeproject
 SpamScope.egg-info/
