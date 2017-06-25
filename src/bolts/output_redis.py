@@ -73,6 +73,10 @@ class OutputRedis(AbstractBolt):
     def process(self, tup):
         raw_mail = tup.values[1]
 
+        # Convert back to object strings convert manually
+        if raw_mail.get("network", None):
+            raw_mail["network"] = json.loads(raw_mail["network"])
+
         # Reformat output
         mail, attachments = reformat_output(
             raw_mail, self.component_name)

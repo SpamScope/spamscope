@@ -9,7 +9,8 @@ python:
     - "2.7"
 
 env:
-    - TIKA_APP_PATH=/tmp/tika-app-1.14.jar 
+    - TIKA_VER=1.15
+      TIKA_APP_JAR=/tmp/tika-app-${TIKA_VER}.jar 
       FAUP_PATH=/tmp/faup 
       ZEMANA_PATH=/tmp/zemana 
       DOCKER_ROOT_PATH=/tmp/docker-root 
@@ -60,7 +61,7 @@ install:
     - cd ${FAUP_PATH}/src/lib/bindings/python && python setup.py install && cd -
 
 before_script:
-    - curl -o ${TIKA_APP_PATH} https://archive.apache.org/dist/tika/tika-app-1.14.jar
+    - curl -o ${TIKA_APP_JAR} https://archive.apache.org/dist/tika/tika-app-${TIKA_VER}.jar
 
 # command to run tests
 script: 

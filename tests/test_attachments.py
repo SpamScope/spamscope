@@ -43,7 +43,7 @@ except ImportError:
 # Set environment variables to change defaults:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
-DEFAULTS = {"TIKA_APP_PATH": "/opt/tika/tika-app-1.14.jar",
+DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.15.jar",
             "VIRUSTOTAL_ENABLED": "False",
             "ZEMANA_ENABLED": "False",
             "THUG_ENABLED": "False"}
@@ -282,7 +282,7 @@ class TestAttachments(unittest.TestCase):
         t = MailAttachments.withhashes(self.attachments_thug)
         parameters = {
             "tika": {"enabled": True,
-                     "path_jar": OPTIONS["TIKA_APP_PATH"],
+                     "path_jar": OPTIONS["TIKA_APP_JAR"],
                      "memory_allocation": None},
             "tika_whitelist_cont_types": ["application/zip"],
             "virustotal": {"enabled": True,

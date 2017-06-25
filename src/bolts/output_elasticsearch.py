@@ -21,6 +21,11 @@ from __future__ import absolute_import, print_function, unicode_literals
 from modules import AbstractBolt, reformat_output
 from elasticsearch import Elasticsearch, helpers
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 
 class OutputElasticsearch(AbstractBolt):
     """Output tokenized mails on Elasticsearch. """
@@ -60,6 +65,10 @@ class OutputElasticsearch(AbstractBolt):
 
     def process(self, tup):
         raw_mail = tup.values[1]
+
+        # Convert back to object strings convert manually
+        if raw_mail.get("network", None):
+            raw_mail["network"] = json.loads(raw_mail["network"])
 
         # Reformat output
         mail, attachments = reformat_output(
