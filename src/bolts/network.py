@@ -46,11 +46,11 @@ class Network(AbstractBolt):
                 except KeyError:
                     self.log("KeyError: {!r} doesn't exist in conf".format(
                         p.__name__), "error")
-                finally:
-                    # We have to convert results in string because Java can't
-                    # convert long number:
-                    # https://github.com/Parsely/streamparse/issues/368
-                    # We need to convert back to object in last output bolts
-                    results = json.dumps(results, ensure_ascii=False)
+            else:
+                # We have to convert results in string because Java can't
+                # convert long number:
+                # https://github.com/Parsely/streamparse/issues/368
+                # We need to convert back to object in last output bolts
+                results = json.dumps(results, ensure_ascii=False)
 
         self.emit([sha256_random, results, is_filtered])
