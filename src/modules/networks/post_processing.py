@@ -62,8 +62,8 @@ You don't need anything else.
 
 @register(processors, active=True)
 def shodan(conf, ipaddress, results):
-    """This method updates the attachments results
-    with the Tika reports.
+    """This method updates the network results
+    with the Shodan report.
 
     Args:
         conf (dict): dict of configuration
@@ -79,8 +79,8 @@ def shodan(conf, ipaddress, results):
         api = shodan.Shodan(conf["api_key"])
 
         try:
-            report = api.host(ipaddress)
-            json.dumps(report, ensure_ascii=False)
+            r = api.host(ipaddress)
+            report = json.dumps(r, ensure_ascii=False)
         except shodan.APIError:
             return
         except TypeError:
@@ -93,7 +93,7 @@ def shodan(conf, ipaddress, results):
 
 @register(processors, active=True)
 def virustotal(conf, ipaddress, results):
-    """This method updates the attachments results
+    """This method updates the network results
     with the Virustotal reports.
 
     Args:
@@ -114,8 +114,8 @@ def virustotal(conf, ipaddress, results):
         # TypeError: SSLError(SSLEOFError(8, u'EOF occurred in violation of
         # protocol (_ssl.c:590)'),) is not JSON serializable')
         try:
-            report = vt.get_ip_report(ipaddress)
-            json.dumps(report, ensure_ascii=False)
+            r = vt.get_ip_report(ipaddress)
+            report = json.dumps(r, ensure_ascii=False)
         except TypeError:
             log.error("TypeError in VirusTotal report for ip {!r}".format(
                 ipaddress))

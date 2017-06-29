@@ -89,7 +89,7 @@
               "type": "ip"
             },
             "match_pattern": "regex",
-            "match": "(^|.*\\.)(sender_ip|srcip|http_iv_remote_address|clientip|syslog_host|ip)$"
+            "match": "(^|.*\\.)(sender_ip|srcip|http_iv_remote_address|clientip|syslog_host|ip_str)$"
           }
         },
         {

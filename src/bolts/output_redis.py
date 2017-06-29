@@ -74,8 +74,15 @@ class OutputRedis(AbstractBolt):
         raw_mail = tup.values[1]
 
         # Convert back to object strings convert manually
-        if raw_mail.get("network", None):
-            raw_mail["network"] = json.loads(raw_mail["network"])
+        if raw_mail.get("network"):
+
+            if raw_mail["network"].get("shodan"):
+                raw_mail["network"]["shodan"] = json.loads(
+                    raw_mail["network"]["shodan"])
+
+            if raw_mail["network"].get("virustotal"):
+                raw_mail["network"]["virustotal"] = json.loads(
+                    raw_mail["network"]["virustotal"])
 
         # Reformat output
         mail, attachments = reformat_output(

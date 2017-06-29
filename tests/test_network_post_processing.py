@@ -18,6 +18,7 @@ limitations under the License.
 """
 
 import os
+import six
 import sys
 import unittest
 import simplejson as json
@@ -60,7 +61,10 @@ class TestPostProcessing(unittest.TestCase):
         virustotal(conf, self.ipaddress, results)
         self.assertTrue(results)
         self.assertIn("virustotal", results)
-        self.assertIsInstance(results["virustotal"], dict)
+        self.assertIsInstance(results["virustotal"], six.text_type)
+        r = json.loads(results["virustotal"])
+        self.assertTrue(r)
+        self.assertIsInstance(r, dict)
 
     @unittest.skipIf(OPTIONS["SHODAN_ENABLED"].capitalize() == "False",
                      "Shodan.io test skipped: "
@@ -73,45 +77,16 @@ class TestPostProcessing(unittest.TestCase):
         # Complete parameters
         conf = {"enabled": True,
                 "api_key": OPTIONS["SHODAN_APIKEY"]}
-
-        results = {}
-        self.assertFalse(results)
-        results_str = json.dumps(results, ensure_ascii=False)
-        self.assertTrue(results_str)
-
-        shodan(conf, self.ipaddress, results)
-
-        results_str = json.dumps(results, ensure_ascii=False)
-        self.assertTrue(results)
-        self.assertIn("shodan", results)
-        self.assertIsInstance(results["shodan"], dict)
-        self.assertIn("data", results["shodan"])
-        self.assertEqual(results["shodan"]["city"], "Mountain View")
-
-        results_converted = json.loads(results_str)
-        self.assertTrue(results_converted)
-        self.assertIn("shodan", results_converted)
-        self.assertIsInstance(results_converted["shodan"], dict)
-        self.assertIn("data", results_converted["shodan"])
-        self.assertEqual(results_converted["shodan"]["city"], "Mountain View")
-
-    @unittest.skipIf(OPTIONS["SHODAN_ENABLED"].capitalize() == "False",
-                     "Shodan.io test skipped: "
-                     "set env variable 'SHODAN_ENABLED' to True")
-    def test_shodan_convert(self):
-        """Test add Shodan processing."""
-
-        from src.modules.networks import shodan
-
-        # Complete parameters
-        conf = {"enabled": True,
-                "api_key": OPTIONS["SHODAN_APIKEY"]}
         results = {}
         self.assertFalse(results)
         shodan(conf, self.ipaddress, results)
-        self.assertTrue(results)
         self.assertIn("shodan", results)
-        self.assertIsInstance(results["shodan"], dict)
+        self.assertIsInstance(results["shodan"], six.text_type)
+        r = json.loads(results["shodan"])
+        self.assertTrue(r)
+        self.assertIsInstance(r, dict)
+        self.assertIn("data", r)
+        self.assertEqual(r["city"], "Mountain View")
 
     @unittest.skipIf(OPTIONS["SHODAN_ENABLED"].capitalize() == "False" or
                      OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
@@ -137,9 +112,9 @@ class TestPostProcessing(unittest.TestCase):
 
         self.assertTrue(results)
         self.assertIn("shodan", results)
-        self.assertIsInstance(results["shodan"], dict)
+        self.assertIsInstance(results["shodan"], six.text_type)
         self.assertIn("virustotal", results)
-        self.assertIsInstance(results["virustotal"], dict)
+        self.assertIsInstance(results["virustotal"], six.text_type)
 
 
 if __name__ == '__main__':

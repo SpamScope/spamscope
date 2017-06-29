@@ -20,11 +20,6 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
 from modules import AbstractBolt
 from modules.networks import processors
 
@@ -46,11 +41,5 @@ class Network(AbstractBolt):
                 except KeyError:
                     self.log("KeyError: {!r} doesn't exist in conf".format(
                         p.__name__), "error")
-            else:
-                # We have to convert results in string because Java can't
-                # convert long number:
-                # https://github.com/Parsely/streamparse/issues/368
-                # We need to convert back to object in last output bolts
-                results = json.dumps(results, ensure_ascii=False)
 
         self.emit([sha256_random, results, is_filtered])
