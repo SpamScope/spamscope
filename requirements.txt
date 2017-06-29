@@ -11,6 +11,6 @@ shodan==1.7.1
 simplejson==3.10.0
 six==1.10.0
 ssdeep==3.2
-streamparse==3.5.0
+streamparse==3.6.0
 tika-app==1.1.1
 virustotal-api==1.1.2
