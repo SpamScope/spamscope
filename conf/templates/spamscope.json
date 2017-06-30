@@ -1,6 +1,6 @@
 {
   "order": 0,
-  "version": 2,
+  "version": 4,
   "template": "spamscope_*-*",
   "settings": {
     "analysis": {
@@ -36,6 +36,14 @@
   "mappings": {
     "_default_": {
       "dynamic_templates": [
+        {
+          "cert_serial": {
+            "mapping": {
+              "type": "text"
+            },
+            "path_match": "network.shodan.data.ssl.cert.serial"
+          }
+        },
         {
           "hashes": {
             "mapping": {

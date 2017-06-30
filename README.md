@@ -213,6 +213,15 @@ $ export SHODAN_APIKEY="your key"
 ```
 
 
+
+## SpamScope on Web
+ - [Shodan Applications & Integrations](https://developer.shodan.io/apps)
+ - [The Honeynet Project](http://honeynet.org/node/1329)
+ - [securityonline.info](http://securityonline.info/pcileech-direct-memory-access-dma-attack-software/)
+ - [jekil/awesome-hacking](https://github.com/jekil/awesome-hacking)
+
+
+
 ## Docker images
 It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
