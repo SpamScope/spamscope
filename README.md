@@ -16,14 +16,14 @@ It's possible to analyze more than 5 milions of mails (without attachments post 
 - It's distributed: SpamScope uses Apache Storm, free and open source distributed realtime computation system.
 - It makes JSON output that you can save where you want.
 - It's easy to setup: there are docker images and docker-compose ready for use.
-- It's integrated with Apache Tika, VirusTotal and Thug (for now).
+- It's integrated with Apache Tika, VirusTotal, Thug and Shodan (for now).
 - It's free (for special functions you can contact me).
 
 ### Distributed
-SpamScope use Apache Storm that allows you to start small and scale horizontally as you grow. Simply add more worker.
+SpamScope uses Apache Storm that allows you to start small and scale horizontally as you grow. Simply add more workers.
 
 ### Flexibility
-You can chose your mails input sources (with spouts) and your functionalities (with bolts). SpamScope come with a tokenizer (split mail in token: headers, body, attachments), attachments and phishing analyzer (Which is the target of mails? Is there a malware in attachment?) and JSON output.
+You can chose your mails input sources (with spouts) and your functionalities (with bolts). SpamScope comes with a tokenizer (split mail in token: headers, body, attachments), attachments and phishing analyzer (Which is the target of mails? Is there a malware in attachment?) and JSON output.
 
 ### Store where you want
 You can build your custom output bolts and store your data in Elasticsearch, Mongo, filesystem, etc.
@@ -43,6 +43,14 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
 
 
 [![Donate](https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2)
+
+
+
+## SpamScope on Web
+ - [Shodan Applications & Integrations](https://developer.shodan.io/apps)
+ - [The Honeynet Project](http://honeynet.org/node/1329)
+ - [securityonline.info](http://securityonline.info/pcileech-direct-memory-access-dma-attack-software/)
+ - [jekil/awesome-hacking](https://github.com/jekil/awesome-hacking)
 
 
 
@@ -135,7 +143,6 @@ If you want submit SpamScope topology use `spamscope-topology submit` tool. For 
 $ spamscope-topology submit --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}
 ```
 
-There are some options that you can use.
 
 ### Important
 It's very important to set the main configuration file. The default value is `/etc/spamscope/spamscope.yml`, but it's possible to set the environment variable `SPAMSCOPE_CONF_FILE`:
@@ -153,7 +160,7 @@ It's possible change the default settings for all Apache Storm options. I sugges
  - **topology.max.spout.pending**: Apache Storm framework will then throttle your spout as needed to meet the `topology.max.spout.pending` requirement
  - **topology.sleep.spout.wait.strategy.time.ms**: max sleep for emit new tuple (mail)
 
-If you don't enable Apache Tika, Thug and VirusTotal, could use:
+If you don't enable Apache Tika, Thug and VirusTotal, you could use:
 
 ```
 topology.tick.tuple.freq.secs: 60
@@ -213,20 +220,13 @@ $ export SHODAN_APIKEY="your key"
 ```
 
 
-
-## SpamScope on Web
- - [Shodan Applications & Integrations](https://developer.shodan.io/apps)
- - [The Honeynet Project](http://honeynet.org/node/1329)
- - [securityonline.info](http://securityonline.info/pcileech-direct-memory-access-dma-attack-software/)
- - [jekil/awesome-hacking](https://github.com/jekil/awesome-hacking)
-
-
-
 ## Docker images
 It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
  - [Root](https://hub.docker.com/r/fmantuano/spamscope-root/)
  - [Elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
+
+For each image there are two tags: **develop** and **latest**.
 
 
 

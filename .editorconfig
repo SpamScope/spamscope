@@ -2,10 +2,16 @@
 
 root = true
 
-[*.py]
+# Unix-style newlines
+[*]
+end_of_line = lf
+insert_final_newline = false
+
+# Set default charset
+[*.{yml,py,json,txt,clj,md}]
 charset = utf-8
+
+[*.py]
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
-end_of_line = lf
-insert_final_newline = false
