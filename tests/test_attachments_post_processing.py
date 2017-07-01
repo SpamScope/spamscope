@@ -37,7 +37,7 @@ except ImportError:
 # Set environment variables to change defaults:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
-DEFAULTS = {"TIKA_APP_PATH": "/opt/tika/tika-app-1.14.jar",
+DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.15.jar",
             "VIRUSTOTAL_ENABLED": "False",
             "ZEMANA_ENABLED": "False",
             "THUG_ENABLED": "False"}
@@ -125,7 +125,7 @@ class TestPostProcessing(unittest.TestCase):
 
         # Complete parameters
         conf = {"enabled": True,
-                "path_jar": OPTIONS["TIKA_APP_PATH"],
+                "path_jar": OPTIONS["TIKA_APP_JAR"],
                 "memory_allocation": None,
                 "whitelist_cont_types": ["application/zip"]}
         attachments = MailAttachments.withhashes(self.attachments)
@@ -159,7 +159,7 @@ class TestPostProcessing(unittest.TestCase):
         # attachments a key of conf
         with self.assertRaises(KeyError):
             conf_inner = {"enabled": True,
-                          "path_jar": OPTIONS["TIKA_APP_PATH"],
+                          "path_jar": OPTIONS["TIKA_APP_JAR"],
                           "memory_allocation": None}
             attachments = MailAttachments.withhashes(self.attachments)
             tika(conf_inner, attachments)

@@ -172,11 +172,11 @@ class Tokenizer(AbstractBolt):
                     hashes = attachments.filter(self._attachments_analyzed)
                     self._attachments_analyzed.extend(hashes)
 
-        except TypeError:
-            pass
+        except TypeError, e:
+            self.raise_exception(e, tup)
 
-        except UnicodeDecodeError:
-            pass
+        except UnicodeDecodeError, e:
+            self.raise_exception(e, tup)
 
         else:
             # Emit network

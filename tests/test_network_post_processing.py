@@ -18,8 +18,10 @@ limitations under the License.
 """
 
 import os
+import six
 import sys
 import unittest
+import simplejson as json
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
@@ -59,7 +61,10 @@ class TestPostProcessing(unittest.TestCase):
         virustotal(conf, self.ipaddress, results)
         self.assertTrue(results)
         self.assertIn("virustotal", results)
-        self.assertIsInstance(results["virustotal"], dict)
+        self.assertIsInstance(results["virustotal"], six.text_type)
+        r = json.loads(results["virustotal"])
+        self.assertTrue(r)
+        self.assertIsInstance(r, dict)
 
     @unittest.skipIf(OPTIONS["SHODAN_ENABLED"].capitalize() == "False",
                      "Shodan.io test skipped: "
@@ -75,9 +80,13 @@ class TestPostProcessing(unittest.TestCase):
         results = {}
         self.assertFalse(results)
         shodan(conf, self.ipaddress, results)
-        self.assertTrue(results)
         self.assertIn("shodan", results)
-        self.assertIsInstance(results["shodan"], dict)
+        self.assertIsInstance(results["shodan"], six.text_type)
+        r = json.loads(results["shodan"])
+        self.assertTrue(r)
+        self.assertIsInstance(r, dict)
+        self.assertIn("data", r)
+        self.assertEqual(r["city"], "Mountain View")
 
     @unittest.skipIf(OPTIONS["SHODAN_ENABLED"].capitalize() == "False" or
                      OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
@@ -103,9 +112,9 @@ class TestPostProcessing(unittest.TestCase):
 
         self.assertTrue(results)
         self.assertIn("shodan", results)
-        self.assertIsInstance(results["shodan"], dict)
+        self.assertIsInstance(results["shodan"], six.text_type)
         self.assertIn("virustotal", results)
-        self.assertIsInstance(results["virustotal"], dict)
+        self.assertIsInstance(results["virustotal"], six.text_type)
 
 
 if __name__ == '__main__':

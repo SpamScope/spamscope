@@ -143,8 +143,8 @@ class FilesMailSpout(AbstractSpout):
             self._queue.task_done()
             self._queue_tail.remove(tup_id)
             self.log("Mails to process: {}".format(len(self._queue_tail)))
-        except KeyError:
-            pass
+        except KeyError, e:
+            self.raise_exception(e, tup_id)
 
     def fail(self, tup_id):
         try:
@@ -154,8 +154,8 @@ class FilesMailSpout(AbstractSpout):
             self._queue.task_done()
             self._queue_tail.remove(tup_id)
 
-        except IOError:
-            pass
+        except IOError, e:
+            self.raise_exception(e, tup_id)
 
         finally:
             self.log("Mail {!r} failed. Check it".format(tup_id))
