@@ -53,18 +53,12 @@ class TestSpamAssassin(unittest.TestCase):
 
     def test_analysis_from_file(self):
         s = spamassassin.analysis_from_file(mail_thug)
-        self.assertIn("X-Spam-Checker-Version", s)
-        self.assertIn("X-Spam-Flag", s)
-        self.assertIn("X-Spam-Level", s)
         self.assertIn("X-Spam-Status", s)
         self.assertIn("pts rule name", s)
 
     def test_report_from_file(self):
         s = spamassassin.report_from_file(mail_thug)
         self.assertIsInstance(s, dict)
-        self.assertIn("X-Spam-Checker-Version", s)
-        self.assertIn("X-Spam-Flag", s)
-        self.assertIn("X-Spam-Level", s)
         self.assertIn("X-Spam-Status", s)
         self.assertIn("score", s)
         self.assertIn("details", s)

@@ -76,6 +76,9 @@ tokenizer:
     # Max number of hashes saved for filter function
     maxlen_network: 1000000
 
+    spamassassin:
+        enabled: False
+
 
 # Network bolt configuration
 network:
