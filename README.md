@@ -88,8 +88,11 @@ python setup.py install
 [Faup](https://github.com/stricaud/faup) stands for Finally An Url Parser and is a library and command line tool to parse URLs and normalize fields.
 To install it follow the [wiki](https://github.com/SpamScope/spamscope/wiki/Installation#faup).
 
+### SpamAssassin (optional)
+SpamScope can use [SpamAssassin](http://spamassassin.apache.org/) an open source anti-spam to analyze every mails.
+
 ### Tika (optional)
-SpamScope can use [Tika App](https://tika.apache.org/) to parse every attachment mail.
+SpamScope can use [Tika App](https://tika.apache.org/) to parse every attachments.
 The **Apache Tika** toolkit detects and extracts metadata and text from over a thousand different file types (such as PPT, XLS, and PDF).
 To install it follow the [wiki](https://github.com/SpamScope/spamscope/wiki/Installation#tika-app-optional).
 To enable Apache Tika analisys, you should set it in `attachments` section.

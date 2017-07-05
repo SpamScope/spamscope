@@ -43,21 +43,24 @@ def obj_report(s):
     """
 
     SCORE_REGX = re.compile(r"score=([0-9\.]+)")
-
     message = email.message_from_string(s)
 
-    details = convert_ascii2json(message.epilogue.strip())
+    t = message.epilogue
+    t = t[t.index("pts rule name"):].strip()
+
+    details = convert_ascii2json(t)
     spam_checker_version = message.get("X-Spam-Checker-Version")
     spam_flag = message.get("X-Spam-Flag")
     spam_level = message.get("X-Spam-Level")
     spam_status = message.get("X-Spam-Status")
+    score = float(SCORE_REGX.search(spam_status).group(1))
 
     report = {
         "X-Spam-Checker-Version": spam_checker_version,
         "X-Spam-Flag": spam_flag,
         "X-Spam-Level": spam_level,
         "X-Spam-Status": spam_status,
-        "score": SCORE_REGX.search(spam_status).group(1),
+        "score": score,
         "details": details}
 
     return report
@@ -75,7 +78,6 @@ def report_from_file(fp):
     """
 
     mail = analysis_from_file(fp)
-
     return obj_report(mail)
 
 
@@ -105,6 +107,10 @@ def analysis_from_file(fp):
     stdoutdata, _ = out.communicate()
 
     return stdoutdata.decode("utf-8").strip()
+
+
+def report_from_string(s):
+    raise NotImplementedError("function not implemented")
 
 
 def convert_ascii2json(table):
