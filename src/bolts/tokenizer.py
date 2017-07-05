@@ -23,6 +23,7 @@ import os
 import random
 import six
 
+import modules.spamassassin as spamassassin
 from collections import deque
 from mailparser import MailParser
 from modules import AbstractBolt
@@ -139,26 +140,38 @@ class Tokenizer(AbstractBolt):
             with_attachments = False
             attachments = []
             body = self.parser.body
+            raw_mail = tup.values[0]
+            mail_format = tup.values[5]
 
             # If filter network is enabled
-            is_filtered = False
+            is_filtered_net = False
             if self.filter_network_enabled:
                 if mail["sender_ip"] in self._network_analyzed:
-                    is_filtered = True
+                    is_filtered_net = True
 
                 # Update databese mail analyzed
                 self._network_analyzed.append(mail["sender_ip"])
 
             # If filter mails is enabled
-            is_filtered = False
+            is_filtered_mail = False
             if self.filter_mails_enabled:
                 if mail["sha1"] in self._mails_analyzed:
                     mail.pop("body", None)
                     body = six.text_type()
-                    is_filtered = True
+                    is_filtered_mail = True
 
                 # Update databese mail analyzed
                 self._mails_analyzed.append(mail["sha1"])
+
+            # SpamAssassin integration
+            # It's possible to use another bolt
+            if not is_filtered_mail and self.conf["spamassassin"]["enabled"]:
+                if mail_format == PATH:
+                    mail["SpamAssassin"] = \
+                        spamassassin.report_from_file(raw_mail)
+                else:
+                    mail["SpamAssassin"] = \
+                        spamassassin.report_from_string(raw_mail)
 
             # Emit only attachments
             raw_attach = self.parser.attachments_list
@@ -180,14 +193,14 @@ class Tokenizer(AbstractBolt):
 
         else:
             # Emit network
-            self.emit([sha256_rand, mail["sender_ip"], is_filtered],
+            self.emit([sha256_rand, mail["sender_ip"], is_filtered_net],
                       stream="network")
 
             # Emit mail
-            self.emit([sha256_rand, mail, is_filtered], stream="mail")
+            self.emit([sha256_rand, mail, is_filtered_mail], stream="mail")
 
             # Emit body
-            self.emit([sha256_rand, body, is_filtered], stream="body")
+            self.emit([sha256_rand, body, is_filtered_mail], stream="body")
 
             self.emit([sha256_rand, with_attachments, list(attachments)],
                       stream="attachments")

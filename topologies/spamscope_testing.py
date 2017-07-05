@@ -38,7 +38,7 @@ class OutputTestingTopology(Topology):
     attachments = Attachments.spec(
         name="attachments",
         inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
-        par=2)
+        par=1)
 
     urls_body = UrlsHandlerBody.spec(
         name="urls-handler-body",
@@ -63,7 +63,7 @@ class OutputTestingTopology(Topology):
     network = Network.spec(
         name="network",
         inputs={tokenizer['network']: Grouping.fields('sha256_random')},
-        par=2)
+        par=1)
 
     json = JsonMaker.spec(
         name="json",

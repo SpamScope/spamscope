@@ -18,7 +18,7 @@ env:
 
 before_install:
     - sudo apt-get -qq update
-    - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar
+    - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar spamassassin
     
     # Build latest images spamscope-root, spamscope-elasticsearch
 
@@ -71,6 +71,7 @@ script:
     - python tests/test_attachments_utils.py
     - python tests/test_bitmap.py
     - python tests/test_utils.py
+    - python tests/test_spamassassin.py
 
     # cli help
     - spamscope-elasticsearch -h
