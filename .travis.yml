@@ -25,28 +25,23 @@ before_install:
     # make images
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH;
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ROOT_PATH;
         docker build -t $DOCKER_USERNAME/spamscope-root .;
         cd -;
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-topology -v';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-elasticsearch -v';
+        
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ELASTICSEARCH_PATH; 
         docker build -t $DOCKER_USERNAME/spamscope-elasticsearch .;
         cd -;
       fi
+      
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH;
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ROOT_PATH;
         docker build -t $DOCKER_USERNAME/spamscope-root:develop .;
         cd -;
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'thug -V';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-topology -v';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-elasticsearch -v';
+        
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ELASTICSEARCH_PATH;
         docker build -t $DOCKER_USERNAME/spamscope-elasticsearch:develop .;
         cd -;
@@ -65,6 +60,17 @@ before_script:
 
 # command to run tests
 script: 
+    # Unitests in Docker containers
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done'
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V'
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-topology -v'
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-elasticsearch -v'
+    
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done'
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'thug -V'
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-topology -v'
+    - docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-elasticsearch -v'
+        
     # Unittests
     - python tests/test_attachments.py
     - python tests/test_attachments_post_processing.py
