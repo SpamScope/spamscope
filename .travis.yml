@@ -29,7 +29,6 @@ before_install:
         docker build -t $DOCKER_USERNAME/spamscope-root .;
         cd -;
         
-        # Unitests in Docker container
         docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/attachments.py';
         docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/test_attachments_post_processing.py';
         docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/test_attachments_utils.py';
@@ -53,7 +52,6 @@ before_install:
         docker build -t $DOCKER_USERNAME/spamscope-root:develop .;
         cd -;
         
-        # Unitests in Docker container
         docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/attachments.py';
         docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/test_attachments_post_processing.py';
         docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/test_attachments_utils.py';
