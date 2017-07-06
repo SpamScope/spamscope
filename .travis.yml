@@ -29,6 +29,18 @@ before_install:
         docker build -t $DOCKER_USERNAME/spamscope-root .;
         cd -;
         
+        # Unitests in Docker container
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/attachments.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/test_attachments_post_processing.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/test_attachments_utils.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/test_bitmap.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/test_network_post_processing.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/test_spamassassin.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python tests/test_utils.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-topology -v';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-elasticsearch -v';
+                
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ELASTICSEARCH_PATH; 
         docker build -t $DOCKER_USERNAME/spamscope-elasticsearch .;
@@ -40,6 +52,18 @@ before_install:
         cd $DOCKER_ROOT_PATH;
         docker build -t $DOCKER_USERNAME/spamscope-root:develop .;
         cd -;
+        
+        # Unitests in Docker container
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/attachments.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/test_attachments_post_processing.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/test_attachments_utils.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/test_bitmap.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/test_network_post_processing.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/test_spamassassin.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python tests/test_utils.py';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'thug -V';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-topology -v';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-elasticsearch -v';
         
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ELASTICSEARCH_PATH;
@@ -60,17 +84,6 @@ before_script:
 
 # command to run tests
 script: 
-    # Unitests in Docker containers
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done'
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V'
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-topology -v'
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-elasticsearch -v'
-    
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done'
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'thug -V'
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-topology -v'
-    - docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-elasticsearch -v'
-        
     # Unittests
     - python tests/test_attachments.py
     - python tests/test_attachments_post_processing.py
