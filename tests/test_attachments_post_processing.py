@@ -205,11 +205,6 @@ class TestPostProcessing(unittest.TestCase):
         self.assertIn('behavior', first_thug_analysis)
         self.assertIn('thug', first_thug_analysis)
         self.assertIn('classifiers', first_thug_analysis)
-        # TODO: disabled because the hashes are changed
-        # self.assertEqual(first_thug_analysis['files'][0]['sha1'],
-                         # "e2835a38f50d287c65b0e53b4787d41095a3514f")
-        # self.assertEqual(first_thug_analysis['files'][0]['md5'],
-                         # "b83c7ac97c22ce248b09f4388c130df0")
         self.assertEqual(
             first_thug_analysis['thug']['personality']['useragent'],
             'win7ie90')
