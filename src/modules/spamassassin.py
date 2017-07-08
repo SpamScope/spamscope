@@ -43,17 +43,26 @@ def obj_report(s):
     """
 
     SCORE_REGX = re.compile(r"score=([0-9\.]+)")
+    s = six.text_type(s, encoding="ascii", errors="ignore")
+
     message = email.message_from_string(s)
 
-    t = message.epilogue
-    t = t[t.index("pts rule name"):].strip()
+    try:
+        t = message.epilogue
+        t = t[t.index("pts rule name"):].strip()
+    except (ValueError, AttributeError):
+        return
 
     details = convert_ascii2json(t)
     spam_checker_version = message.get("X-Spam-Checker-Version")
     spam_flag = message.get("X-Spam-Flag")
     spam_level = message.get("X-Spam-Level")
     spam_status = message.get("X-Spam-Status")
-    score = float(SCORE_REGX.search(spam_status).group(1))
+
+    try:
+        score = float(SCORE_REGX.search(spam_status).group(1))
+    except AttributeError:
+        score = 0.0
 
     report = {
         "X-Spam-Checker-Version": spam_checker_version,
@@ -105,8 +114,7 @@ def analysis_from_file(fp):
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     stdoutdata, _ = out.communicate()
-
-    return stdoutdata.decode("utf-8").strip()
+    return stdoutdata
 
 
 def report_from_string(s):

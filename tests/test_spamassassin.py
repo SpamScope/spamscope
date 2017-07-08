@@ -30,6 +30,7 @@ import src.modules.spamassassin as spamassassin
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_thug_spamassassin = os.path.join(
     base_path, 'samples', 'mail_thug_spamassassin')
+mail_spamassassin = os.path.join(base_path, 'samples', 'mail_spamassassin')
 
 
 class TestSpamAssassin(unittest.TestCase):
@@ -58,6 +59,15 @@ class TestSpamAssassin(unittest.TestCase):
 
     def test_report_from_file(self):
         s = spamassassin.report_from_file(mail_thug)
+        self.assertIsInstance(s, dict)
+        self.assertIn("X-Spam-Status", s)
+        self.assertIn("score", s)
+        self.assertIn("details", s)
+        self.assertIsInstance(s["details"], list)
+        self.assertIsInstance(s["score"], float)
+
+    def test_mail_spamassassin(self):
+        s = spamassassin.report_from_file(mail_spamassassin)
         self.assertIsInstance(s, dict)
         self.assertIn("X-Spam-Status", s)
         self.assertIn("score", s)
