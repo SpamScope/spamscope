@@ -136,7 +136,7 @@ def convert_ascii2json(table):
     l = []
 
     for row in t:
-        if row[0]:
+        if row[0] or row[0] == 0:
             l.append({
                 "pts": float(row[0]),
                 "rule name": row[1].strip(),
