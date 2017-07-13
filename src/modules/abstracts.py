@@ -42,6 +42,11 @@ except ImportError:
     from chainmap import ChainMap
 
 
+# Constants mail types
+MAIL_PATH = 0
+MAIL_STRING = 1
+
+
 class AbstractComponentMixin(object):
 
     __metaclass__ = ABCMeta

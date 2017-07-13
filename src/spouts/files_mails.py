@@ -24,16 +24,13 @@ import glob
 import os
 import shutil
 import time
-from modules import AbstractSpout, MailItem
+from modules import AbstractSpout, MailItem, MAIL_PATH
 from modules.exceptions import ImproperlyConfigured
 
 
-MAIL_PATH = "path"
-
-
 class FilesMailSpout(AbstractSpout):
-    outputs = ['mail_path', 'mail_server', 'mailbox',
-               'priority', 'trust', 'kind_data']
+    outputs = ['raw_mail', 'mail_server', 'mailbox',
+               'priority', 'trust', 'mail_type']
 
     def initialize(self, stormconf, context):
         super(FilesMailSpout, self).initialize(stormconf, context)
