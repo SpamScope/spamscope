@@ -3,6 +3,7 @@ astropy==1.3.3
 backports.functools-lru-cache==1.3
 chainmap==1.0.2
 elasticsearch==5.4.0
+lxml==3.8.0
 mail-parser==1.2.0
 patool==1.12
 pyparsing==2.2.0
