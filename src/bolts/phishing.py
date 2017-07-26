@@ -109,7 +109,7 @@ class Phishing(AbstractBolt):
                     self._pb.set_property_score(v)
 
         # Check urls
-        # Target not added because urls come already analyzed text
+        # Target not added because text urls already analyzed
         for k, v in urls:
             if k:
                 with_urls = True

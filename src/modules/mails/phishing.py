@@ -29,7 +29,7 @@ from ..attachments import MailAttachments
 from ..bitmap import PhishingBitMap
 
 
-def is_form(body):
+def check_form(body):
     """
     Check the presence of forms action.
 
@@ -49,6 +49,17 @@ def is_form(body):
 
 
 def check_urls(urls, keywords):
+    """
+    Check the keywords in urls.
+
+    Args:
+        urls (dict): output of urls_extractor function
+        keywords (list): list of keywords
+
+    Returns:
+        boolean True if any keywords is in urls
+    """
+
     for domain, details in urls.iteritems():
         for i in details:
             if swt(i["url"], keywords):
