@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from .attachments import Attachments
-from .forms import Forms
 from .json_maker import JsonMaker
 from .output_debug import OutputDebug
 from .output_elasticsearch import OutputElasticsearch

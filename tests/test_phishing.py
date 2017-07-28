@@ -94,6 +94,17 @@ class TestPhishing(unittest.TestCase):
         self.assertIn("Test", results["targets"])
         self.assertTrue(results["with_phishing"])
 
+    def test_check_phishing_form(self):
+        results = phishing.check_phishing(
+            email=self.email_form,
+            attachments=self.attachments,
+            urls_body=self.urls,
+            urls_attachments=self.urls,
+            target_keys=self.targets,
+            subject_keys=self.subjects)
+
+        self.assertIn("mail_form", results["score_expanded"])
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

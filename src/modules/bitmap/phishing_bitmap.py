@@ -36,4 +36,5 @@ class PhishingBitMap(BitMap):
             "filename_attachments": 4,
             "mail_from": 5,
             "mail_subject": 6,
+            "mail_form": 7,
         }

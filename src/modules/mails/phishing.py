@@ -136,6 +136,10 @@ def check_phishing(**kwargs):
     if swt(subject, subject_keys):
         bitmap.set_property_score("mail_subject")
 
+    # Check form
+    if check_form(body):
+        bitmap.set_property_score("mail_form")
+
     results = {"score": bitmap.score,
                "score_expanded": bitmap.score_properties,
                "targets": list(targets),

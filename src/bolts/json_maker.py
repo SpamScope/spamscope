@@ -91,9 +91,6 @@ class JsonMaker(Bolt):
                 mail["phishing_score_expanded"] = \
                     self._phishing_bitmap.score_properties
 
-            # Forms
-            mail["with_forms"] = greedy_data["forms"][1]
-
             # Urls in body
             mail["with_urls_body"] = greedy_data["urls-handler-body"][1]
 
