@@ -19,7 +19,6 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
-from modules.bitmap import PhishingBitMap
 
 
 def reformat_urls(urls):
@@ -38,9 +37,6 @@ class JsonMaker(Bolt):
     def initialize(self, stormconf, context):
         self._mails = {}
         self.input_bolts = set(context["source->stream->grouping"].keys())
-
-        # Phishing bitmap
-        self._phishing_bitmap = PhishingBitMap()
 
     def _compose_output(self, greedy_data):
 
@@ -81,15 +77,9 @@ class JsonMaker(Bolt):
             # Phishing:
             # we need of a complete mail for a complete score, so
             # if mail is filtered we can't compose score
-            phishing_score = greedy_data["phishing"][2]
-            mail["with_phishing"] = greedy_data["phishing"][1]
-            mail["phishing_score"] = phishing_score
-
-            if phishing_score:
-                self._phishing_bitmap.score = phishing_score
-                mail["targets"] = greedy_data["phishing"][3]
-                mail["phishing_score_expanded"] = \
-                    self._phishing_bitmap.score_properties
+            phishing = greedy_data["phishing"][1]
+            if phishing:
+                mail["phishing"] = phishing
 
             # Urls in body
             mail["with_urls_body"] = greedy_data["urls-handler-body"][1]
