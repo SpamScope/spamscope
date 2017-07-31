@@ -25,7 +25,7 @@ base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 sys.path.append(root)
 
-import src.modules.spamassassin as spamassassin
+import src.modules.mails.spamassassin as spamassassin
 
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_thug_spamassassin = os.path.join(

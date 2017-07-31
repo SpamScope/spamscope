@@ -58,6 +58,10 @@ class Attachments(UserList):
         self.run(filtercontenttypes, intelligence)
 
     def _intelligence(self):
+        """
+        Post processing attachments with third party tools
+        """
+
         for p in processors:
             try:
                 p(getattr(self, p.__name__), self)

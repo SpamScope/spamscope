@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,27 +21,27 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 
 from modules import AbstractBolt
-from modules.networks import processors
+from modules.mails import processors
 
 
-class Network(AbstractBolt):
+class Mail(AbstractBolt):
     """
-    Post processing sender ip address with third party tools
+    Post processing raw mails with third party tools
     """
 
-    outputs = ['sha256_random', 'network', 'is_filtered']
+    outputs = ['sha256_random', 'mail', 'is_filtered']
 
     def process(self, tup):
         sha256_random = tup.values[0]
-        ipaddress = tup.values[1]
+        mail = tup.values[1]
         is_filtered = tup.values[2]
 
         results = {}
 
-        if not is_filtered and ipaddress:
+        if not is_filtered and mail:
             for p in processors:
                 try:
-                    p(self.conf[p.__name__], ipaddress, results)
+                    p(self.conf[p.__name__], mail, results)
                 except KeyError:
                     self.log("KeyError: {!r} doesn't exist in conf".format(
                         p.__name__), "error")
