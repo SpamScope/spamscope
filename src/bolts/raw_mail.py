@@ -24,24 +24,25 @@ from modules import AbstractBolt
 from modules.mails import processors
 
 
-class Mail(AbstractBolt):
+class RawMail(AbstractBolt):
     """
     Post processing raw mails with third party tools
     """
 
-    outputs = ['sha256_random', 'mail', 'is_filtered']
+    outputs = ['sha256_random', 'results', 'is_filtered']
 
     def process(self, tup):
         sha256_random = tup.values[0]
-        mail = tup.values[1]
-        is_filtered = tup.values[2]
+        raw_mail = tup.values[1]
+        mail_type = tup.values[2]
+        is_filtered = tup.values[3]
 
         results = {}
 
-        if not is_filtered and mail:
+        if not is_filtered:
             for p in processors:
                 try:
-                    p(self.conf[p.__name__], mail, results)
+                    p(self.conf[p.__name__], raw_mail, mail_type, results)
                 except KeyError:
                     self.log("KeyError: {!r} doesn't exist in conf".format(
                         p.__name__), "error")

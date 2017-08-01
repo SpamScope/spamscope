@@ -76,9 +76,6 @@ tokenizer:
     # Max number of hashes saved for filter function
     maxlen_network: 1000000
 
-    spamassassin:
-        enabled: False
-
 
 # Network bolt configuration
 network:
@@ -89,6 +86,12 @@ network:
     virustotal:
         enabled: False
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+# RawMail bolt configuration
+raw_mail:
+    spamassassin:
+        enabled: False
 
 
 # Attachments bolt configuration

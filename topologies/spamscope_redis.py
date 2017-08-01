@@ -21,7 +21,7 @@ limitations under the License.
 from streamparse import Grouping, Topology
 from bolts import (Attachments, JsonMaker,
                    Phishing, Tokenizer, UrlsHandlerAttachments,
-                   UrlsHandlerBody, Network, OutputRedis)
+                   UrlsHandlerBody, Network, OutputRedis, RawMail)
 from spouts import FilesMailSpout
 
 
@@ -61,15 +61,21 @@ class OutputRedisTopology(Topology):
         inputs={tokenizer['network']: Grouping.fields('sha256_random')},
         par=2)
 
+    raw_mail = RawMail.spec(
+        name="raw_mail",
+        inputs={tokenizer['raw_mail']: Grouping.fields('sha256_random')},
+        par=2)
+
     json = JsonMaker.spec(
         name="json",
         inputs={
-            tokenizer['mail']: Grouping.fields('sha256_random'),
-            phishing: Grouping.fields('sha256_random'),
             attachments: Grouping.fields('sha256_random'),
             network: Grouping.fields('sha256_random'),
-            urls_body: Grouping.fields('sha256_random'),
-            urls_attachments: Grouping.fields('sha256_random')})
+            phishing: Grouping.fields('sha256_random'),
+            raw_mail: Grouping.fields('sha256_random'),
+            tokenizer['mail']: Grouping.fields('sha256_random'),
+            urls_attachments: Grouping.fields('sha256_random'),
+            urls_body: Grouping.fields('sha256_random'), })
 
     output_redis = OutputRedis.spec(
         name="output-redis",

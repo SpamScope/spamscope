@@ -29,7 +29,7 @@ class Network(AbstractBolt):
     Post processing sender ip address with third party tools
     """
 
-    outputs = ['sha256_random', 'network', 'is_filtered']
+    outputs = ['sha256_random', 'results', 'is_filtered']
 
     def process(self, tup):
         sha256_random = tup.values[0]

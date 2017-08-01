@@ -34,12 +34,18 @@ class Tokenizer(AbstractBolt):
     """Split the mail in token parts (body, attachments, etc.). """
 
     outputs = [
-        Stream(fields=['sha256_random', 'mail', 'is_filtered'], name='mail'),
-        Stream(fields=['sha256_random', 'body', 'is_filtered'], name='body'),
-        Stream(fields=['sha256_random', 'network', 'is_filtered'],
-               name='network'),
-        Stream(fields=['sha256_random', 'with_attachments', 'attachments'],
-               name='attachments')]
+        Stream(fields=[
+            'sha256_random', 'mail', 'is_filtered'], name='mail'),
+        Stream(fields=[
+            'sha256_random', 'raw_mail', 'mail_type', 'is_filtered'],
+            name='raw_mail'),
+        Stream(fields=[
+            'sha256_random', 'body', 'is_filtered'], name='body'),
+        Stream(fields=[
+            'sha256_random', 'network', 'is_filtered'], name='network'),
+        Stream(fields=[
+            'sha256_random', 'with_attachments', 'attachments'],
+            name='attachments')]
 
     def initialize(self, stormconf, context):
         super(Tokenizer, self).initialize(stormconf, context)
@@ -157,8 +163,9 @@ class Tokenizer(AbstractBolt):
 
         else:
             # Emit network
-            self.emit([sha256_rand, mail["sender_ip"], is_filtered_net],
-                      stream="network")
+            self.emit([
+                sha256_rand, mail["sender_ip"], is_filtered_net],
+                stream="network")
 
             # Emit mail
             self.emit([sha256_rand, mail, is_filtered_mail], stream="mail")
@@ -167,5 +174,6 @@ class Tokenizer(AbstractBolt):
             self.emit([sha256_rand, body, is_filtered_mail], stream="body")
 
             # Emit attachments
-            self.emit([sha256_rand, with_attachments, list(attachments)],
-                      stream="attachments")
+            self.emit([
+                sha256_rand, with_attachments, list(attachments)],
+                stream="attachments")

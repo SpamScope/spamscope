@@ -24,6 +24,7 @@ import glob
 import os
 import shutil
 import time
+
 from modules import AbstractSpout, MailItem, MAIL_PATH
 from modules.exceptions import ImproperlyConfigured
 
