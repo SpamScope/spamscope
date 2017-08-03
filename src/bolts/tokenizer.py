@@ -18,33 +18,37 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+
 import datetime
 import random
 import six
-
-import modules.spamassassin as spamassassin
 from collections import deque
+
+from streamparse import Stream
 import mailparser
 from modules import AbstractBolt, MAIL_PATH, MAIL_STRING
 from modules.attachments import fingerprints, MailAttachments
-from streamparse import Stream
 
 
 class Tokenizer(AbstractBolt):
-    """Split the mail in token parts (body, attachments, etc.). """
+    """Split the mail in token parts (body, attachments, etc.) and sends
+    these parts to others bolts."""
 
     outputs = [
-        Stream(fields=[
-            'sha256_random', 'mail', 'is_filtered'], name='mail'),
-        Stream(fields=[
-            'sha256_random', 'raw_mail', 'mail_type', 'is_filtered'],
+        Stream(
+            fields=['sha256_random', 'mail', 'is_filtered'],
+            name='mail'),
+        Stream(
+            fields=['sha256_random', 'raw_mail', 'mail_type', 'is_filtered'],
             name='raw_mail'),
-        Stream(fields=[
-            'sha256_random', 'body', 'is_filtered'], name='body'),
-        Stream(fields=[
-            'sha256_random', 'network', 'is_filtered'], name='network'),
-        Stream(fields=[
-            'sha256_random', 'with_attachments', 'attachments'],
+        Stream(
+            fields=['sha256_random', 'body', 'is_filtered'],
+            name='body'),
+        Stream(
+            fields=['sha256_random', 'network', 'is_filtered'],
+            name='network'),
+        Stream(
+            fields=['sha256_random', 'with_attachments', 'attachments'],
             name='attachments')]
 
     def initialize(self, stormconf, context):
@@ -54,14 +58,11 @@ class Tokenizer(AbstractBolt):
             MAIL_PATH: mailparser.parse_from_file,
             MAIL_STRING: mailparser.parse_from_string}
 
-        self.spamassassin = {
-            MAIL_PATH: spamassassin.report_from_file,
-            MAIL_STRING: spamassassin.report_from_string}
-
         self.mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
         self.network_analyzed = deque(maxlen=self.conf["maxlen_network"])
-        self.attachments_analyzed = deque(maxlen=self.conf[
-            "maxlen_attachments"])
+        self.attachments_analyzed = deque(
+            maxlen=self.conf["maxlen_attachments"])
+
         self._load_filters()
 
     def _load_filters(self):
@@ -124,7 +125,7 @@ class Tokenizer(AbstractBolt):
                 if mail["sender_ip"] in self.network_analyzed:
                     is_filtered_net = True
 
-                # Update databese mail analyzed
+                # Update database ip addresses analyzed
                 self.network_analyzed.append(mail["sender_ip"])
 
             # If filter mails is enabled
@@ -133,22 +134,16 @@ class Tokenizer(AbstractBolt):
                 if mail["sha1"] in self.mails_analyzed:
                     mail.pop("body", None)
                     body = six.text_type()
+                    raw_mail = six.text_type()
                     is_filtered_mail = True
 
-                # Update databese mail analyzed
+                # Update database mails analyzed
                 self.mails_analyzed.append(mail["sha1"])
 
-            # SpamAssassin integration
-            # It's possible to use another bolt
-            if not is_filtered_mail and self.conf["spamassassin"]["enabled"]:
-                self.spamassassin[mail_type](raw_mail)
-
-            # Emit only attachments
-            raw_attach = self.parser.attachments_list
-
-            if raw_attach:
+            if self.parser.attachments_list:
                 with_attachments = True
-                attachments = MailAttachments.withhashes(raw_attach)
+                attachments = MailAttachments.withhashes(
+                    self.parser.attachments_list)
 
                 # If filter attachments is enabled
                 if self.filter_attachments_enabled:
@@ -162,16 +157,21 @@ class Tokenizer(AbstractBolt):
             self.raise_exception(e, tup)
 
         else:
+            # Emit mail
+            self.emit([sha256_rand, mail, is_filtered_mail], stream="mail")
+
+            # Emit raw_mail
+            self.emit([
+                sha256_rand, raw_mail, mail_type, is_filtered_mail],
+                stream="raw_mail")
+
+            # Emit body
+            self.emit([sha256_rand, body, is_filtered_mail], stream="body")
+
             # Emit network
             self.emit([
                 sha256_rand, mail["sender_ip"], is_filtered_net],
                 stream="network")
-
-            # Emit mail
-            self.emit([sha256_rand, mail, is_filtered_mail], stream="mail")
-
-            # Emit body
-            self.emit([sha256_rand, body, is_filtered_mail], stream="body")
 
             # Emit attachments
             self.emit([

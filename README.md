@@ -208,7 +208,7 @@ To simplify this operation, SpamScope comes with a custom tool `spamscope-topolo
 SpamScope comes with unittests for each its modules. In bolts and spouts there are no special features, all intelligence is in external modules.
 All unittests are in `tests` folder.
 
-To have complete tests you should set the followings variables enviroment:
+To have complete tests you should set the followings enviroment variables:
 
 ```
 $ export THUG_ENABLED=True

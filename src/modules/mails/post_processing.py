@@ -25,6 +25,11 @@ try:
 except ImportError:
     from ...modules import register
 
+try:
+    from modules import MAIL_PATH, MAIL_STRING
+except ImportError:
+    from ...modules import MAIL_PATH, MAIL_STRING
+
 
 processors = set()
 
@@ -39,13 +44,13 @@ This module contains all post processors for raw mails
 The skeleton of function must be like this:
 
     @register(processors, active=True)
-    def processor(conf, mail, results):
+    def processor(conf, raw_mail, mail_type, results):
         if conf["enabled"]:
             from module_x import y # import custom object for this processor
             ...
 
 The function must be have the same name of configuration section in
-conf/spamscope.yml --> mail --> processor
+conf/spamscope.yml --> raw_mail --> processor
 
 The results will be added on dict given as input.
 
@@ -56,13 +61,14 @@ You don't need anything else.
 
 
 @register(processors, active=True)
-def spamassassin(conf, mail, results):
+def spamassassin(conf, raw_mail, mail_type, results):
     """This method updates the mail results
     with the SpamAssassin report.
 
     Args:
         conf (dict): dict of configuration
-        mail (string): raw mail
+        raw_mail (string): raw mail
+        mail_type (string): type of mail (mail path, mail string, ...)
         results (dict): dict where will put the results
 
     Returns:
@@ -70,7 +76,10 @@ def spamassassin(conf, mail, results):
     """
 
     if conf["enabled"]:
-        import spamassassin
-        # TODO: manage different types
+        from .spamassassin import report_from_file, report_from_string
 
-        # results["spamassassin"] = report
+        spamassassin = {
+            MAIL_PATH: report_from_file,
+            MAIL_STRING: report_from_string}
+
+        results["spamassassin"] = spamassassin[mail_type](raw_mail)
