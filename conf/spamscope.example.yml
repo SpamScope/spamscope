@@ -79,17 +79,20 @@ tokenizer:
 
 # Network bolt configuration
 network:
+    # Shodan analysis https://www.shodan.io/
     shodan:
         enabled: False
-        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
+    # VirusTotal analysis https://www.virustotal.com/
     virustotal:
         enabled: False
-        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
 # RawMail bolt configuration
 raw_mail:
+    # SpamAssassin analysis: https://spamassassin.apache.org/
     spamassassin:
         enabled: False
 
@@ -102,6 +105,7 @@ attachments:
         generic: /path/to/generic_content_types
         custom: /path/to/custom_content_types
 
+    # Apache Tika analysis: https://tika.apache.org/
     tika:
         # Enable Tika but it's very slow:
         enabled: False
@@ -117,10 +121,11 @@ attachments:
             generic: /path/to/generic_content_types
             custom: /path/to/custom_content_types
 
+    # VirusTotal analysis: https://www.virustotal.com/
     virustotal:
         enabled: False
 
-        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
         # All content types to analyze with virustotal
         # Example in content_types/virustotal/generic.example.yml
@@ -129,6 +134,7 @@ attachments:
             generic: /path/to/generic_content_types
             custom: /path/to/custom_content_types
 
+    # Thug analysis: https://github.com/buffer/thug
     thug:
         enabled: False
 
@@ -145,6 +151,8 @@ attachments:
 
         referer: http://www.google.com/
 
+    # Zemana Antimalware analysis: https://www.zemana.com/
+    # only premium users
     zemana:
         enabled: False
 

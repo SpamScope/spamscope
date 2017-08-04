@@ -18,10 +18,8 @@ limitations under the License.
 """
 
 import os
-import six
 import sys
 import unittest
-import simplejson as json
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
@@ -32,17 +30,18 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
+from src.modules import MAIL_PATH
+
 # Set environment variables to change defaults:
-# Example export VIRUSTOTAL_APIKEY=your_api_key
+# Example export SPAMASSASSIN_ENABLED=True
 
 DEFAULTS = {"SPAMASSASSIN_ENABLED": "False"}
 OPTIONS = ChainMap(os.environ, DEFAULTS)
 
+mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
+
 
 class TestPostProcessing(unittest.TestCase):
-
-    def setUp(self):
-        pass
 
     @unittest.skipIf(OPTIONS["SPAMASSASSIN_ENABLED"].capitalize() == "False",
                      "SpamAssassin test skipped: "
@@ -55,10 +54,36 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True}
         results = {}
         self.assertFalse(results)
-        spamassassin(conf, mail_thug, mail_type, results)
+        spamassassin(conf, mail_thug, MAIL_PATH, results)
         self.assertTrue(results)
         self.assertIn("spamassassin", results)
         self.assertIsInstance(results["spamassassin"], dict)
+        self.assertIn("X-Spam-Checker-Version", results["spamassassin"])
+        self.assertIn("X-Spam-Flag", results["spamassassin"])
+        self.assertIn("X-Spam-Level", results["spamassassin"])
+        self.assertIn("X-Spam-Status", results["spamassassin"])
+        self.assertIn("score", results["spamassassin"])
+        self.assertIn("details", results["spamassassin"])
+
+    @unittest.skipIf(OPTIONS["SPAMASSASSIN_ENABLED"].capitalize() == "False",
+                     "Complete post processing test skipped: "
+                     "set env variable 'SPAMASSASSIN_ENABLED' to True")
+    def test_processors(self):
+        """Test all post processing."""
+
+        from src.modules.mails import processors
+
+        conf = {
+            "spamassassin": {"enabled": True}}
+
+        results = {}
+        self.assertFalse(results)
+
+        for p in processors:
+            p(conf[p.__name__], self.ipaddress, results)
+
+        self.assertTrue(results)
+        self.assertIn("spamassassin", results)
 
 
 if __name__ == '__main__':

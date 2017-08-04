@@ -71,15 +71,18 @@ class JsonMaker(Bolt):
         if network:
             mail["network"] = network
 
+        # Raw mail
+        raw_mail = greedy_data["raw_mail"][1]
+        if raw_mail:
+            mail["raw_mail"] = raw_mail
+
         # Add intelligence output only if mail is not filtered
         if not mail["is_filtered"]:
 
             # Phishing:
             # we need of a complete mail for a complete score, so
             # if mail is filtered we can't compose score
-            phishing = greedy_data["phishing"][1]
-            if phishing:
-                mail["phishing"] = phishing
+            mail["phishing"] = greedy_data["phishing"][1]
 
             # Urls in body
             mail["with_urls_body"] = greedy_data["urls-handler-body"][1]

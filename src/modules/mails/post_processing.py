@@ -48,6 +48,7 @@ The skeleton of function must be like this:
         if conf["enabled"]:
             from module_x import y # import custom object for this processor
             ...
+        results["processor"] = report
 
 The function must be have the same name of configuration section in
 conf/spamscope.yml --> raw_mail --> processor
@@ -76,7 +77,7 @@ def spamassassin(conf, raw_mail, mail_type, results):
     """
 
     if conf["enabled"]:
-        from .spamassassin import report_from_file, report_from_string
+        from .spamassassin_analysis import report_from_file, report_from_string
 
         spamassassin = {
             MAIL_PATH: report_from_file,

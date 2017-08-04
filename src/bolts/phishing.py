@@ -54,23 +54,23 @@ class Phishing(AbstractBolt):
 
         # If mail is filtered don't check for phishing
         is_filtered = greedy_data["tokenizer"][2]
+        results = {}
 
-        if is_filtered:
-            return None
+        if not is_filtered:
 
-        # Get all data
-        email = greedy_data["tokenizer"][1]
-        attachments = greedy_data["attachments"][2]
-        urls_body = greedy_data["urls-handler-body"][2]
-        urls_attachments = greedy_data["urls-handler-attachments"][2]
+            # Get all data
+            email = greedy_data["tokenizer"][1]
+            attachments = greedy_data["attachments"][2]
+            urls_body = greedy_data["urls-handler-body"][2]
+            urls_attachments = greedy_data["urls-handler-attachments"][2]
 
-        results = check_phishing(
-            email=email,
-            attachments=attachments,
-            urls_body=urls_body,
-            urls_attachments=urls_attachments,
-            target_keys=self.target_keys,
-            subject_keys=self.subject_keys)
+            results = check_phishing(
+                email=email,
+                attachments=attachments,
+                urls_body=urls_body,
+                urls_attachments=urls_attachments,
+                target_keys=self.target_keys,
+                subject_keys=self.subject_keys)
 
         return results
 
