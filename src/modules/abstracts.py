@@ -26,7 +26,6 @@ from streamparse.bolt import Bolt
 from streamparse.spout import Spout
 from pyfaup.faup import Faup
 
-from .exceptions import ImproperlyConfigured
 from .utils import load_config, urls_extractor
 
 try:
@@ -125,7 +124,7 @@ class AbstractUrlsHandlerBolt(AbstractBolt):
                 domains = load_config(v["path"])
 
                 if not isinstance(domains, list):
-                    raise ImproperlyConfigured(
+                    raise RuntimeError(
                         "Whitelist {!r} for {!r} not loaded".format(
                             k, self.component_name))
 

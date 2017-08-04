@@ -29,9 +29,7 @@ sys.path.append(root)
 
 import src.modules.utils as utils
 from mailparser import MailParser
-from pyfaup.faup import Faup
 from src.modules.attachments import MailAttachments, fingerprints
-from src.modules import ImproperlyConfigured
 
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
@@ -111,7 +109,7 @@ class TestSearchText(unittest.TestCase):
 
     def test_reformat_output_first(self):
 
-        with self.assertRaises(ImproperlyConfigured):
+        with self.assertRaises(RuntimeError):
             self.f(mail=self.mail_obj)
 
         with self.assertRaises(KeyError):
@@ -218,7 +216,7 @@ class TestSearchText(unittest.TestCase):
         self.assertIn("123456", results)
         self.assertNotIn(123456, results)
 
-        with self.assertRaises(ImproperlyConfigured):
+        with self.assertRaises(RuntimeError):
             d = {"generic": "conf/keywords/targets.example.yml"}
             results = utils.load_keywords_list(d)
 
@@ -237,7 +235,7 @@ class TestSearchText(unittest.TestCase):
         self.assertNotIn(123, results["Banca Tizio"])
         self.assertIn("123 456", results["Banca Tizio"])
 
-        with self.assertRaises(ImproperlyConfigured):
+        with self.assertRaises(RuntimeError):
             d = {"generic": "conf/keywords/subjects.example.yml"}
             results = utils.load_keywords_dict(d)
 
@@ -269,9 +267,8 @@ class TestSearchText(unittest.TestCase):
                 Give satisfaction to your loved one
                 http://contents.xn--90afavbplfx2a6a5b2a.xn--p1ai/
         """
-        parser = Faup()
 
-        urls = utils.urls_extractor(parser, body)
+        urls = utils.urls_extractor(body)
         self.assertIsInstance(urls, dict)
         self.assertIn("apache.org", urls)
         self.assertIn("python.org", urls)
@@ -281,10 +278,56 @@ class TestSearchText(unittest.TestCase):
             self.assertIsInstance(urls[i], list)
             self.assertEqual(len(urls[i]), 2)
 
-        urls = utils.urls_extractor(parser, body_unicode_error)
+        urls = utils.urls_extractor(body_unicode_error)
         self.assertIsInstance(urls, dict)
         self.assertIn("xn--90afavbplfx2a6a5b2a.xn--p1ai", urls)
         self.assertEqual(len(urls["xn--90afavbplfx2a6a5b2a.xn--p1ai"]), 1)
+
+    def test_load_whitelist(self):
+        d = {"generic": {"path": "conf/whitelists/generic.example.yml"}}
+        results = utils.load_whitelist(d)
+        self.assertIsInstance(results, set)
+        self.assertIn("google.com", results)
+        self.assertIn("amazon.com", results)
+        self.assertIn("facebook.com", results)
+
+        d = {"generic": {
+            "path": "conf/whitelists/generic.example.yml",
+            "expiry": None}}
+        results = utils.load_whitelist(d)
+        self.assertIsInstance(results, set)
+        self.assertIn("google.com", results)
+        self.assertIn("amazon.com", results)
+        self.assertIn("facebook.com", results)
+
+        d = {"generic": {
+            "path": "conf/whitelists/generic.example.yml",
+            "expiry": "2016-06-28T12:33:00.000Z"}}
+        results = utils.load_whitelist(d)
+        self.assertIsInstance(results, set)
+        self.assertEqual(len(results), 0)
+
+    def test_text2urls_whitelisted(self):
+
+        body = """
+        bla bla https://tweetdeck.twitter.com/random bla bla
+        http://kafka.apache.org/documentation.html
+        http://kafka.apache.org/documentation1.html
+        bla bla bla https://docs.python.org/2/library/re.html bla bla
+        bla bla bla https://docs.python.org/2/library/re_2.html> bla bla
+        <p>https://tweetdeck.twitter.com/random</p> bla bla
+        <p>https://tweetdeck.twitter.com/random_2</p>
+        """
+
+        d = {"generic": {"path": "conf/whitelists/generic.example.yml"}}
+        whitelist = utils.load_whitelist(d)
+        with_urls, urls = utils.text2urls_whitelisted(body, whitelist)
+
+        self.assertTrue(with_urls)
+        self.assertIsInstance(urls, dict)
+        self.assertNotIn("apache.org", urls)
+        self.assertIn("python.org", urls)
+        self.assertIn("twitter.com", urls)
 
 
 if __name__ == '__main__':

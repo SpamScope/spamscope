@@ -26,7 +26,6 @@ import os
 import re
 import tempfile
 
-from .exceptions import ImproperlyConfigured
 from pyfaup.faup import Faup
 import six
 import yaml
@@ -179,7 +178,7 @@ def load_config(config_file):
     except:
         message = "Config file {} not loaded".format(config_file)
         log.exception(message)
-        raise ImproperlyConfigured(message)
+        raise RuntimeError(message)
 
 
 def load_keywords_list(obj_paths, lower=True):
@@ -189,7 +188,7 @@ def load_keywords_list(obj_paths, lower=True):
         temp = load_config(v)
 
         if not isinstance(temp, list):
-            raise ImproperlyConfigured("List {!r} not valid".format(k))
+            raise RuntimeError("List {!r} not valid".format(k))
 
         if lower:
             keywords |= {six.text_type(i).lower() for i in temp}
@@ -206,7 +205,7 @@ def load_keywords_dict(obj_paths, lower=True):
         temp = load_config(v)
 
         if not isinstance(temp, dict):
-            raise ImproperlyConfigured("List {!r} not valid".format(k))
+            raise RuntimeError("List {!r} not valid".format(k))
 
         keywords.update(temp)
 
@@ -247,7 +246,7 @@ def reformat_output(mail=None, bolt=None, **kwargs):
     if bolt not in ('output-elasticsearch', 'output-redis'):
         message = "Bolt {!r} not in list of permitted bolts".format(bolt)
         log.exception(message)
-        raise ImproperlyConfigured(message)
+        raise RuntimeError(message)
 
     if mail:
         mail = copy.deepcopy(mail)
@@ -381,15 +380,15 @@ def load_whitelist(whitelists):
         reload_ = True
 
         if expiry:
-            now = datetime.utcnow()
-            reload_ = bool(datetime.strptime(
+            now = datetime.datetime.utcnow()
+            reload_ = bool(datetime.datetime.strptime(
                 expiry, "%Y-%m-%dT%H:%M:%S.%fZ") > now)
 
         if reload_:
             domains = load_config(v["path"])
 
             if not isinstance(domains, list):
-                raise ImproperlyConfigured(
+                raise RuntimeError(
                     "Whitelist {!r} not loaded".format(k))
 
             domains = {i.lower() for i in domains}

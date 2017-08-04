@@ -26,10 +26,6 @@ from random import shuffle
 log = logging.getLogger(__name__)
 
 
-class RedisImproperlyConfigured(Exception):
-    pass
-
-
 class RedisConnectionFailed(Exception):
     pass
 
@@ -143,7 +139,7 @@ class Redis:
         if not isinstance(self.hosts, list) and \
                 not isinstance(self.hosts, str):
             log.exception("hosts must be 'list' or 'string'")
-            raise RedisImproperlyConfigured("hosts must be 'list' or 'string'")
+            raise RuntimeError("hosts must be 'list' or 'string'")
 
         if isinstance(self.hosts, list):
             if self.shuffle_hosts:
@@ -175,7 +171,7 @@ class Redis:
 
         if not queue:
             log.exception("queue not defined")
-            raise RedisImproperlyConfigured("Must define a queue")
+            raise RuntimeError("Must define a queue")
 
         if not self._current_retry:
             log.exception("Redis connection failed for {} times".format(
