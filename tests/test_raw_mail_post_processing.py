@@ -80,7 +80,7 @@ class TestPostProcessing(unittest.TestCase):
         self.assertFalse(results)
 
         for p in processors:
-            p(conf[p.__name__], self.ipaddress, results)
+            p(conf[p.__name__], mail_thug, MAIL_PATH, results)
 
         self.assertTrue(results)
         self.assertIn("spamassassin", results)
