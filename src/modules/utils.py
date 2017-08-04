@@ -18,15 +18,18 @@ limitations under the License.
 """
 
 from __future__ import unicode_literals
+
 import copy
 import datetime
 import logging
 import os
 import re
-import six
 import tempfile
-import yaml
+
 from .exceptions import ImproperlyConfigured
+from pyfaup.faup import Faup
+import six
+import yaml
 
 RE_URL = re.compile(r'((?:(?:ht|f)tp(?:s?)\:\/\/)'
                     r'(?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+)', re.I)
@@ -92,7 +95,7 @@ def write_payload(payload, extension, content_transfer_encoding="base64"):
     return temp
 
 
-def urls_extractor(faup_parser, text):
+def urls_extractor(text):
     """This function extract all url http(s) and ftp(s) from text.
 
     Args:
@@ -119,12 +122,13 @@ def urls_extractor(faup_parser, text):
             }
     """
 
+    faup = Faup()
     text = six.text_type(text)
     results = {}
 
     for i in set(match.group().strip() for match in RE_URL.finditer(text)):
-        faup_parser.decode(i)
-        tokens = faup_parser.get()
+        faup.decode(i)
+        tokens = faup.get()
         results.setdefault(tokens["domain"], []).append(tokens)
     else:
         return results
@@ -346,3 +350,80 @@ def register(processors, active=True):
         return func
 
     return decorate
+
+
+def load_whitelist(whitelists):
+    """
+    Given a dict with this structure:
+
+        alexa:
+            path: /path/to/alexa
+            expiry: 2016-06-28T12:33:00.000Z # date ISO 8601 only UTC
+        test1:
+            path: /path/to/test1
+            expiry:
+        test2:
+            path: /path/to/test2
+
+    return a set with all domains in whitelist.
+
+    Args:
+        whitelists (dict): dict of lists of domains
+
+    Returns:
+        set of all domains in all lists.
+    """
+
+    whitelist = set()
+
+    for k, v in whitelists.iteritems():
+        expiry = v.get('expiry')
+        reload_ = True
+
+        if expiry:
+            now = datetime.utcnow()
+            reload_ = bool(datetime.strptime(
+                expiry, "%Y-%m-%dT%H:%M:%S.%fZ") > now)
+
+        if reload_:
+            domains = load_config(v["path"])
+
+            if not isinstance(domains, list):
+                raise ImproperlyConfigured(
+                    "Whitelist {!r} not loaded".format(k))
+
+            domains = {i.lower() for i in domains}
+            whitelist |= domains
+
+    return whitelist
+
+
+def text2urls_whitelisted(text, whitelist):
+    """
+    Given text and whitelist return all urls in text not in
+    whitelist.
+
+    Args:
+        text (string): text to analyze to extract urls
+        whitelist (set): set with all domains in whitelist
+
+    Returns:
+        tuple with two elements, a bool (True if there are urls)
+        and Faup urls
+    """
+
+    with_urls = False
+    urls = {}
+
+    if text:
+        urls = urls_extractor(text)
+        domains = urls.keys()
+
+        for d in domains:
+            if d.lower() in whitelist:
+                urls.pop(d)
+
+    if urls:
+        with_urls = True
+
+    return with_urls, urls
