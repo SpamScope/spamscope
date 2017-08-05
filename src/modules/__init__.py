@@ -18,4 +18,3 @@ from .abstracts import (AbstractBolt, AbstractSpout, AbstractUrlsHandlerBolt,
                         MAIL_PATH, MAIL_STRING)
 from .utils import *
 from .redis_client import Redis
-from .exceptions import *
