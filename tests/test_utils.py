@@ -321,9 +321,8 @@ class TestSearchText(unittest.TestCase):
 
         d = {"generic": {"path": "conf/whitelists/generic.example.yml"}}
         whitelist = utils.load_whitelist(d)
-        with_urls, urls = utils.text2urls_whitelisted(body, whitelist)
+        urls = utils.text2urls_whitelisted(body, whitelist)
 
-        self.assertTrue(with_urls)
         self.assertIsInstance(urls, dict)
         self.assertNotIn("apache.org", urls)
         self.assertIn("python.org", urls)

@@ -400,18 +400,16 @@ def load_whitelist(whitelists):
 def text2urls_whitelisted(text, whitelist):
     """
     Given text and whitelist return all urls in text not in
-    whitelist.
+    whitelist (domains whitelist).
 
     Args:
         text (string): text to analyze to extract urls
         whitelist (set): set with all domains in whitelist
 
     Returns:
-        tuple with two elements, a bool (True if there are urls)
-        and Faup urls
+        Faup urls
     """
 
-    with_urls = False
     urls = {}
 
     if text:
@@ -422,7 +420,4 @@ def text2urls_whitelisted(text, whitelist):
             if d.lower() in whitelist:
                 urls.pop(d)
 
-    if urls:
-        with_urls = True
-
-    return with_urls, urls
+    return urls

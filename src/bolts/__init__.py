@@ -23,5 +23,4 @@ from .output_redis import OutputRedis
 from .phishing import Phishing
 from .raw_mail import RawMail
 from .tokenizer import Tokenizer
-from .urls_handler_attachments import UrlsHandlerAttachments
-from .urls_handler_body import UrlsHandlerBody
+from .urls import Urls
