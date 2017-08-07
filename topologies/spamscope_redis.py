@@ -40,18 +40,17 @@ class OutputRedisTopology(Topology):
         par=2)
 
     urls = Urls.spec(
-        name="urls-handler-body",
+        name="urls",
         inputs={
-            tokenizer['body']: Grouping.fields('sha256_random'),
-            attachments: Grouping.fields('sha256_random')})
+            attachments: Grouping.fields('sha256_random'),
+            tokenizer['body']: Grouping.fields('sha256_random')})
 
     phishing = Phishing.spec(
         name="phishing",
         inputs={
-            tokenizer['mail']: Grouping.fields('sha256_random'),
             attachments: Grouping.fields('sha256_random'),
-            urls_body: Grouping.fields('sha256_random'),
-            urls_attachments: Grouping.fields('sha256_random')})
+            tokenizer['mail']: Grouping.fields('sha256_random'),
+            urls: Grouping.fields('sha256_random')})
 
     network = Network.spec(
         name="network",
@@ -71,8 +70,7 @@ class OutputRedisTopology(Topology):
             phishing: Grouping.fields('sha256_random'),
             raw_mail: Grouping.fields('sha256_random'),
             tokenizer['mail']: Grouping.fields('sha256_random'),
-            urls_attachments: Grouping.fields('sha256_random'),
-            urls_body: Grouping.fields('sha256_random'), })
+            urls: Grouping.fields('sha256_random')})
 
     output_redis = OutputRedis.spec(
         name="output-redis",

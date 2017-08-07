@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ class Phishing(AbstractBolt):
             # Get all data
             email = greedy_data["tokenizer"][1]
             attachments = greedy_data["attachments"][2]
-            urls_body = greedy_data["urls-handler-body"][2]
-            urls_attachments = greedy_data["urls-handler-attachments"][2]
+            urls_body = greedy_data["urls"]["body"][1]
+            urls_attachments = greedy_data["urls"]["attachments"][1]
 
             results = check_phishing(
                 email=email,

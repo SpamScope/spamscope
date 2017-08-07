@@ -407,7 +407,8 @@ def text2urls_whitelisted(text, whitelist):
         whitelist (set): set with all domains in whitelist
 
     Returns:
-        Faup urls
+        Return a dict, with a key for every second-level domain and
+        value a list of disassembled urls (output Faup tool).
     """
 
     urls = {}
@@ -421,3 +422,22 @@ def text2urls_whitelisted(text, whitelist):
                 urls.pop(d)
 
     return urls
+
+
+def reformat_urls(urls):
+    """
+    Change urls format to store them in Elasticsearch (dot . issue)
+
+    Args:
+        urls (dict): output of urls_extractor
+
+    Returns:
+        list of all urls
+    """
+
+    new_urls = []
+
+    for v in urls.values():
+        new_urls.extend(v)
+
+    return new_urls

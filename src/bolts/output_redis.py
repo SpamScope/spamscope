@@ -73,7 +73,7 @@ class OutputRedis(AbstractBolt):
     def process(self, tup):
         raw_mail = tup.values[1]
 
-        # Convert back to object strings convert manually
+        # Convert back to object strings converted manually
         if raw_mail.get("network"):
 
             if raw_mail["network"].get("shodan"):

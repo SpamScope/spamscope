@@ -326,7 +326,32 @@ class TestSearchText(unittest.TestCase):
         self.assertIsInstance(urls, dict)
         self.assertNotIn("apache.org", urls)
         self.assertIn("python.org", urls)
+        self.assertIsInstance(urls["python.org"], list)
         self.assertIn("twitter.com", urls)
+        self.assertIsInstance(urls["twitter.com"], list)
+
+    def test_reformat_urls(self):
+
+        body = """
+        bla bla https://tweetdeck.twitter.com/random bla bla
+        http://kafka.apache.org/documentation.html
+        http://kafka.apache.org/documentation1.html
+        bla bla bla https://docs.python.org/2/library/re.html bla bla
+        bla bla bla https://docs.python.org/2/library/re_2.html> bla bla
+        <p>https://tweetdeck.twitter.com/random</p> bla bla
+        <p>https://tweetdeck.twitter.com/random_2</p>
+        """
+
+        d = {"generic": {"path": "conf/whitelists/generic.example.yml"}}
+        whitelist = utils.load_whitelist(d)
+        urls = utils.text2urls_whitelisted(body, whitelist)
+        self.assertIsInstance(urls, dict)
+
+        urls = utils.reformat_urls(urls)
+        self.assertIsInstance(urls, list)
+
+        with self.assertRaises(TypeError):
+            utils.reformat_urls(dict)
 
 
 if __name__ == '__main__':
