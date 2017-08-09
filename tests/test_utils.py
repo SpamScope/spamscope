@@ -54,6 +54,53 @@ class TestSearchText(unittest.TestCase):
             'elastic_index_attach': "spamscope_attachments-",
             'elastic_type_attach': "spamscope"}
 
+    def test_mail_item(self):
+        mail = utils.MailItem(
+            filename=text_files,
+            mail_server="test_mail_server",
+            mailbox="test_mailbox",
+            priority=1,
+            trust="test_trust")
+
+        self.assertEqual(mail.filename, text_files)
+        self.assertEqual(mail.mail_server, "test_mail_server")
+        self.assertEqual(mail.mailbox, "test_mailbox")
+        self.assertEqual(mail.priority, 1)
+        self.assertEqual(mail.trust, "test_trust")
+        self.assertIsInstance(mail.timestamp, float)
+
+        mail_1 = utils.MailItem(
+            filename=text_files,
+            mail_server="test_mail_server",
+            mailbox="test_mailbox",
+            priority=1,
+            trust="test_trust")
+
+        mail_2 = utils.MailItem(
+            filename=text_files,
+            mail_server="test_mail_server",
+            mailbox="test_mailbox",
+            priority=2,
+            trust="test_trust")
+
+        mail_3 = utils.MailItem(
+            filename=text_files,
+            mail_server="test_mail_server",
+            mailbox="test_mailbox",
+            priority=1,
+            trust="test_trust")
+
+        self.assertTrue(mail_1 < mail_2)
+        self.assertFalse(mail_1 < mail_3)
+
+    def test_load_conf(self):
+        c = "conf/spamscope.example.yml"
+        conf = utils.load_config(c)
+        self.assertIsInstance(conf, dict)
+
+        with self.assertRaises(RuntimeError):
+            utils.load_config("conf/fake.yml")
+
     def test_write_payload(self):
         with open(text_files) as f:
             payload = f.read()

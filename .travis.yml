@@ -55,7 +55,7 @@ before_script:
 # command to run tests
 script: 
     # Unittests and coverage
-    - coverage run --include=src/modules/* -m unittest discover -s tests -f -v
+    - coverage run --include=src/modules/* --omit=src/modules/abstracts.py -m unittest discover -s tests -f -v
     # - python -m unittest discover -s tests -f -v
 
     # cli help
