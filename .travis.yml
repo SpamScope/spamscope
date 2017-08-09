@@ -47,14 +47,16 @@ install:
     - git clone https://$BITBUCKET_USER:$BITBUCKET_ROBOT_KEY@bitbucket.org/$BITBUCKET_USER/zemana-api.git $ZEMANA_PATH && cd $ZEMANA_PATH && python setup.py install && cd -
     - src/cli/faup.sh
     - cd ${FAUP_PATH}/src/lib/bindings/python && python setup.py install && cd -
+    - pip install coveralls
 
 before_script:
     - curl -o ${TIKA_APP_JAR} https://archive.apache.org/dist/tika/tika-app-${TIKA_VER}.jar
 
 # command to run tests
 script: 
-    # Unittests
-    - python -m unittest discover -s tests -f -v
+    # Unittests and coverage
+    - coverage run --include=src/modules/* -m unittest discover -s tests -f -v
+    # - python -m unittest discover -s tests -f -v
 
     # cli help
     - spamscope-elasticsearch -h
@@ -64,6 +66,8 @@ script:
     - cd tests && python timing_test_search_keywords.py && cd -
 
 after_success:
+    coveralls
+
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push $DOCKER_USERNAME/spamscope-root;
