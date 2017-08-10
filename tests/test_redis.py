@@ -41,6 +41,9 @@ class TestRedis(unittest.TestCase):
         self.assertEquals(redis.reconnect_interval, 1)
         self.assertEquals(redis.max_retry, 60)
 
+        redis.max_retry = 0
+        self.assertEquals(redis.max_retry, 0)
+
         with self.assertRaises(RuntimeError):
             redis = Redis(hosts=1)
 

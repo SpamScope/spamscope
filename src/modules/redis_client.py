@@ -112,10 +112,6 @@ class Redis:
         return self._reconnect_interval
 
     @property
-    def currenthost(self):
-        return self._currenthost
-
-    @property
     def max_retry(self):
         return self._max_retry
 
@@ -161,23 +157,16 @@ class Redis:
 
         # Connect to Redis
         self._redis = redis.StrictRedis(
-            host=self.currenthost,
+            host=self._currenthost,
             port=self.port,
             db=self.db,
-            password=self.password,
-        )
+            password=self.password)
 
     def push_messages(self, queue=None, messages=None):
 
         if not queue:
             log.exception("queue not defined")
             raise RuntimeError("Must define a queue")
-
-        if not self._current_retry:
-            log.exception("Redis connection failed for {} times".format(
-                self.max_retry))
-            raise RedisConnectionFailed(
-                "Redis connection failed for {} times".format(self.max_retry))
 
         try:
             # Connect to Redis server
@@ -192,6 +181,13 @@ class Redis:
         except:
             log.warning(
                 "Failed to push messages in Redis server".format(self.hosts))
+
+            if not self._current_retry:
+                log.exception("Redis connection failed for {} times".format(
+                    self.max_retry))
+                raise RedisConnectionFailed(
+                    "Redis connection failed for {} times".format(
+                        self.max_retry))
 
             time.sleep(self._reconnect_interval)
 
