@@ -18,14 +18,17 @@ limitations under the License.
 """
 
 
+from abc import ABCMeta
+
 from streamparse import Grouping, Topology
-from bolts import (Attachments, JsonMaker,
-                   Phishing, Tokenizer, UrlsHandlerAttachments,
-                   UrlsHandlerBody, Network, OutputRedis)
 from spouts import FilesMailSpout
+from bolts import (Attachments, JsonMaker, Phishing, Tokenizer,
+                   Urls, Network, RawMail)
 
 
-class OutputTestingTopology(Topology):
+class AbstractTopology(Topology):
+
+    __metaclass__ = ABCMeta
 
     files_spout = FilesMailSpout.spec(
         name="files-mails")
@@ -38,40 +41,37 @@ class OutputTestingTopology(Topology):
     attachments = Attachments.spec(
         name="attachments",
         inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
-        par=1)
+        par=2)
 
-    urls_body = UrlsHandlerBody.spec(
-        name="urls-handler-body",
-        inputs={tokenizer['body']: Grouping.fields('sha256_random')})
-
-    urls_attachments = UrlsHandlerAttachments.spec(
-        name="urls-handler-attachments",
-        inputs={attachments: Grouping.fields('sha256_random')})
+    urls = Urls.spec(
+        name="urls",
+        inputs={
+            attachments: Grouping.fields('sha256_random'),
+            tokenizer['body']: Grouping.fields('sha256_random')})
 
     phishing = Phishing.spec(
         name="phishing",
         inputs={
-            tokenizer['mail']: Grouping.fields('sha256_random'),
             attachments: Grouping.fields('sha256_random'),
-            urls_body: Grouping.fields('sha256_random'),
-            urls_attachments: Grouping.fields('sha256_random')})
+            tokenizer['mail']: Grouping.fields('sha256_random'),
+            urls: Grouping.fields('sha256_random')})
 
     network = Network.spec(
         name="network",
         inputs={tokenizer['network']: Grouping.fields('sha256_random')},
-        par=1)
+        par=2)
+
+    raw_mail = RawMail.spec(
+        name="raw_mail",
+        inputs={tokenizer['raw_mail']: Grouping.fields('sha256_random')},
+        par=2)
 
     json = JsonMaker.spec(
         name="json",
         inputs={
-            tokenizer['mail']: Grouping.fields('sha256_random'),
-            phishing: Grouping.fields('sha256_random'),
             attachments: Grouping.fields('sha256_random'),
             network: Grouping.fields('sha256_random'),
-            urls_body: Grouping.fields('sha256_random'),
-            urls_attachments: Grouping.fields('sha256_random')})
-
-    output_redis = OutputRedis.spec(
-        name="output-redis",
-        inputs=[json],
-        par=1)
+            phishing: Grouping.fields('sha256_random'),
+            raw_mail: Grouping.fields('sha256_random'),
+            tokenizer['mail']: Grouping.fields('sha256_random'),
+            urls: Grouping.fields('sha256_random')})

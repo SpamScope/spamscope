@@ -221,6 +221,7 @@ $ export ZEMANA_PARTNERID="your partner id"
 $ export ZEMANA_USERID="your userid" 
 $ export SHODAN_ENABLED=True
 $ export SHODAN_APIKEY="your key"
+$ export SPAMASSASSIN_ENABLED=True
 ```
 
 

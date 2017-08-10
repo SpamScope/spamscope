@@ -21,14 +21,14 @@ import os
 import sys
 import unittest
 
-base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
-
 try:
     from collections import ChainMap
 except ImportError:
     from chainmap import ChainMap
+
+base_path = os.path.realpath(os.path.dirname(__file__))
+root = os.path.join(base_path, '..')
+sys.path.append(root)
 
 from src.modules import MAIL_PATH
 

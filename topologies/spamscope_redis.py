@@ -18,60 +18,12 @@ limitations under the License.
 """
 
 
-from streamparse import Grouping, Topology
-from bolts import (Attachments, JsonMaker, Phishing, Tokenizer,
-                   Urls, Network, OutputRedis, RawMail)
-from spouts import FilesMailSpout
+from bolts import OutputRedis
+from .abstracts import AbstractTopology
 
 
-class OutputRedisTopology(Topology):
-
-    files_spout = FilesMailSpout.spec(
-        name="files-mails")
-
-    tokenizer = Tokenizer.spec(
-        name="tokenizer",
-        inputs=[files_spout],
-        par=1)
-
-    attachments = Attachments.spec(
-        name="attachments",
-        inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
-        par=2)
-
-    urls = Urls.spec(
-        name="urls",
-        inputs={
-            attachments: Grouping.fields('sha256_random'),
-            tokenizer['body']: Grouping.fields('sha256_random')})
-
-    phishing = Phishing.spec(
-        name="phishing",
-        inputs={
-            attachments: Grouping.fields('sha256_random'),
-            tokenizer['mail']: Grouping.fields('sha256_random'),
-            urls: Grouping.fields('sha256_random')})
-
-    network = Network.spec(
-        name="network",
-        inputs={tokenizer['network']: Grouping.fields('sha256_random')},
-        par=2)
-
-    raw_mail = RawMail.spec(
-        name="raw_mail",
-        inputs={tokenizer['raw_mail']: Grouping.fields('sha256_random')},
-        par=2)
-
-    json = JsonMaker.spec(
-        name="json",
-        inputs={
-            attachments: Grouping.fields('sha256_random'),
-            network: Grouping.fields('sha256_random'),
-            phishing: Grouping.fields('sha256_random'),
-            raw_mail: Grouping.fields('sha256_random'),
-            tokenizer['mail']: Grouping.fields('sha256_random'),
-            urls: Grouping.fields('sha256_random')})
+class OutputRedisTopology(AbstractTopology):
 
     output_redis = OutputRedis.spec(
         name="output-redis",
-        inputs=[json])
+        inputs=[AbstractTopology().json])

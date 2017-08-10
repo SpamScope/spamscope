@@ -21,6 +21,11 @@ import os
 import sys
 import unittest
 
+try:
+    from collections import ChainMap
+except ImportError:
+    from chainmap import ChainMap
+
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 sys.path.append(root)
@@ -32,9 +37,15 @@ mail_thug_spamassassin = os.path.join(
     base_path, 'samples', 'mail_thug_spamassassin')
 mail_spamassassin = os.path.join(base_path, 'samples', 'mail_spamassassin')
 
+DEFAULTS = {"SPAMASSASSIN_ENABLED": "False"}
+OPTIONS = ChainMap(os.environ, DEFAULTS)
+
 
 class TestSpamAssassin(unittest.TestCase):
 
+    @unittest.skipIf(OPTIONS["SPAMASSASSIN_ENABLED"].capitalize() == "False",
+                     "SpamAssassin test skipped: "
+                     "set env variable 'SPAMASSASSIN_ENABLED' to True")
     def test_obj_report(self):
         with open(mail_thug_spamassassin) as f:
             s = f.read()
@@ -52,11 +63,17 @@ class TestSpamAssassin(unittest.TestCase):
         self.assertEqual(report["score"], 5.8)
         self.assertEqual(len(report["details"]), 3)
 
+    @unittest.skipIf(OPTIONS["SPAMASSASSIN_ENABLED"].capitalize() == "False",
+                     "SpamAssassin test skipped: "
+                     "set env variable 'SPAMASSASSIN_ENABLED' to True")
     def test_analysis_from_file(self):
         s = spamassassin.analysis_from_file(mail_thug)
         self.assertIn("X-Spam-Status", s)
         self.assertIn("pts rule name", s)
 
+    @unittest.skipIf(OPTIONS["SPAMASSASSIN_ENABLED"].capitalize() == "False",
+                     "SpamAssassin test skipped: "
+                     "set env variable 'SPAMASSASSIN_ENABLED' to True")
     def test_report_from_file(self):
         s = spamassassin.report_from_file(mail_thug)
         self.assertIsInstance(s, dict)
@@ -66,6 +83,9 @@ class TestSpamAssassin(unittest.TestCase):
         self.assertIsInstance(s["details"], list)
         self.assertIsInstance(s["score"], float)
 
+    @unittest.skipIf(OPTIONS["SPAMASSASSIN_ENABLED"].capitalize() == "False",
+                     "SpamAssassin test skipped: "
+                     "set env variable 'SPAMASSASSIN_ENABLED' to True")
     def test_mail_spamassassin(self):
         s = spamassassin.report_from_file(mail_spamassassin)
         self.assertIsInstance(s, dict)
