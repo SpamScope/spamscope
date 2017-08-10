@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/SpamScope/spamscope.svg?branch=master)](https://travis-ci.org/SpamScope/spamscope)
+[![BCH compliance](https://bettercodehub.com/edge/badge/SpamScope/spamscope?branch=develop)](https://bettercodehub.com/)
 
 ![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 
@@ -208,7 +209,7 @@ To simplify this operation, SpamScope comes with a custom tool `spamscope-topolo
 SpamScope comes with unittests for each its modules. In bolts and spouts there are no special features, all intelligence is in external modules.
 All unittests are in `tests` folder.
 
-To have complete tests you should set the followings variables enviroment:
+To have complete tests you should set the followings enviroment variables:
 
 ```
 $ export THUG_ENABLED=True
@@ -220,6 +221,7 @@ $ export ZEMANA_PARTNERID="your partner id"
 $ export ZEMANA_USERID="your userid" 
 $ export SHODAN_ENABLED=True
 $ export SHODAN_APIKEY="your key"
+$ export SPAMASSASSIN_ENABLED=True
 ```
 
 

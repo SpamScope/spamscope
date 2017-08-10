@@ -3,6 +3,7 @@
 .DS_Store
 .coverage
 .env
+.idea/
 .ropeproject
 SpamScope.egg-info/
 _build

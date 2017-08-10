@@ -18,15 +18,17 @@ limitations under the License.
 """
 
 from __future__ import unicode_literals
+
 import copy
 import datetime
 import logging
 import os
 import re
-import six
 import tempfile
+
+from pyfaup.faup import Faup
+import six
 import yaml
-from .exceptions import ImproperlyConfigured
 
 RE_URL = re.compile(r'((?:(?:ht|f)tp(?:s?)\:\/\/)'
                     r'(?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+)', re.I)
@@ -92,7 +94,7 @@ def write_payload(payload, extension, content_transfer_encoding="base64"):
     return temp
 
 
-def urls_extractor(faup_parser, text):
+def urls_extractor(text):
     """This function extract all url http(s) and ftp(s) from text.
 
     Args:
@@ -119,12 +121,13 @@ def urls_extractor(faup_parser, text):
             }
     """
 
+    faup = Faup()
     text = six.text_type(text)
     results = {}
 
     for i in set(match.group().strip() for match in RE_URL.finditer(text)):
-        faup_parser.decode(i)
-        tokens = faup_parser.get()
+        faup.decode(i)
+        tokens = faup.get()
         results.setdefault(tokens["domain"], []).append(tokens)
     else:
         return results
@@ -175,7 +178,7 @@ def load_config(config_file):
     except:
         message = "Config file {} not loaded".format(config_file)
         log.exception(message)
-        raise ImproperlyConfigured(message)
+        raise RuntimeError(message)
 
 
 def load_keywords_list(obj_paths, lower=True):
@@ -185,7 +188,7 @@ def load_keywords_list(obj_paths, lower=True):
         temp = load_config(v)
 
         if not isinstance(temp, list):
-            raise ImproperlyConfigured("List {!r} not valid".format(k))
+            raise RuntimeError("List {!r} not valid".format(k))
 
         if lower:
             keywords |= {six.text_type(i).lower() for i in temp}
@@ -202,7 +205,7 @@ def load_keywords_dict(obj_paths, lower=True):
         temp = load_config(v)
 
         if not isinstance(temp, dict):
-            raise ImproperlyConfigured("List {!r} not valid".format(k))
+            raise RuntimeError("List {!r} not valid".format(k))
 
         keywords.update(temp)
 
@@ -243,7 +246,7 @@ def reformat_output(mail=None, bolt=None, **kwargs):
     if bolt not in ('output-elasticsearch', 'output-redis'):
         message = "Bolt {!r} not in list of permitted bolts".format(bolt)
         log.exception(message)
-        raise ImproperlyConfigured(message)
+        raise RuntimeError(message)
 
     if mail:
         mail = copy.deepcopy(mail)
@@ -346,3 +349,95 @@ def register(processors, active=True):
         return func
 
     return decorate
+
+
+def load_whitelist(whitelists):
+    """
+    Given a dict with this structure:
+
+        alexa:
+            path: /path/to/alexa
+            expiry: 2016-06-28T12:33:00.000Z # date ISO 8601 only UTC
+        test1:
+            path: /path/to/test1
+            expiry:
+        test2:
+            path: /path/to/test2
+
+    return a set with all domains in whitelist.
+
+    Args:
+        whitelists (dict): dict of lists of domains
+
+    Returns:
+        set of all domains in all lists.
+    """
+
+    whitelist = set()
+
+    for k, v in whitelists.iteritems():
+        expiry = v.get('expiry')
+        reload_ = True
+
+        if expiry:
+            now = datetime.datetime.utcnow()
+            reload_ = bool(datetime.datetime.strptime(
+                expiry, "%Y-%m-%dT%H:%M:%S.%fZ") > now)
+
+        if reload_:
+            domains = load_config(v["path"])
+
+            if not isinstance(domains, list):
+                raise RuntimeError(
+                    "Whitelist {!r} not loaded".format(k))
+
+            domains = {i.lower() for i in domains}
+            whitelist |= domains
+
+    return whitelist
+
+
+def text2urls_whitelisted(text, whitelist):
+    """
+    Given text and whitelist return all urls in text not in
+    whitelist (domains whitelist).
+
+    Args:
+        text (string): text to analyze to extract urls
+        whitelist (set): set with all domains in whitelist
+
+    Returns:
+        Return a dict, with a key for every second-level domain and
+        value a list of disassembled urls (output Faup tool).
+    """
+
+    urls = {}
+
+    if text:
+        urls = urls_extractor(text)
+        domains = urls.keys()
+
+        for d in domains:
+            if d.lower() in whitelist:
+                urls.pop(d)
+
+    return urls
+
+
+def reformat_urls(urls):
+    """
+    Change urls format to store them in Elasticsearch (dot . issue)
+
+    Args:
+        urls (dict): output of urls_extractor
+
+    Returns:
+        list of all urls
+    """
+
+    new_urls = []
+
+    for v in urls.values():
+        new_urls.extend(v)
+
+    return new_urls

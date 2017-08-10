@@ -20,10 +20,7 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 import logging
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import simplejson as json
 
 try:
     from modules import register

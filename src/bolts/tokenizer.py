@@ -18,87 +18,63 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+
 import datetime
-import os
 import random
 import six
-
-import modules.spamassassin as spamassassin
 from collections import deque
-from mailparser import MailParser
-from modules import AbstractBolt
-from modules.attachments import fingerprints, MailAttachments
+
 from streamparse import Stream
-
-STRING = "string"
-PATH = "path"
-
-
-class InvalidMailFormat(ValueError):
-    pass
+import mailparser
+from modules import AbstractBolt, MAIL_PATH, MAIL_STRING
+from modules.attachments import fingerprints, MailAttachments
 
 
 class Tokenizer(AbstractBolt):
-    """Split the mail in token parts (body, attachments, etc.). """
+    """Split the mail in token parts (body, attachments, etc.) and sends
+    these parts to others bolts."""
 
     outputs = [
-        Stream(fields=['sha256_random', 'mail', 'is_filtered'], name='mail'),
-        Stream(fields=['sha256_random', 'body', 'is_filtered'], name='body'),
-        Stream(fields=['sha256_random', 'network', 'is_filtered'],
-               name='network'),
-        Stream(fields=['sha256_random', 'with_attachments', 'attachments'],
-               name='attachments')]
+        Stream(
+            fields=['sha256_random', 'mail', 'is_filtered'],
+            name='mail'),
+        Stream(
+            fields=['sha256_random', 'raw_mail', 'mail_type', 'is_filtered'],
+            name='raw_mail'),
+        Stream(
+            fields=['sha256_random', 'body', 'is_filtered'],
+            name='body'),
+        Stream(
+            fields=['sha256_random', 'network', 'is_filtered'],
+            name='network'),
+        Stream(
+            fields=['sha256_random', 'with_attachments', 'attachments'],
+            name='attachments')]
 
     def initialize(self, stormconf, context):
         super(Tokenizer, self).initialize(stormconf, context)
 
-        self._parser = MailParser()
-        self._mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
-        self._network_analyzed = deque(maxlen=self.conf["maxlen_network"])
-        self._attachments_analyzed = deque(
+        self.mailparser = {
+            MAIL_PATH: mailparser.parse_from_file,
+            MAIL_STRING: mailparser.parse_from_string}
+
+        self.mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
+        self.network_analyzed = deque(maxlen=self.conf["maxlen_network"])
+        self.attachments_analyzed = deque(
             maxlen=self.conf["maxlen_attachments"])
+
         self._load_filters()
 
     def _load_filters(self):
-        self._filter_mails_enabled = self.conf["filter_mails"]
-        self._filter_network_enabled = self.conf["filter_network"]
-        self._filter_attachments_enabled = self.conf["filter_attachments"]
-
-    @property
-    def filter_mails_enabled(self):
-        return self._filter_mails_enabled
-
-    @property
-    def filter_network_enabled(self):
-        return self._filter_network_enabled
-
-    @property
-    def filter_attachments_enabled(self):
-        return self._filter_attachments_enabled
-
-    @property
-    def parser(self):
-        return self._parser
+        self.filter_mails_enabled = self.conf["filter_mails"]
+        self.filter_network_enabled = self.conf["filter_network"]
+        self.filter_attachments_enabled = self.conf["filter_attachments"]
 
     def _make_mail(self, tup):
         raw_mail = tup.values[0]
-        mail_format = tup.values[5]
+        mail_type = tup.values[5]
         rand = '_' + ''.join(random.choice('0123456789') for i in range(10))
-
-        # Check if kind_data is correct
-        if mail_format != STRING and mail_format != PATH:
-            raise InvalidMailFormat(
-                "Invalid mail format {!r}. Choose {!r} or {!r}".format(
-                    mail_format, STRING, PATH))
-
-        # Parsing mail
-        if mail_format == PATH:
-            if os.path.exists(raw_mail):
-                self.parser.parse_from_file(raw_mail)
-        else:
-            self.parser.parse_from_string(raw_mail)
-
-        # Getting all parts
+        self.parser = self.mailparser[mail_type](raw_mail)
         mail = self.parser.parsed_mail_obj
 
         # Data mail sources
@@ -113,7 +89,7 @@ class Tokenizer(AbstractBolt):
         sha256_rand = mail["sha256"] + rand
 
         # Add path to result
-        if mail_format == PATH:
+        if mail_type == MAIL_PATH:
             mail["path_mail"] = raw_mail
 
         # Dates
@@ -141,49 +117,38 @@ class Tokenizer(AbstractBolt):
             attachments = []
             body = self.parser.body
             raw_mail = tup.values[0]
-            mail_format = tup.values[5]
+            mail_type = tup.values[5]
 
             # If filter network is enabled
             is_filtered_net = False
             if self.filter_network_enabled:
-                if mail["sender_ip"] in self._network_analyzed:
+                if mail["sender_ip"] in self.network_analyzed:
                     is_filtered_net = True
 
-                # Update databese mail analyzed
-                self._network_analyzed.append(mail["sender_ip"])
+                # Update database ip addresses analyzed
+                self.network_analyzed.append(mail["sender_ip"])
 
             # If filter mails is enabled
             is_filtered_mail = False
             if self.filter_mails_enabled:
-                if mail["sha1"] in self._mails_analyzed:
+                if mail["sha1"] in self.mails_analyzed:
                     mail.pop("body", None)
                     body = six.text_type()
+                    raw_mail = six.text_type()
                     is_filtered_mail = True
 
-                # Update databese mail analyzed
-                self._mails_analyzed.append(mail["sha1"])
+                # Update database mails analyzed
+                self.mails_analyzed.append(mail["sha1"])
 
-            # SpamAssassin integration
-            # It's possible to use another bolt
-            if not is_filtered_mail and self.conf["spamassassin"]["enabled"]:
-                if mail_format == PATH:
-                    mail["SpamAssassin"] = \
-                        spamassassin.report_from_file(raw_mail)
-                else:
-                    mail["SpamAssassin"] = \
-                        spamassassin.report_from_string(raw_mail)
-
-            # Emit only attachments
-            raw_attach = self.parser.attachments_list
-
-            if raw_attach:
+            if self.parser.attachments_list:
                 with_attachments = True
-                attachments = MailAttachments.withhashes(raw_attach)
+                attachments = MailAttachments.withhashes(
+                    self.parser.attachments_list)
 
                 # If filter attachments is enabled
                 if self.filter_attachments_enabled:
-                    hashes = attachments.filter(self._attachments_analyzed)
-                    self._attachments_analyzed.extend(hashes)
+                    hashes = attachments.filter(self.attachments_analyzed)
+                    self.attachments_analyzed.extend(hashes)
 
         except TypeError, e:
             self.raise_exception(e, tup)
@@ -192,15 +157,23 @@ class Tokenizer(AbstractBolt):
             self.raise_exception(e, tup)
 
         else:
-            # Emit network
-            self.emit([sha256_rand, mail["sender_ip"], is_filtered_net],
-                      stream="network")
-
             # Emit mail
             self.emit([sha256_rand, mail, is_filtered_mail], stream="mail")
+
+            # Emit raw_mail
+            self.emit([
+                sha256_rand, raw_mail, mail_type, is_filtered_mail],
+                stream="raw_mail")
 
             # Emit body
             self.emit([sha256_rand, body, is_filtered_mail], stream="body")
 
-            self.emit([sha256_rand, with_attachments, list(attachments)],
-                      stream="attachments")
+            # Emit network
+            self.emit([
+                sha256_rand, mail["sender_ip"], is_filtered_net],
+                stream="network")
+
+            # Emit attachments
+            self.emit([
+                sha256_rand, with_attachments, list(attachments)],
+                stream="attachments")

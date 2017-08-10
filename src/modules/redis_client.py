@@ -26,10 +26,6 @@ from random import shuffle
 log = logging.getLogger(__name__)
 
 
-class RedisImproperlyConfigured(Exception):
-    pass
-
-
 class RedisConnectionFailed(Exception):
     pass
 
@@ -116,10 +112,6 @@ class Redis:
         return self._reconnect_interval
 
     @property
-    def currenthost(self):
-        return self._currenthost
-
-    @property
     def max_retry(self):
         return self._max_retry
 
@@ -143,7 +135,7 @@ class Redis:
         if not isinstance(self.hosts, list) and \
                 not isinstance(self.hosts, str):
             log.exception("hosts must be 'list' or 'string'")
-            raise RedisImproperlyConfigured("hosts must be 'list' or 'string'")
+            raise RuntimeError("hosts must be 'list' or 'string'")
 
         if isinstance(self.hosts, list):
             if self.shuffle_hosts:
@@ -165,23 +157,16 @@ class Redis:
 
         # Connect to Redis
         self._redis = redis.StrictRedis(
-            host=self.currenthost,
+            host=self._currenthost,
             port=self.port,
             db=self.db,
-            password=self.password,
-        )
+            password=self.password)
 
     def push_messages(self, queue=None, messages=None):
 
         if not queue:
             log.exception("queue not defined")
-            raise RedisImproperlyConfigured("Must define a queue")
-
-        if not self._current_retry:
-            log.exception("Redis connection failed for {} times".format(
-                self.max_retry))
-            raise RedisConnectionFailed(
-                "Redis connection failed for {} times".format(self.max_retry))
+            raise RuntimeError("Must define a queue")
 
         try:
             # Connect to Redis server
@@ -196,6 +181,13 @@ class Redis:
         except:
             log.warning(
                 "Failed to push messages in Redis server".format(self.hosts))
+
+            if not self._current_retry:
+                log.exception("Redis connection failed for {} times".format(
+                    self.max_retry))
+                raise RedisConnectionFailed(
+                    "Redis connection failed for {} times".format(
+                        self.max_retry))
 
             time.sleep(self._reconnect_interval)
 
