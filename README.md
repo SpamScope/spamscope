@@ -8,13 +8,13 @@
 ## Overview
 SpamScope is an advanced spam analysis tool that use [Apache Storm](http://storm.apache.org/) with [streamparse](https://github.com/Parsely/streamparse) to process a stream of mails. 
 
-It's possible to analyze more than 5 milions of mails (without attachments post processors) for day with a 4 cores server and 4 GB of RAM (without third party analysis). 
+It's possible to analyze more than 5 milions of mails for day with a 4 cores server and 4 GB of RAM (without third party analysis). 
 
 ![Schema topology](docs/images/schema_topology.png?raw=true "Schema topology")
 
 ### Why should I use SpamScope
 - It's very fast: the job is splitted in functionalities that work in parallel.
-- It's flexible: you can chose what SpamScope has to do.
+- It's flexible: you can choose what SpamScope has to do.
 - It's distributed: SpamScope uses Apache Storm, free and open source distributed realtime computation system.
 - It makes JSON output that you can save where you want.
 - It's easy to setup: there are docker images and docker-compose ready for use.
@@ -25,16 +25,16 @@ It's possible to analyze more than 5 milions of mails (without attachments post 
 SpamScope uses Apache Storm that allows you to start small and scale horizontally as you grow. Simply add more workers.
 
 ### Flexibility
-You can chose your mails input sources (with spouts) and your functionalities (with bolts). 
+You can choose your mails input sources (with **spouts**) and your functionalities (with **bolts**). 
 
 SpamScope comes with the following bolts: 
- - tokenizer splits mail in token like headers, body, attachments and it can filter emails, attachments and ip address already seen
- - phishing lookings for your keywords in email and connects email to targets (bank, your customers, etc.)
+ - tokenizer splits mail in token like headers, body, attachments and it can filter emails, attachments and ip addresses already seen
+ - phishing looks for your keywords in email and connects email to targets (bank, your customers, etc.)
  - raw_mail is for all third party tools that analyze raw mails like SpamAssassin
  - attachments analyzes all mail attachments and uses third party tools like VirusTotal
  - network analyzes all sender ip addresses with third party tools like Shodan
  - urls extracts all urls in email and attachments
- - json and outputs make the json report and save it
+ - json_maker and outputs make the json report and save it
 
 ### Store where you want
 You can build your custom output bolts and store your data in Elasticsearch, MongoDB, filesystem, etc.
