@@ -26,4 +26,4 @@ class OutputRedisTopology(AbstractTopology):
 
     output_redis = OutputRedis.spec(
         name="output-redis",
-        inputs=[AbstractTopology().json])
+        inputs=[AbstractTopology().json_maker])

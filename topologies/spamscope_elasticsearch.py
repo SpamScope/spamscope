@@ -26,4 +26,4 @@ class OutputElasticsearchTopology(AbstractTopology):
 
     output_elasticsearch = OutputElasticsearch.spec(
         name="output-elasticsearch",
-        inputs=[AbstractTopology().json])
+        inputs=[AbstractTopology().json_maker])

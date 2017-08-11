@@ -30,13 +30,13 @@ Submit options:
 
 ```
 usage: spamscope-topology submit [-h]
-                                 [-g {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}]
+                                 [-g {spamscope_debug,spamscope_elasticsearch,spamscope_redis}]
                                  [-w WORKERS] [-k TICK] [-p MAX_PENDING]
                                  [-s SPOUT_SLEEP] [-t TIMEOUT]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -g {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}, --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis,spamscope_testing}
+  -g {spamscope_debug,spamscope_elasticsearch,spamscope_redis}, --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis}
                         SpamScope topology.
   -w WORKERS, --workers WORKERS
                         Apache Storm workers for your topology.

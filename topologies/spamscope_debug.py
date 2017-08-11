@@ -26,4 +26,4 @@ class OutputDebugTopology(AbstractTopology):
 
     output_debug = OutputDebug.spec(
         name="output-debug",
-        inputs=[AbstractTopology().json])
+        inputs=[AbstractTopology().json_maker])

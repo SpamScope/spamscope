@@ -66,13 +66,14 @@ script:
     - cd tests && python timing_test_search_keywords.py && cd -
 
 after_success:
-    coveralls
+    - coveralls
 
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push $DOCKER_USERNAME/spamscope-root;
         docker push $DOCKER_USERNAME/spamscope-elasticsearch;
       fi
+
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push $DOCKER_USERNAME/spamscope-root:develop;

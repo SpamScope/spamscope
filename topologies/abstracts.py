@@ -66,8 +66,8 @@ class AbstractTopology(Topology):
         inputs={tokenizer['raw_mail']: Grouping.fields('sha256_random')},
         par=2)
 
-    json = JsonMaker.spec(
-        name="json",
+    json_maker = JsonMaker.spec(
+        name="json_maker",
         inputs={
             attachments: Grouping.fields('sha256_random'),
             network: Grouping.fields('sha256_random'),
