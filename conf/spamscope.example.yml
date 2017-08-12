@@ -162,23 +162,8 @@ attachments:
         useragent: SpamScope
 
 
-# Urls handler body
-urls-handler-body:
-    whitelists:
-        # Only second level domains to whitelisting
-        # Example in conf/whitelists/generic.example.yml
-        alexa:
-            path: /path/to/alexa
-            expiry: 2016-06-28T12:33:00.000Z # date ISO 8601 only UTC
-        test1:
-            path: /path/to/test1
-            expiry:
-        test2:
-            path: /path/to/test2
-
-
-# Urls handler attachments
-urls-handler-attachments:
+# Urls
+urls:
     whitelists:
         # Only second level domains to whitelisting
         # Example in conf/whitelists/generic.example.yml
