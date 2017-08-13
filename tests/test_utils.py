@@ -30,12 +30,14 @@ sys.path.append(root)
 import src.modules.utils as utils
 from mailparser import MailParser
 from src.modules.attachments import MailAttachments, fingerprints
+from pyfaup.faup import Faup
 
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
 
 
 class TestSearchText(unittest.TestCase):
+    faup = Faup()
 
     def setUp(self):
         self.f = utils.reformat_output
@@ -315,7 +317,7 @@ class TestSearchText(unittest.TestCase):
                 http://contents.xn--90afavbplfx2a6a5b2a.xn--p1ai/
         """
 
-        urls = utils.urls_extractor(body)
+        urls = utils.urls_extractor(body, self.faup)
         self.assertIsInstance(urls, dict)
         self.assertIn("apache.org", urls)
         self.assertIn("python.org", urls)
@@ -325,7 +327,7 @@ class TestSearchText(unittest.TestCase):
             self.assertIsInstance(urls[i], list)
             self.assertEqual(len(urls[i]), 2)
 
-        urls = utils.urls_extractor(body_unicode_error)
+        urls = utils.urls_extractor(body_unicode_error, self.faup)
         self.assertIsInstance(urls, dict)
         self.assertIn("xn--90afavbplfx2a6a5b2a.xn--p1ai", urls)
         self.assertEqual(len(urls["xn--90afavbplfx2a6a5b2a.xn--p1ai"]), 1)
@@ -368,7 +370,7 @@ class TestSearchText(unittest.TestCase):
 
         d = {"generic": {"path": "conf/whitelists/generic.example.yml"}}
         whitelist = utils.load_whitelist(d)
-        urls = utils.text2urls_whitelisted(body, whitelist)
+        urls = utils.text2urls_whitelisted(body, whitelist, self.faup)
 
         self.assertIsInstance(urls, dict)
         self.assertNotIn("apache.org", urls)
@@ -391,7 +393,7 @@ class TestSearchText(unittest.TestCase):
 
         d = {"generic": {"path": "conf/whitelists/generic.example.yml"}}
         whitelist = utils.load_whitelist(d)
-        urls = utils.text2urls_whitelisted(body, whitelist)
+        urls = utils.text2urls_whitelisted(body, whitelist, self.faup)
         self.assertIsInstance(urls, dict)
 
         urls = utils.reformat_urls(urls)

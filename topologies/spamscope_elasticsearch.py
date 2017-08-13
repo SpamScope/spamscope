@@ -18,12 +18,60 @@ limitations under the License.
 """
 
 
-from bolts import OutputElasticsearch
-from .abstracts import AbstractTopology
+from spouts import FilesMailSpout
+from bolts import (Attachments, JsonMaker, Phishing, Tokenizer,
+                   Urls, Network, RawMail, OutputElasticsearch)
+from streamparse import Grouping, Topology
 
 
-class OutputElasticsearchTopology(AbstractTopology):
+class OutputElasticsearchTopology(Topology):
+
+    files_spout = FilesMailSpout.spec(
+        name="files-mails")
+
+    tokenizer = Tokenizer.spec(
+        name="tokenizer",
+        inputs=[files_spout],
+        par=1)
+
+    attachments = Attachments.spec(
+        name="attachments",
+        inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
+        par=2)
+
+    urls = Urls.spec(
+        name="urls",
+        inputs={
+            attachments: Grouping.fields('sha256_random'),
+            tokenizer['body']: Grouping.fields('sha256_random')})
+
+    phishing = Phishing.spec(
+        name="phishing",
+        inputs={
+            attachments: Grouping.fields('sha256_random'),
+            tokenizer['mail']: Grouping.fields('sha256_random'),
+            urls: Grouping.fields('sha256_random')})
+
+    network = Network.spec(
+        name="network",
+        inputs={tokenizer['network']: Grouping.fields('sha256_random')},
+        par=2)
+
+    raw_mail = RawMail.spec(
+        name="raw_mail",
+        inputs={tokenizer['raw_mail']: Grouping.fields('sha256_random')},
+        par=2)
+
+    json_maker = JsonMaker.spec(
+        name="json_maker",
+        inputs={
+            attachments: Grouping.fields('sha256_random'),
+            network: Grouping.fields('sha256_random'),
+            phishing: Grouping.fields('sha256_random'),
+            raw_mail: Grouping.fields('sha256_random'),
+            tokenizer['mail']: Grouping.fields('sha256_random'),
+            urls: Grouping.fields('sha256_random')})
 
     output_elasticsearch = OutputElasticsearch.spec(
         name="output-elasticsearch",
-        inputs=[AbstractTopology().json_maker])
+        inputs=[json_maker])

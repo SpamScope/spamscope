@@ -26,7 +26,6 @@ import os
 import re
 import tempfile
 
-from pyfaup.faup import Faup
 import six
 import yaml
 
@@ -94,7 +93,7 @@ def write_payload(payload, extension, content_transfer_encoding="base64"):
     return temp
 
 
-def urls_extractor(text):
+def urls_extractor(text, faup):
     """This function extract all url http(s) and ftp(s) from text.
 
     Args:
@@ -121,7 +120,7 @@ def urls_extractor(text):
             }
     """
 
-    faup = Faup()
+    # faup = Faup()
     text = six.text_type(text)
     results = {}
 
@@ -397,7 +396,7 @@ def load_whitelist(whitelists):
     return whitelist
 
 
-def text2urls_whitelisted(text, whitelist):
+def text2urls_whitelisted(text, whitelist, faup):
     """
     Given text and whitelist return all urls in text not in
     whitelist (domains whitelist).
@@ -414,7 +413,7 @@ def text2urls_whitelisted(text, whitelist):
     urls = {}
 
     if text:
-        urls = urls_extractor(text)
+        urls = urls_extractor(text, faup)
         domains = urls.keys()
 
         for d in domains:

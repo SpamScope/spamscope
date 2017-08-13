@@ -19,6 +19,8 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+from pyfaup.faup import Faup
+
 from modules import AbstractBolt, load_whitelist, text2urls_whitelisted
 from modules.attachments import MailAttachments
 
@@ -28,6 +30,9 @@ class Urls(AbstractBolt):
 
     def initialize(self, stormconf, context):
         super(Urls, self).initialize(stormconf, context)
+
+        # Faup
+        self.faup = Faup()
 
         # Input bolts for Phishing bolt
         self.input_bolts = set(context["source->stream->grouping"].keys())
@@ -53,14 +58,14 @@ class Urls(AbstractBolt):
         # urls body
         if not is_filtered:
             text = greedy_data["tokenizer"][1]
-            urls = text2urls_whitelisted(text, self.whitelists)
+            urls = text2urls_whitelisted(text, self.whitelists, self.faup)
             if urls:
                 results["body"] = urls
 
         # I can have 2 mails with same body, but with different attachments
         attachments = MailAttachments(greedy_data["attachments"][2])
         text = attachments.payloadstext()
-        urls = text2urls_whitelisted(text, self.whitelists)
+        urls = text2urls_whitelisted(text, self.whitelists, self.faup)
         if urls:
             results["attachments"] = urls
 

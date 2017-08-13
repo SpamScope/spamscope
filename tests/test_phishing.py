@@ -29,12 +29,14 @@ sys.path.append(root)
 
 import src.modules.mails.phishing as phishing
 import src.modules.utils as utils
+from pyfaup.faup import Faup
 
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_form = os.path.join(base_path, 'samples', 'mail_form')
 
 
 class TestPhishing(unittest.TestCase):
+    faup = Faup()
 
     def setUp(self):
         parser = mailparser.parse_from_file(mail_thug)
@@ -45,7 +47,7 @@ class TestPhishing(unittest.TestCase):
         self.email_form = parser.parsed_mail_obj
 
         body = self.email_form.get("body")
-        self.urls = utils.urls_extractor(body)
+        self.urls = utils.urls_extractor(body, self.faup)
 
         d = {"generic": "conf/keywords/targets.example.yml",
              "custom": "conf/keywords/targets_english.example.yml"}

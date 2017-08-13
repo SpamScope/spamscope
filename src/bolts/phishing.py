@@ -61,8 +61,8 @@ class Phishing(AbstractBolt):
             # Get all data
             email = greedy_data["tokenizer"][1]
             attachments = greedy_data["attachments"][2]
-            urls_body = greedy_data["urls"]["body"][1]
-            urls_attachments = greedy_data["urls"]["attachments"][1]
+            urls_body = greedy_data["urls"][1].get("body", {})
+            urls_attachments = greedy_data["urls"][1].get("attachments", {})
 
             results = check_phishing(
                 email=email,

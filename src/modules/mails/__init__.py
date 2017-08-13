@@ -15,3 +15,4 @@ limitations under the License.
 """
 
 from .post_processing import processors, spamassassin
+from .phishing import check_form, check_urls, check_phishing
