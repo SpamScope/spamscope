@@ -66,9 +66,9 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
 
 
 ## Output example
-  - [Raw mail](https://goo.gl/wMBfbF).
+  - [Raw example email](https://goo.gl/wMBfbF).
   - [SpamScope output](https://goo.gl/MS7ugy).
-  - [SpamScope output with Thug](https://goo.gl/Y4kWCv).
+  - [SpamScope complete output](https://goo.gl/fr4i7C).
 
 
 
