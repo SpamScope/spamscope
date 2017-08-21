@@ -22,6 +22,7 @@ import logging
 import magic
 import os
 import patoolib
+import six
 import ssdeep
 import tempfile
 from collections import namedtuple
@@ -47,6 +48,13 @@ def fingerprints(data):
     """
 
     Hashes = namedtuple('Hashes', "md5 sha1 sha256 sha512 ssdeep")
+
+    if six.PY2:
+        if not isinstance(data, str):
+            data = data.encode("utf-8")
+    elif six.PY3:
+        if not isinstance(data, bytes):
+            data = data.encode("utf-8")
 
     # md5
     md5 = hashlib.md5()
