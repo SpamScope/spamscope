@@ -33,6 +33,7 @@ from pyfaup.faup import Faup
 
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_form = os.path.join(base_path, 'samples', 'mail_form')
+mail_test_5 = os.path.join(base_path, 'samples', 'mail_test_5')
 
 
 class TestPhishing(unittest.TestCase):
@@ -57,12 +58,18 @@ class TestPhishing(unittest.TestCase):
              "custom": "conf/keywords/subjects_english.example.yml"}
         self.subjects = utils.load_keywords_list(d)
 
-    def test_check_check_form(self):
+    def test_check_form(self):
         body = self.email_form.get("body")
         flag_form = phishing.check_form(body)
         self.assertTrue(flag_form)
 
         body = self.email.get("body")
+        flag_form = phishing.check_form(body)
+        self.assertFalse(flag_form)
+
+    def test_form_value_error(self):
+        parser = mailparser.parse_from_file(mail_test_5)
+        body = parser.parsed_mail_obj.get("body")
         flag_form = phishing.check_form(body)
         self.assertFalse(flag_form)
 

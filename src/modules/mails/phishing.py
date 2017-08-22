@@ -40,6 +40,9 @@ def check_form(body):
         boolean True if there is form
     """
 
+    # http://lxml.de/parsing.html - Python unicode strings
+    body = body.encode("utf-8")
+
     if body.strip():
         tree = html.fromstring(body)
         results = tree.xpath('//form')

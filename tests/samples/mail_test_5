@@ -1,0 +1,687 @@
+Return-Path: <vwservice@birrwagen.it>
+Delivered-To: valeriano.zama@mymail.it
+Received: (qmail 21081 invoked from network); 4 Jul 2017 16:47:27 -0000
+Received: from mailout-it1.mail-vwbs.de (100.99.139.156)
+  by void.f0m2ehfnj1vuddoxs0ky40ac5c.bx.internal.test.net with SMTP; 4 Jul 2017 16:47:27 -0000
+Received: from unknown (HELO bsul0047.fs01.vwf.vwfs-ad) ([10.41.77.136])
+  by fs-de-bs-sr-web-mgw3.fs01.vwf.vwfs-ad with ESMTP; 04 Jul 2017 18:47:26 +0200
+Received: from audi.de (bsul0115.sec.vwfsag.vwg [10.40.65.62])
+	by bsul0047.fs01.vwf.vwfs-ad (Postfix) with ESMTP id 73044180E1
+	for <valeriano.zama@mymail.it>; Tue,  4 Jul 2017 18:47:26 +0200 (CEST)
+Date: Tue, 4 Jul 2017 18:44:43 +0200 (CET)
+From: Volkswagen Service <vwservice@birrwagen.it>
+Subject: Volkswagen Service Promo Locator - Nuove promozioni personalizzate
+To: <valeriano.zama@mymail.it>
+Message-ID: <ADR42000001928103@audi.de>
+MIME-Version: 1.0
+Importance: Normal
+X-Priority: 3 (Normal)
+X-Mailer: SAP Web Application Server 7.00
+Content-Type: text/html;
+ charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Description: Volkswagen Service Promo Locator - Nuove promozion
+
+<?xml version=3D=221.0=22 encoding=3D=22utf-8=22?><html xmlns=3D=22http://w=
+ww.w3.org/1999/xhtml=22>
+<head>
+<meta http-equiv=3D=22Content-Type=22 content=3D=22text/html; charset=3Dutf=
+-8=22/>
+<meta name=3D=22viewport=22 content=3D=22width=3Ddevice-width, initial-scal=
+e=3D1.0=22/>
+<title>DEM Volkswagen Service</title>
+
+<style type=3D=22text/css=22>
+/*<=21=5BCDATA=5B*/
+        =23outlook a =7B
+            padding: 0;
+        =7D
+
+        body =7B
+            width: 100% =21important;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            margin: 0;
+            padding: 0;
+        =7D
+
+        /* Prevent Webkit and Windows Mobile platforms from changing defaul=
+t font sizes, while not breaking desktop design. */
+        .ExternalClass =7B
+            width: 100%;
+        =7D
+
+        /* Force Hotmail to display emails at full width */
+        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalCla=
+ss font, .ExternalClass td, .ExternalClass div =7B
+            line-height: 100%;
+        =7D
+
+        /* Force Hotmail to display normal line spacing.  */
+        =23backgroundTable =7B
+            margin: 0;
+            padding: 0;
+            width: 100% =21important;
+            line-height: 100% =21important;
+        =7D
+
+        img =7B
+            outline: none;
+            text-decoration: none;
+            border: none;
+            -ms-interpolation-mode: bicubic;
+        =7D
+
+        a img =7B
+            border: none;
+        =7D
+
+        .image_fix =7B
+            display: block;
+        =7D
+
+        p =7B
+            margin: 0px 0px =21important;
+        =7D
+
+        table td =7B
+            border-collapse: collapse;
+            border-spacing: 0;
+            border: none;
+            padding: 0;
+        =7D
+
+        table =7B
+            border-collapse: collapse;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        =7D
+
+        a =7B
+            color: =2300b1eb;
+            text-decoration: none;
+            text-decoration: none =21important;
+        =7D
+
+        /*STYLES*/
+        table=5Bclass=3Dfull=5D =7B
+            width: 100%;
+            clear: both;
+        =7D
+
+        /*IPAD STYLES*/
+
+        =40media only screen and (min-width: 600px) =7B
+            .container =7B
+                width: 600px =21important;
+            =7D
+        =7D
+
+        =40media only screen and (max-width: 600px) =7B
+            a=5Bhref=5E=3D=22tel=22=5D, a=5Bhref=5E=3D=22sms=22=5D =7B
+                text-decoration: none;
+                color: =2300b1eb; /* or whatever your want */
+                pointer-events: none;
+                cursor: default;
+            =7D
+
+            .mobile_link a=5Bhref=5E=3D=22tel=22=5D, .mobile_link a=5Bhref=
+=5E=3D=22sms=22=5D =7B
+                text-decoration: default;
+                color: =2300b1eb =21important;
+                pointer-events: auto;
+                cursor: default;
+            =7D
+
+            table=5Bclass=3D=22emhide=22=5D =7B
+                display: none =21important;
+            =7D
+
+            td=5Bclass=3D=22emhide=22=5D =7B
+                display: none =21important;
+            =7D
+
+            table=5Bclass=3Ddevicewidth=5D =7B
+                width: 100% =21important;
+                text-align: center =21important;
+            =7D
+
+            div=5Bclass=3Ddevicewidthinner=5D =7B
+                width: 280px =21important;
+                text-align: center =21important;
+            =7D
+
+            /*
+                        table=5Bclass=3Ddevicewidthinner=5D =7Bwidth: 280px=
+=21important;text-align:center=21important;=7D
+                        img=5Bclass=3Ddevicewidthinner=5D =7Bheight:168px=
+=21important; width: auto=21important;text-align:center=21important;=7D*/
+            td=5Bclass=3DmobileSpacer=5D =7B
+                height: 0px =21important;
+            =7D
+
+            td=5Bclass=3D=22noborderOnMobile=22=5D =7B
+                border: none =21important;
+            =7D
+        =7D
+
+        /*IPHONE STYLES*/
+        =40media only screen and (max-width: 480px) =7B
+            a=5Bhref=5E=3D=22tel=22=5D, a=5Bhref=5E=3D=22sms=22=5D =7B
+                text-decoration: none;
+                color: =2300b1eb; /* or whatever your want */
+                pointer-events: none;
+                cursor: default;
+            =7D
+
+            .mobile_link a=5Bhref=5E=3D=22tel=22=5D, .mobile_link a=5Bhref=
+=5E=3D=22sms=22=5D =7B
+                text-decoration: default;
+                color: =2300b1eb =21important;
+                pointer-events: auto;
+                cursor: default;
+            =7D
+
+/*=5D=5D>*/
+</style>
+</P></head>
+<body>
+<div class=3D=22preview_text=22 style=3D=22display:none; font-size:1px; col=
+or: =23ffffff; line-height: 0px; max-width:0px;  opacity:0;overflow:hidden;=
+=22>Vieni a scoprire Volkswagen Service Promo Locator aggiornato nella graf=
+ica, con inedite funzionalit=C3=A0 e nuove proposte commerciali per la pros=
+sima estate.</div>
+<table width=3D=22100%=22 bgcolor=3D=22=23FFFFFF=22 cellpadding=3D=220=22 c=
+ellspacing=3D=220=22 border=3D=220=22 id=3D=22backgroundTable=22>
+<tbody>
+<tr>
+<td style=3D=22 padding:0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            <table width=3D=22600=22 align=3D=22center=22 cellpadding=3D=22=
+0=22 cellspacing=3D=220=22 border=3D=220=22>
+                <tr>
+                    <td>
+            <=21=5Bendif=5D-->
+<table class=3D=22container=22 width=3D=22100%=22 cellpadding=3D=220=22 cel=
+lspacing=3D=220=22 border=3D=220=22 style=3D=22max-width: 600px; margin:0 a=
+uto;=22>
+<tr>
+<td style=3D=22text-align: center; vertical-align: top; font-size: 0; paddi=
+ng: 0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        <table width=3D=22100%=22 align=3D=22center=22 cell=
+padding=3D=220=22 cellspacing=3D=220=22 border=3D=220=22
+                        <tr>
+                            <td>
+                        <=21=5Bendif=5D-->
+<div style=3D=22width: 100%; display: inline-block; vertical-align: top; ma=
+rgin:0; padding:0;=22>
+<table width=3D=22100%=22 cellpadding=3D=220=22 cellspacing=3D=220=22 borde=
+r=3D=220=22 align=3D=22center=22 style=3D=22border-collapse: collapse; bord=
+er-spacing: 0;=22>
+<tbody><=21-- Spacing -->
+<tr>
+<td width=3D=22100%=22 height=3D=225=22 style=3D=22 padding:0;=22/>
+</tr>
+<=21-- Spacing -->
+<tr>
+<td align=3D=22center=22 valign=3D=22middle=22 style=3D=22font-family: Aria=
+l, sans-serif; font-size: 10px; line-height: 12px; letter-spacing:  0.03em;=
+ color: =23999999; padding:10px;=22>Se non visualizzi correttamente questa =
+email, <a href=3D=22http://www.birrwagen-italia.it/newsletter/2017/1706-Pr=
+omoLocator/DEM_PromoLocator_giugno_2017_online.html?firstname=3DValeriano&a=
+mp;lastname=3DZama&MIG=3D01B25B599AAC0022E10000000A28413E&URLGUID=3D46A54A5=
+95A1D2255E10000000A28413E=22 target=3D=22_blank=22 style=3D=22text-decorati=
+on: none; color: =23666666=22>clicca qui</a>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        </td></tr></table>
+                        <=21=5Bendif=5D--></td>
+</tr>
+</table>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            </td></tr></table>
+            <=21=5Bendif=5D--></td>
+</tr>
+</tbody>
+</table>
+<table width=3D=22100%=22 bgcolor=3D=22=23FFFFFF=22 cellpadding=3D=220=22 c=
+ellspacing=3D=220=22 border=3D=220=22 id=3D=22backgroundTable=22>
+<tbody>
+<tr>
+<td style=3D=22 padding:0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            <table width=3D=22600=22 align=3D=22center=22 cellpadding=3D=22=
+0=22 cellspacing=3D=220=22 border=3D=220=22>
+                <tr>
+                    <td>
+            <=21=5Bendif=5D-->
+<table class=3D=22container=22 width=3D=22100%=22 cellpadding=3D=220=22 cel=
+lspacing=3D=220=22 border=3D=220=22 style=3D=22max-width: 600px; margin:0 a=
+uto;=22>
+<tr>
+<td style=3D=22text-align: center; vertical-align: top; font-size: 0; paddi=
+ng:0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        <table width=3D=22100%=22 cellpadding=3D=220=22 cel=
+lspacing=3D=220=22 border=3D=220=22>
+                            <tr>
+                                <td>
+                        <=21=5Bendif=5D-->
+<div style=3D=22width:100%;display: inline-block; vertical-align: top; marg=
+in:0; padding:0;=22>
+<table bgcolor=3D=22=23EEEEEE=22 width=3D=22100%=22 align=3D=22center=22 ce=
+llspacing=3D=220=22 cellpadding=3D=220=22 border=3D=220=22>
+<tbody>
+<tr><=21-- start of image -->
+<td align=3D=22left=22 width=3D=22100=22 style=3D=22 padding:0;=22><img wid=
+th=3D=22110=22 border=3D=220=22 height=3D=22101=22 alt=3D=22Volkswagen=22 s=
+tyle=3D=22display:block;  border:none; outline:none; text-decoration:none;=
+=22  src=3D=22http://www.birrwagen-italia.it/newsletter/2017/1706-PromoLoc=
+ator/images/Logo-Volkswagen.jpg=22/></td>
+<td align=3D=22right=22 width=3D=22180=22 style=3D=22 padding:0;=22>
+<table width=3D=22100%=22 align=3D=22right=22 cellspacing=3D=220=22 cellpad=
+ding=3D=220=22 border=3D=220=22>
+<tbody>
+<tr align=3D=22right=22>
+<td style=3D=22padding:0 24px 0 0;font-family: Arial, sans-serif; font-size=
+: 18px; line-height: 22px; letter-spacing: 0.05em; color:  =23666666=22><st=
+rong>Volkswagen Service</strong></td>
+</tr>
+<tr>
+<td width=3D=22100%=22 height=3D=225=22 style=3D=22padding:0;=22/>
+</tr>
+<tr align=3D=22right=22>
+<td width=3D=22100%=22 style=3D=22padding:0 24px 0 0;font-family: Arial, sa=
+ns-serif; font-size: 12px; line-height: 14px; letter-spacing:  0.03em; colo=
+r: =23999999=22>GIUGNO 2017</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        </td></tr></table>
+                        <=21=5Bendif=5D--></td>
+</tr>
+</table>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            </td></tr></table>
+            <=21=5Bendif=5D--></td>
+</tr>
+</tbody>
+</table>
+<table width=3D=22100%=22 bgcolor=3D=22=23FFFFFF=22 cellpadding=3D=220=22 c=
+ellspacing=3D=220=22 border=3D=220=22 id=3D=22backgroundTable=22>
+<tbody>
+<tr>
+<td style=3D=22 padding:0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            <table width=3D=22600=22 align=3D=22center=22 cellpadding=3D=22=
+0=22 cellspacing=3D=220=22 border=3D=220=22>
+                <tr>
+                    <td>
+            <=21=5Bendif=5D-->
+<table class=3D=22container=22 width=3D=22100%=22 cellpadding=3D=220=22 cel=
+lspacing=3D=220=22 border=3D=220=22 style=3D=22max-width: 600px; margin:0 a=
+uto;=22>
+<tr>
+<td style=3D=22text-align: center; vertical-align: top; font-size: 0; paddi=
+ng: 0; width:100%;=22><img width=3D=22600=22 border=3D=220=22 alt=3D=22Semp=
+re  tutto a portata di mano.=22 style=3D=22width:100%; height:auto; display=
+:block; border:none; outline:none;  text-decoration:none;font-family: Arial=
+, sans-serif; font-size: 13px; line-height: 16px; letter-spacing: 0.03em; c=
+olor: =23f9f9f9;=22  src=3D=22http://www.birrwagen-italia.it/newsletter/20=
+17/1706-PromoLocator/images/Img-principale.jpg=22/></td>
+</tr>
+</table>
+<=21--=5Bif (gte mso 9)=7C(IE )=5D>
+            </td></tr></table>
+            <=21=5Bendif=5D--></td>
+</tr>
+</tbody>
+</table>
+<table width=3D=22100%=22 bgcolor=3D=22=23FFFFFF=22 cellpadding=3D=220=22 c=
+ellspacing=3D=220=22 border=3D=220=22 id=3D=22backgroundTable=22>
+<tbody>
+<tr>
+<td style=3D=22 padding:0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            <table width=3D=22600=22 align=3D=22center=22 cellpadding=3D=22=
+0=22 cellspacing=3D=220=22 border=3D=220=22>
+                <tr>
+                    <td>
+            <=21=5Bendif=5D-->
+<table class=3D=22container=22 width=3D=22100%=22 cellpadding=3D=220=22 cel=
+lspacing=3D=220=22 border=3D=220=22 style=3D=22max-width: 600px; margin:0 a=
+uto;=22>
+<tr>
+<td style=3D=22text-align: center; vertical-align: top; font-size: 0; paddi=
+ng: 0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        <table width=3D=22100%=22 align=3D=22center=22 cell=
+padding=3D=220=22 cellspacing=3D=220=22 border=3D=220=22>
+                            <tr>
+                                <td>
+                        <=21=5Bendif=5D-->
+<div style=3D=22width: 100%; display: inline-block; vertical-align: top; ma=
+rgin:0; padding:0;=22>
+<table bgcolor=3D=22=23FFFFFF=22 width=3D=22100%=22 cellpadding=3D=220=22 c=
+ellspacing=3D=220=22 border=3D=220=22 align=3D=22center=22 style=3D=22borde=
+r-collapse: collapse;  border-spacing: 0;=22>
+<tbody>
+<tr>
+<td width=3D=22100%=22 height=3D=2230=22/>
+</tr>
+<tr>
+<td>
+<table width=3D=2294%=22 align=3D=22center=22 cellpadding=3D=220=22 cellspa=
+cing=3D=220=22 border=3D=220=22>
+<tbody>
+<tr>
+<td style=3D=22font-family: Arial, sans-serif; font-size: 14px; color: =236=
+66666; text-align:left;line-height: 18px; letter-spacing:  0.025em;padding:=
+0;=22>Gentile <strong><span id=3D=22userData_FirstName=22>Valeriano</span> =
+<span  id=3D=22userData_LastName=22>Zama</span></strong>,<br/>
+<br/>
+<strong>Volkswagen Service Promo Locator</strong>, il servizio delle promoz=
+ioni su misura per la tua Volkswagen, =C3=A8  online aggiornato nella grafi=
+ca, con inedite funzionalit=C3=A0 e nuove proposte commerciali per la pross=
+ima estate.<br/>
+<br/>
+Vieni a scoprirlo nel nostro sito=21<br/></td>
+</tr>
+<tr bgcolor=3D=22=23FFFFFF=22 class=3D=22container=22>
+<td style=3D=22text-align: center; vertical-align: top; font-size: 0; paddi=
+ng:0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                                                    <table width=3D=22100%=
+=22 align=3D=22center=22 cellpadding=3D=220=22 cellspacing=3D=220=22
+                                                           border=3D=220=22>
+                                                        <tr>
+                                                            <td>
+                                                    <=21=5Bendif=5D-->
+<div style=3D=22width: 100%; display: inline-block; vertical-align:top; mar=
+gin:0; padding:0; text-align:center;=22>
+<table width=3D=22100%=22 border=3D=220=22 cellpadding=3D=220=22 cellspacin=
+g=3D=220=22 style=3D=22border-collapse: collapse; border-spacing: 0;  text-=
+align:center;=22>
+<tr>
+<td style=3D=22padding:0; margin:0; text-align:center=22>
+<table width=3D=22100%=22 cellpadding=3D=220=22 cellspacing=3D=220=22 borde=
+r=3D=220=22>
+<tr>
+<td height=3D=2230=22 style=3D=22padding:0;=22/>
+</tr>
+<tr style=3D=22padding:0;=22>
+<td style=3D=22padding:0;=22 align=3D=22left=22><a  href=3D=22https://www.c=
+rm-vwg.com/tracker/tracking.php?urlid=3DCBC94959EE30F24AE10000000A28413E&MI=
+G=3D01B25B599AAC0022E10000000A28413E&URLGUID=3D47A54A595A1D2255E10000000A28=
+413E=22 title=3D=22Vai a Promo Lcoator=22  target=3D=22_blank=22 style=3D=
+=22color:=23666666;text-decoration:none;=22><=21--PromoLocator-->
+ <img width=3D=22270=22 height=3D=2245=22 border=3D=220=22 alt=3D=22Vai a P=
+romo Lcoator=22 style=3D=22display:block; border:none; outline:none; text-d=
+ecoration:none;=22 src=3D=22http://www.birrwagen-italia.it/newsletter/2017=
+/1706-PromoLocator/images/CTA-Vai-a-PromoLocator.png=22/></a></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+<=21--
+                                            <tr>
+                                                <td width=3D=22100%=22 heig=
+ht=3D=2230=22 style=3D=22padding:0;=22>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                              <td style=3D=22font-family: A=
+rial, sans-serif; font-size: 14px; color: =23666666;  text-align:left;line-=
+height: 18px; letter-spacing: 0.025em;padding:0;=22>                       =
+                           Non perdere l&rsquo;occasione di scoprire <stron=
+g>tutte le altre offerte</strong> dedicate alla tua Volkswagen.
+                                                  <br />
+                                                </td>
+                                            </tr>
+                                            <tr bgcolor=3D=22=23FFFFFF=22 c=
+lass=3D=22container=22 text-align=3D=22center=22>
+                                                <td style=3D=22text-align: =
+center; vertical-align: top; font-size: 0; padding:0;=22>
+                                                    =5Bif (gte mso 9)=7C(IE=
+)=5D>
+                                                    <table width=3D=22100%=
+=22 align=3D=22center=22 cellpadding=3D=220=22 cellspacing=3D=220=22
+                                                           border=3D=220=22>
+                                                        <tr>
+                                                            <td>
+                                                    <=21=5Bendif=5D
+                                                    <div style=3D=22width: =
+100%; display: inline-block; vertical-align:top; margin:0;  padding:0; text=
+-align:center;=22>
+                                                        <table width=3D=221=
+00%=22 border=3D=220=22 cellpadding=3D=220=22 cellspacing=3D=220=22
+                                                               style=3D=22b=
+order-collapse: collapse; border-spacing: 0;  text-align:center;=22>
+                                                            <tr>
+                                                                <td style=
+=3D=22padding:0; margin:0; text-align:center=22>
+                                                                    <table =
+width=3D=22100%=22 cellpadding=3D=220=22 cellspacing=3D=220=22
+                                                                           =
+border=3D=220=22>
+                                                                        <tr>
+                                                                          <=
+td height=3D=2230=22 style=3D=22padding:0;=22></td>
+                                                                        </t=
+r>
+                                                                        <tr=
+ style=3D=22padding:0;=22>
+                                                                           =
+ <td style=3D=22padding:0;=22 align=3D=22left=22><a  href=3D=22http://promo=
+locator.birrwagen.it/=22 target=3D=22_blank=22 style=3D=22color:=23666666;=
+text-decoration:none;=22>
+                                                                           =
+     <img width=3D=22363=22 height=3D=2245=22 border=3D=220=22  alt=3D=22Vo=
+lkswagen Service Promo Locator=22 style=3D=22display:block; border:none; ou=
+tline:none; text-decoration:none;=22  src=3D=22http://www.birrwagen-italia=
+.it/newsletter/2017/1706-PromoLocator/images/CTA-Promo-Locator.png=22/>
+                                                                           =
+ </a></td>
+                                                                        </t=
+r>
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                            </tr>
+-->
+<tr>
+<td width=3D=22100%=22 height=3D=2245=22 style=3D=22padding:0;=22/>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        </td></tr></table>
+                        <=21=5Bendif=5D--></td>
+</tr>
+</table>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            </td></tr></table>
+            <=21=5Bendif=5D--></td>
+</tr>
+</tbody>
+</table>
+<table width=3D=22100%=22 bgcolor=3D=22=23FFFFFF=22 cellpadding=3D=220=22 c=
+ellspacing=3D=220=22 border=3D=220=22 id=3D=22backgroundTable=22>
+<tbody>
+<tr>
+<td style=3D=22 padding:0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            <table width=3D=22600=22 align=3D=22center=22 cellpadding=3D=22=
+0=22 cellspacing=3D=220=22 border=3D=220=22>
+                <tr>
+                    <td>
+            <=21=5Bendif=5D-->
+<table class=3D=22container=22 width=3D=22100%=22 cellpadding=3D=220=22 cel=
+lspacing=3D=220=22 border=3D=220=22 style=3D=22max-width: 600px; margin:0 a=
+uto;=22>
+<tr>
+<td style=3D=22text-align: center; vertical-align: top; font-size: 0; paddi=
+ng:0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        <table width=3D=22100%=22 cellpadding=3D=220=22 cel=
+lspacing=3D=220=22 border=3D=220=22>
+                            <tr>
+                                <td>
+                        <=21=5Bendif=5D-->
+<div style=3D=22width:100%;display: inline-block; vertical-align: top; marg=
+in:0; padding:0;=22>
+<table bgcolor=3D=22=23EEEEEE=22 width=3D=22100%=22 align=3D=22center=22 ce=
+llspacing=3D=220=22 cellpadding=3D=220=22 border=3D=220=22>
+<tbody>
+<tr>
+<td width=3D=22100%=22 height=3D=221=22 style=3D=22padding:0;=22/>
+</tr>
+<tr><=21-- start of image -->
+<td align=3D=22right=22 width=3D=22180=22 style=3D=22 padding:0;=22>
+<table width=3D=22100%=22 align=3D=22left=22 cellspacing=3D=220=22 cellpadd=
+ing=3D=220=22 border=3D=220=22>
+<tbody>
+<tr align=3D=22left=22>
+<td width=3D=22100%=22 style=3D=22padding:24px; font-family: Arial, sans-se=
+rif; font-size: 14px; line-height: 24px; letter-spacing: 0.03em;  color: =
+=23666666=22><strong>VOLKSWAGEN SERVICE</strong></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        </td></tr></table>
+                        <=21=5Bendif=5D--></td>
+</tr>
+</table>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            </td></tr></table>
+            <=21=5Bendif=5D--></td>
+</tr>
+</tbody>
+</table>
+<table width=3D=22100%=22 cellpadding=3D=220=22 cellspacing=3D=220=22 borde=
+r=3D=220=22 id=3D=22backgroundTable=22>
+<tbody>
+<tr bgcolor=3D=22=23FFFFFF=22>
+<td width=3D=22100%=22 style=3D=22 padding:0;=22><=21--=5Bif (gte mso 9)=7C=
+(IE)=5D>
+            <table width=3D=22600=22 align=3D=22center=22 cellpadding=3D=22=
+0=22 cellspacing=3D=220=22 border=3D=220=22>
+                <tr>
+                    <td>
+            <=21=5Bendif=5D-->
+<table class=3D=22container=22 width=3D=22100%=22 cellpadding=3D=220=22 cel=
+lspacing=3D=220=22 border=3D=220=22 align=3D=22center=22 style=3D=22max-wid=
+th: 600px; margin:0  auto;=22>
+<tr>
+<td style=3D=22text-align: center; vertical-align: top; font-size: 0; paddi=
+ng: 0;=22><=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        <table width=3D=22100%=22 align=3D=22center=22 cell=
+padding=3D=220=22 cellspacing=3D=220=22 border=3D=220=22>
+                            <tr>
+                                <td>
+                        <=21=5Bendif=5D-->
+<div style=3D=22width: 100%; display: inline-block; vertical-align: top; ma=
+rgin:0; padding:0;=22>
+<table bgcolor=3D=22=23FFFFFF=22 width=3D=22100%=22 cellpadding=3D=220=22 c=
+ellspacing=3D=220=22 align=3D=22center=22 border=3D=220=22 style=3D=22borde=
+r-collapse: collapse;  border-spacing: 0;=22>
+<tbody>
+<tr>
+<td height=3D=2212=22/>
+</tr>
+<tr>
+<td align=3D=22center=22>
+<table width=3D=2294%=22 cellpadding=3D=220=22 cellspacing=3D=220=22 border=
+=3D=220=22>
+<tbody>
+<tr>
+<td align=3D=22justify=22 valign=3D=22top=22 style=3D=22font-family: Arial,=
+ sans-serif; font-size: 10px; line-height: 12px; letter-spacing: 0.03em; co=
+lor: =23999999; padding:0;=22>Ai sensi dell=E2=80=99articolo 13 D.lgs. n. 1=
+96/2003 (Codice Privacy) La informiamo che i Suoi dati personali  saranno t=
+rattati da Volkswagen Group Italia S.p.A. - con sede in Verona, Viale G.R. =
+Gumpert, 1 - in qualit=C3=A0 di Titolare del  trattamento. Il trattamento -=
+ previo specifico consenso dell=E2=80=99interessato - sar=C3=A1 finalizzato=
+ allo svolgimento di attivit=C3=A1 di  informazione e comunicazione commerc=
+iale e di marketing, materiale promozionale e pubblicitario relativo a prod=
+otti e/o servizi,  svolgimento di ricerche di mercato, elaborazione dei dat=
+i, ed attivit=C3=A1 di profilazione. Quest=E2=80=99ultimo trattamento ha la=
+ finalit=C3=A1 di profilare - solo con il consenso specifico dell=E2=80=99i=
+nteressato - il cliente al fine di migliorare i servizi offerti in base all=
+e  esigenze dei propri clienti ed al fine di trarre informazioni su comport=
+amenti e abitudini commerciali nel settore automobilistico. L=E2=80=99attiv=
+it=C3=A1 di marketing, invece, ha la finalit=C3=A1 di raccogliere ed utiliz=
+zare dati pertinenti e non eccedenti per elaborare studi,  ricerche, statis=
+tiche di mercato; inviare materiale pubblicitario ed informativo; compiere =
+attivit=C3=A1 dirette di vendita o di  collocamento di prodotti o servizi; =
+inviare informazioni commerciali; effettuare comunicazioni commerciali inte=
+rattive. I dati  personali, il cui conferimento =C3=A9 facoltativo, saranno=
+ trattati in forma cartacea ed informatica anche con l=E2=80=99ausilio di m=
+ezzi  elettronici o comunque automatizzati, telefono cellulare e/o fisso, p=
+osta elettronica, per il tempo strettamente necessario per i  fini cui sono=
+ stati raccolti, ferma restando l=E2=80=99applicazione di adeguate misure d=
+i sicurezza. Il rifiuto a fornire i dati comporta  l=E2=80=99impossibilit=
+=C3=A0 di ottenere il servizio. Nel caso Lei decida di non prestare il dist=
+into consenso sulle operazioni di trattamento  ai fini commerciali appena s=
+opra specificate (marketing e profilazione), tale rifiuto non avr=C3=A1 con=
+seguenze di alcun tipo. I dati  personali saranno trattati in forma cartace=
+a ed automatizzata, per il tempo strettamente necessario a conseguire i fin=
+i per cui  sono stati raccolti, ferma restando l=E2=80=99applicazione di ad=
+eguate misure di sicurezza dei dati, ai sensi del Codice in materia di  pro=
+tezione dei dati personali. I Suoi dati potranno essere trasferiti ad altre=
+ societ=C3=A1 facenti parte del Gruppo Volkswagen  (controllate e/o collega=
+te) e/o ad imprese facenti parte della Rete di Vendita ed Assistenza di Vol=
+kswagen Group Italia S.p.A.,  nonch=C3=A8 a societ=C3=A1 che prestano servi=
+zi per Volkswagen Group Italia stessa. I dati non saranno oggetto di diffus=
+ione. I dati sono  trattati elettronicamente dalla rete di vendita Volkswag=
+en. I diritti di cui all'articolo 7 del Codice Privacy (quali accesso,  cor=
+rezione, cancellazione, trasformazione in forma anonima, opposizione al tra=
+ttamento ecc.) potranno essere da Lei esercitati inviando apposita richiest=
+a in tal senso a Volkswagen Group Italia S.p.A, Viale G.R. Gumpert, 1 Veron=
+a - Ufficio Marketing Service.<br/>
+<br/>
+<br/>
+<br/></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+                        </td></tr></table>
+                        <=21=5Bendif=5D--></td>
+</tr>
+</table>
+<=21--=5Bif (gte mso 9)=7C(IE)=5D>
+            </td></tr></table>
+            <=21=5Bendif=5D--></td>
+</tr>
+</tbody>
+</table>
+<img src=3D=22https://www.crm-vwg.com/tracker/tracking.php?urlid=3DCCC94959=
+EE30F24AE10000000A28413E&MIG=3D01B25B599AAC0022E10000000A28413E&URLGUID=3D5=
+9A44A595A1D2255E10000000A28413E=22 width=3D=221=22 height=3D=221=22/>
+</P></body>
+</P></html>
+
