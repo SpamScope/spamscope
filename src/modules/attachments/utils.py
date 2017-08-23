@@ -26,7 +26,6 @@ import six
 import ssdeep
 import tempfile
 from collections import namedtuple
-from .exceptions import TempIOError
 
 try:
     from functools import lru_cache
@@ -97,12 +96,14 @@ def check_archive(data, write_sample=False):
     """
 
     is_archive = True
+    temp = tempfile.mkstemp()[-1]
+
     try:
-        temp = tempfile.mkstemp()[-1]
         with open(temp, 'wb') as f:
             f.write(data)
-    except:
-        raise TempIOError("Failed opening {!r} file".format(temp))
+    except UnicodeEncodeError:
+        with open(temp, 'wb') as f:
+            f.write(data.encode("utf-8"))
 
     try:
         patoolib.test_archive(temp, verbosity=-1)

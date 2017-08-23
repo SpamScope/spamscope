@@ -230,6 +230,7 @@ class Attachments(UserList):
             except TypeError, e:
                 # https://gist.github.com/perrygeo/ee7c65bb1541ff6ac770
                 raw_dict["payload"] += "==="
+                log.warning("Added '===' to payload base64 in TypeError")
                 payload = base64.b64decode(raw_dict["payload"])
                 raw_dict.setdefault("errors", []).append(repr(e))
         else:

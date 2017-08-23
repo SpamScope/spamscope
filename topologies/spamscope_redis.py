@@ -60,7 +60,7 @@ class OutputRedisTopology(Topology):
     raw_mail = RawMail.spec(
         name="raw_mail",
         inputs={tokenizer['raw_mail']: Grouping.fields('sha256_random')},
-        par=2)
+        par=4)
 
     json_maker = JsonMaker.spec(
         name="json_maker",
