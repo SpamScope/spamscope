@@ -30,6 +30,15 @@ files-mails:
             files_pattern: "*untroubled*"
             priority: 1
             path_mails: /path/mails1
+
+            # This flag enables Outlook msg parsing for every mails in mailbox
+            # Default value is False
+            outlook: False
+
+            # List of others headers to get
+            headers:
+                - custom_one
+                - custom_two
         test1: 
             mail_server: hostname
             trust_string: "test1_trust_string"

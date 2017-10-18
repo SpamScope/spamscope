@@ -224,7 +224,7 @@ class Attachments(UserList):
     @staticmethod
     def _metadata(raw_dict):
         """ Return payload, file size and extension of raw data. """
-        if raw_dict["content_transfer_encoding"] == "base64":
+        if raw_dict["binary"]:
             try:
                 payload = base64.b64decode(raw_dict["payload"])
             except TypeError, e:

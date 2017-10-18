@@ -26,7 +26,7 @@ from collections import deque
 
 from streamparse import Stream
 import mailparser
-from modules import AbstractBolt, MAIL_PATH, MAIL_STRING
+from modules import AbstractBolt, MAIL_PATH, MAIL_STRING, MAIL_PATH_OUTLOOK
 from modules.attachments import fingerprints, MailAttachments
 
 
@@ -56,6 +56,7 @@ class Tokenizer(AbstractBolt):
 
         self.mailparser = {
             MAIL_PATH: mailparser.parse_from_file,
+            MAIL_PATH_OUTLOOK: mailparser.parse_from_file_msg,
             MAIL_STRING: mailparser.parse_from_string}
 
         self.mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])

@@ -62,7 +62,9 @@ class TestSearchText(unittest.TestCase):
             mail_server="test_mail_server",
             mailbox="test_mailbox",
             priority=1,
-            trust="test_trust")
+            trust="test_trust",
+            mail_type=1,
+            headers=["header1", "header2"])
 
         self.assertEqual(mail.filename, text_files)
         self.assertEqual(mail.mail_server, "test_mail_server")
@@ -70,6 +72,9 @@ class TestSearchText(unittest.TestCase):
         self.assertEqual(mail.priority, 1)
         self.assertEqual(mail.trust, "test_trust")
         self.assertIsInstance(mail.timestamp, float)
+        self.assertEqual(mail.mail_type, 1)
+        self.assertIsInstance(mail.headers, [])
+        self.assertEqual(mail.headers, ["header1", "header2"])
 
         mail_1 = utils.MailItem(
             filename=text_files,

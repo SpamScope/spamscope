@@ -42,6 +42,7 @@ except ImportError:
 # Constants mail types
 MAIL_PATH = 0
 MAIL_STRING = 1
+MAIL_PATH_OUTLOOK = 2
 
 
 class AbstractComponentMixin(object):

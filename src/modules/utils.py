@@ -43,6 +43,8 @@ class MailItem(object):
         mailbox='localhost',
         priority=None,
         trust=None,
+        mail_type=None,
+        headers=[]
     ):
         self.filename = filename
         self.mail_server = mail_server
@@ -50,6 +52,8 @@ class MailItem(object):
         self.priority = priority
         self.trust = trust
         self.timestamp = os.path.getctime(filename)
+        self.mail_type = mail_type
+        self.headers = headers
 
     def __cmp__(self, other):
         if self.priority > other.priority:

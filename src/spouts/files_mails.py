@@ -25,7 +25,7 @@ import os
 import shutil
 import time
 
-from modules import AbstractSpout, MailItem, MAIL_PATH
+from modules import AbstractSpout, MailItem, MAIL_PATH, MAIL_PATH_OUTLOOK
 
 
 class FilesMailSpout(AbstractSpout):
@@ -78,6 +78,9 @@ class FilesMailSpout(AbstractSpout):
 
             # put new mails in queue
             for mail in (all_mails - self._queue_tail):
+                mail_type = MAIL_PATH_OUTLOOK \
+                    if v.get("outlook", False) else MAIL_PATH
+
                 self._queue_tail.add(mail)
                 self._queue.put(
                     MailItem(
@@ -85,7 +88,9 @@ class FilesMailSpout(AbstractSpout):
                         mail_server=v["mail_server"],
                         mailbox=k,
                         priority=v["priority"],
-                        trust=v["trust_string"]))
+                        trust=v["trust_string"],
+                        mail_type=mail_type,
+                        headers=v.get("headers", [])))
 
     def next_tuple(self):
 
@@ -113,7 +118,7 @@ class FilesMailSpout(AbstractSpout):
                 mail.mailbox,
                 mail.priority,
                 mail.trust,
-                MAIL_PATH],
+                mail.mail_type],
                 tup_id=mail.filename)
 
         # If queue is empty
