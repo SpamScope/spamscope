@@ -30,7 +30,7 @@ from modules import AbstractSpout, MailItem, MAIL_PATH, MAIL_PATH_OUTLOOK
 
 class FilesMailSpout(AbstractSpout):
     outputs = ['raw_mail', 'mail_server', 'mailbox',
-               'priority', 'trust', 'mail_type']
+               'priority', 'trust', 'mail_type', 'headers']
 
     def initialize(self, stormconf, context):
         super(FilesMailSpout, self).initialize(stormconf, context)
@@ -113,12 +113,13 @@ class FilesMailSpout(AbstractSpout):
             mail = self._queue.get(block=True)
 
             self.emit([
-                mail.filename,
-                mail.mail_server,
-                mail.mailbox,
-                mail.priority,
-                mail.trust,
-                mail.mail_type],
+                mail.filename,  # 0
+                mail.mail_server,  # 1
+                mail.mailbox,  # 2
+                mail.priority,  # 3
+                mail.trust,  # 4
+                mail.mail_type,  # 5
+                mail.headers],  # 6
                 tup_id=mail.filename)
 
         # If queue is empty

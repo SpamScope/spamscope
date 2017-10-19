@@ -73,7 +73,7 @@ class TestSearchText(unittest.TestCase):
         self.assertEqual(mail.trust, "test_trust")
         self.assertIsInstance(mail.timestamp, float)
         self.assertEqual(mail.mail_type, 1)
-        self.assertIsInstance(mail.headers, [])
+        self.assertIsInstance(mail.headers, list)
         self.assertEqual(mail.headers, ["header1", "header2"])
 
         mail_1 = utils.MailItem(

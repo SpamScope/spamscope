@@ -20,6 +20,7 @@ It's possible to analyze more than 5 milions of mails for day with a 4 cores ser
 - It's easy to setup: there are docker images and docker-compose ready for use.
 - It's integrated with Apache Tika, VirusTotal, Thug, Shodan and SpamAssassin (for now).
 - It's free and open source (for special functions you can contact me).
+- It can analyze Outlook msg.
 
 ### Distributed
 SpamScope uses Apache Storm that allows you to start small and scale horizontally as you grow. Simply add more workers.

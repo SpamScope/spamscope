@@ -101,6 +101,10 @@ class Tokenizer(AbstractBolt):
 
         mail["analisys_date"] = datetime.datetime.utcnow().isoformat()
 
+        # Adding custom headers
+        for h in tup.values[6]:
+            mail[h] = self.parser.message.get(h)
+
         # Remove attachments
         mail.pop("attachments", None)
 
