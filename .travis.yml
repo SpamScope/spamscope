@@ -34,11 +34,11 @@ before_install:
       
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH &&
-        cd $DOCKER_ROOT_PATH && docker build -t $DOCKER_USERNAME/spamscope-root:develop . && cd - &&
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'python -m unittest discover -s tests -f -v' &&
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v' &&
+        cd $DOCKER_ROOT_PATH && docker build -t $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH . && cd - &&
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH /bin/sh -c 'python -m unittest discover -s tests -f -v' &&
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v' &&
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH &&
-        cd $DOCKER_ELASTICSEARCH_PATH && docker build -t $DOCKER_USERNAME/spamscope-elasticsearch:develop . && cd -;
+        cd $DOCKER_ELASTICSEARCH_PATH && docker build -t $DOCKER_USERNAME/spamscope-elasticsearch:$TRAVIS_BRANCH . && cd -;
       fi
 
 # command to install dependencies
@@ -76,8 +76,8 @@ after_success:
 
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        docker push $DOCKER_USERNAME/spamscope-root:develop;
-        docker push $DOCKER_USERNAME/spamscope-elasticsearch:develop;
+        docker push $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH;
+        docker push $DOCKER_USERNAME/spamscope-elasticsearch:$TRAVIS_BRANCH;
       fi
 
 notifications:
