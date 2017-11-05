@@ -103,7 +103,7 @@ class Tokenizer(AbstractBolt):
 
         # Adding custom headers
         for h in tup.values[6]:
-            mail[h] = self.parser.message.get(h)
+            mail["custom_" + h] = self.parser.message.get(h)
 
         # Remove attachments
         mail.pop("attachments", None)
