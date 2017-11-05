@@ -26,6 +26,7 @@ base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
+mail_test_4 = os.path.join(base_path, 'samples', 'mail_test_4')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
 
@@ -164,6 +165,26 @@ class TestPostProcessing(unittest.TestCase):
             attachments = MailAttachments.withhashes(self.attachments)
             tika(conf_inner, attachments)
 
+    def test_tika_bug_incorrect_padding(self):
+        """Test add Tika processing."""
+
+        from src.modules.attachments import tika
+
+        # Complete parameters
+        conf = {"enabled": True,
+                "path_jar": OPTIONS["TIKA_APP_JAR"],
+                "memory_allocation": None,
+                "whitelist_cont_types": ["application/zip"]}
+
+        p = MailParser()
+        p.parse_from_file(mail_test_4)
+        attachments = MailAttachments.withhashes(p.attachments_list)
+        attachments(intelligence=False, filtercontenttypes=False)
+        tika(conf, attachments)
+
+        for i in attachments:
+            self.assertIn("tika", i)
+
     @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False",
                      "Thug test skipped: "
                      "set env variable 'THUG_ENABLED' to True")
@@ -205,10 +226,6 @@ class TestPostProcessing(unittest.TestCase):
         self.assertIn('behavior', first_thug_analysis)
         self.assertIn('thug', first_thug_analysis)
         self.assertIn('classifiers', first_thug_analysis)
-        self.assertEqual(first_thug_analysis['files'][0]['sha1'],
-                         "e2835a38f50d287c65b0e53b4787d41095a3514f")
-        self.assertEqual(first_thug_analysis['files'][0]['md5'],
-                         "b83c7ac97c22ce248b09f4388c130df0")
         self.assertEqual(
             first_thug_analysis['thug']['personality']['useragent'],
             'win7ie90')

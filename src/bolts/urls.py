@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,15 +19,20 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-from modules import AbstractBolt, load_keywords_list, load_keywords_dict
-from modules.mails import check_phishing
+from pyfaup.faup import Faup
+
+from modules import AbstractBolt, load_whitelist, text2urls_whitelisted
+from modules.attachments import MailAttachments
 
 
-class Phishing(AbstractBolt):
+class Urls(AbstractBolt):
     outputs = ['sha256_random', 'results']
 
     def initialize(self, stormconf, context):
-        super(Phishing, self).initialize(stormconf, context)
+        super(Urls, self).initialize(stormconf, context)
+
+        # Faup
+        self.faup = Faup()
 
         # Input bolts for Phishing bolt
         self.input_bolts = set(context["source->stream->grouping"].keys())
@@ -41,42 +46,34 @@ class Phishing(AbstractBolt):
     def _load_lists(self):
 
         # Load subjects keywords
-        self.subject_keys = load_keywords_list(
-            self.conf["lists"]["subjects"])
-        self.log("Phishing subjects keywords reloaded")
+        self.whitelists = load_whitelist(self.conf["whitelists"])
+        self.log("Whitelists domains reloaded")
 
-        # Load targets keywords
-        self.target_keys = load_keywords_dict(
-            self.conf["lists"]["targets"])
-        self.log("Phishing targets keywords reloaded")
+    def _get_urls(self, greedy_data):
 
-    def _phishing(self, greedy_data):
-
-        # If mail is filtered don't check for phishing
+        # If mail is filtered don't check for urls
         is_filtered = greedy_data["tokenizer"][2]
         results = {}
 
+        # urls body
         if not is_filtered:
+            text = greedy_data["tokenizer"][1]
+            urls = text2urls_whitelisted(text, self.whitelists, self.faup)
+            if urls:
+                results["body"] = urls
 
-            # Get all data
-            email = greedy_data["tokenizer"][1]
-            attachments = greedy_data["attachments"][2]
-            urls_body = greedy_data["urls"][1].get("body", {})
-            urls_attachments = greedy_data["urls"][1].get("attachments", {})
-
-            results = check_phishing(
-                email=email,
-                attachments=attachments,
-                urls_body=urls_body,
-                urls_attachments=urls_attachments,
-                target_keys=self.target_keys,
-                subject_keys=self.subject_keys)
+        # I can have 2 mails with same body, but with different attachments
+        attachments = MailAttachments(greedy_data["attachments"][2])
+        text = attachments.payloadstext()
+        urls = text2urls_whitelisted(text, self.whitelists, self.faup)
+        if urls:
+            results["attachments"] = urls
 
         return results
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
-        super(Phishing, self).process_tick(freq)
+        super(Urls, self).process_tick(freq)
         self._load_lists()
 
     def process(self, tup):
@@ -88,7 +85,5 @@ class Phishing(AbstractBolt):
         diff = self.input_bolts - set(self._mails[sha256_random].keys())
 
         if not diff:
-            results = self._phishing(
-                self._mails.pop(sha256_random))
-
+            results = self._get_urls(self._mails.pop(sha256_random))
             self.emit([sha256_random, results])

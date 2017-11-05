@@ -17,12 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-__all__ = ["TempIOError", "ThugAnalysisFailed",
-           "HashError", "ContentTypeError"]
-
-
-class TempIOError(Exception):
-    pass
+__all__ = ["ThugAnalysisFailed", "HashError", "ContentTypeError"]
 
 
 class ThugAnalysisFailed(Exception):

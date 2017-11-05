@@ -15,3 +15,8 @@ Google:
 
 Amazon:
     - amazon
+
+Test:
+    - payment
+    - hampton
+    - global

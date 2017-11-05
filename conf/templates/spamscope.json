@@ -79,7 +79,8 @@
               "type": "text",
               "analyzer": "html_body"
             },
-            "match": "body"
+            "match_pattern": "regex",
+            "path_match": "^body$"
           }
         },
         {
@@ -122,7 +123,7 @@
                 }
               }
             },
-            "match_mapping_type": "text"
+            "match_mapping_type": "string"
           }
         }
       ],

@@ -1,0 +1,7 @@
+exclude:
+- /fabfile.py
+- /topologies/.*
+component_depth: 1
+languages:
+- python
+- script

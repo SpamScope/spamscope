@@ -58,6 +58,10 @@ class Attachments(UserList):
         self.run(filtercontenttypes, intelligence)
 
     def _intelligence(self):
+        """
+        Post processing attachments with third party tools
+        """
+
         for p in processors:
             try:
                 p(getattr(self, p.__name__), self)
@@ -220,12 +224,14 @@ class Attachments(UserList):
     @staticmethod
     def _metadata(raw_dict):
         """ Return payload, file size and extension of raw data. """
-        if raw_dict["content_transfer_encoding"] == "base64":
+        if raw_dict["binary"]:
             try:
                 payload = base64.b64decode(raw_dict["payload"])
             except TypeError, e:
                 # https://gist.github.com/perrygeo/ee7c65bb1541ff6ac770
-                payload = base64.b64decode(raw_dict["payload"] + "===")
+                raw_dict["payload"] += "==="
+                log.warning("Added '===' to payload base64 in TypeError")
+                payload = base64.b64decode(raw_dict["payload"])
                 raw_dict.setdefault("errors", []).append(repr(e))
         else:
             payload = raw_dict["payload"]

@@ -18,59 +18,45 @@ env:
 
 before_install:
     - sudo apt-get -qq update
-    - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar
+    - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar spamassassin
     
     # Build latest images spamscope-root, spamscope-elasticsearch
 
     # make images
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH;
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
-        cd $DOCKER_ROOT_PATH;
-        docker build -t $DOCKER_USERNAME/spamscope-root .;
-        cd -;
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-topology -v';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'spamscope-elasticsearch -v';
-        cd $DOCKER_ELASTICSEARCH_PATH; 
-        docker build -t $DOCKER_USERNAME/spamscope-elasticsearch .;
-        cd -;
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH &&
+        cd $DOCKER_ROOT_PATH && docker build -t $DOCKER_USERNAME/spamscope-root . && cd - &&
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python -m unittest discover -s tests -f -v' &&
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v' &&
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH &&
+        cd $DOCKER_ELASTICSEARCH_PATH && docker build -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -;
       fi
+      
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH;
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
-        cd $DOCKER_ROOT_PATH;
-        docker build -t $DOCKER_USERNAME/spamscope-root:develop .;
-        cd -;
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'for f in tests/test_*.py; do python "$f"; done';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'thug -V';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-topology -v';
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:develop /bin/sh -c 'spamscope-elasticsearch -v';
-        cd $DOCKER_ELASTICSEARCH_PATH;
-        docker build -t $DOCKER_USERNAME/spamscope-elasticsearch:develop .;
-        cd -;
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH &&
+        cd $DOCKER_ROOT_PATH && docker build -t $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH . && cd - &&
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH /bin/sh -c 'python -m unittest discover -s tests -f -v' &&
+        docker run --rm -it $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v' &&
+        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH &&
+        cd $DOCKER_ELASTICSEARCH_PATH && docker build -t $DOCKER_USERNAME/spamscope-elasticsearch:$TRAVIS_BRANCH . && cd -;
       fi
 
 # command to install dependencies
 install: 
     - pip install -r requirements.txt && python setup.py install
-    - git clone https://$BITBUCKET_USER:$BITBUCKET_ROBOT_KEY@bitbucket.org/$BITBUCKET_USER/zemana-api.git $ZEMANA_PATH;
-      cd $ZEMANA_PATH && python setup.py install && cd -
+    - git clone https://$BITBUCKET_USER:$BITBUCKET_ROBOT_KEY@bitbucket.org/$BITBUCKET_USER/zemana-api.git $ZEMANA_PATH && cd $ZEMANA_PATH && python setup.py install && cd -
     - src/cli/faup.sh
     - cd ${FAUP_PATH}/src/lib/bindings/python && python setup.py install && cd -
+    - pip install coveralls
 
 before_script:
     - curl -o ${TIKA_APP_JAR} https://archive.apache.org/dist/tika/tika-app-${TIKA_VER}.jar
 
 # command to run tests
 script: 
-    # Unittests
-    - python tests/test_attachments.py
-    - python tests/test_attachments_post_processing.py
-    - python tests/test_attachments_utils.py
-    - python tests/test_bitmap.py
-    - python tests/test_utils.py
+    # Unittests and coverage
+    - coverage run --include=src/modules/* --omit=src/modules/abstracts.py -m unittest discover -s tests -f -v
+    # - python -m unittest discover -s tests -f -v
 
     # cli help
     - spamscope-elasticsearch -h
@@ -80,16 +66,21 @@ script:
     - cd tests && python timing_test_search_keywords.py && cd -
 
 after_success:
+    - coveralls
+
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push $DOCKER_USERNAME/spamscope-root;
         docker push $DOCKER_USERNAME/spamscope-elasticsearch;
       fi
+
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        docker push $DOCKER_USERNAME/spamscope-root:develop;
-        docker push $DOCKER_USERNAME/spamscope-elasticsearch:develop;
+        docker push $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH;
+        docker push $DOCKER_USERNAME/spamscope-elasticsearch:$TRAVIS_BRANCH;
       fi
 
 notifications:
-    slack: spamscope:$SLACK_KEY
+    email: false
+    slack:
+        secure: C9SiQ+mfwtLEpyn7cJRpR4e1KNTNNWVLIe+zmq78+LSCeHOpdsfbCp2Y2/C7nbcBj1yLLxmfa30PkPX2tRBady5MikXj05+tblOic3RdMoAAsGErMwAWEzysWy1z1l1bNrnviQ7rExpyRq+6lkg8zj8vIoKh2WZlcSJpQmKd4gzwITFgdawwiraioEf20I/nVon/U/S4NqINDrv6BhffngKwRcBary7GexPNfu/lTR4bg0Ow8isi4Gbu9naU24ueoiuXsUtXSuwQUPuJEAnWFKsZpJ7g053RpRNkOZAYcsdM5e3RegdPbby9+c/XSAPXGjzWfI8j+EcgTFtDZI0pAStGIilsdf7K9y7OkL0JHgS9lIYtgNLRkMBHdHyvGqEmZYExXl1gwi8RhmfoJdiOwVW0AuqmnqpvmTDaimzyBJZ9hR62u9ZLXh9XP6mNYxgWmRp1zeRfHliFv+5iPIcEiST85IWXQpt2uy+Isb7XaY8edtkfjLkEXiPAtB9jU/QEVRCsw1Ei0QzUWyY7QZxptwNemzC6FnNbVO40O3ifC3KgUfKj34TIQb892OM51yHNabeGkGdHDD91TM0d3tnjXl/6O339lMN97mtkVFtJDS5jxwyfxJtGmSqzvyZ0Xx5WVKcBcIbmDoJ7dk8+GW+p6BclUaKwWLJc4mpiYVOaD/U=

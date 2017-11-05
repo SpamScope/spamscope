@@ -86,7 +86,10 @@ class TestPostProcessing(unittest.TestCase):
         self.assertTrue(r)
         self.assertIsInstance(r, dict)
         self.assertIn("data", r)
-        self.assertEqual(r["city"], "Mountain View")
+
+        results = {}
+        shodan(conf, "8.8.8", results)
+        self.assertFalse(results)
 
     @unittest.skipIf(OPTIONS["SHODAN_ENABLED"].capitalize() == "False" or
                      OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",

@@ -58,7 +58,7 @@ def get_args():
         "-g",
         "--topology",
         choices=["spamscope_debug", "spamscope_elasticsearch",
-                 "spamscope_redis", "spamscope_testing"],
+                 "spamscope_redis"],
         default="debug",
         help="SpamScope topology.",
         dest="topology")

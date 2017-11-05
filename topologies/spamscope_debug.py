@@ -18,11 +18,10 @@ limitations under the License.
 """
 
 
-from streamparse import Grouping, Topology
-from bolts import (Attachments, Forms, JsonMaker,
-                   Phishing, Tokenizer, UrlsHandlerAttachments,
-                   UrlsHandlerBody, Network, OutputDebug)
 from spouts import FilesMailSpout
+from bolts import (Attachments, JsonMaker, Phishing, Tokenizer,
+                   Urls, Network, RawMail, OutputDebug)
+from streamparse import Grouping, Topology
 
 
 class OutputDebugTopology(Topology):
@@ -40,42 +39,39 @@ class OutputDebugTopology(Topology):
         inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
         par=2)
 
-    urls_body = UrlsHandlerBody.spec(
-        name="urls-handler-body",
-        inputs={tokenizer['body']: Grouping.fields('sha256_random')})
-
-    urls_attachments = UrlsHandlerAttachments.spec(
-        name="urls-handler-attachments",
-        inputs={attachments: Grouping.fields('sha256_random')})
+    urls = Urls.spec(
+        name="urls",
+        inputs={
+            attachments: Grouping.fields('sha256_random'),
+            tokenizer['body']: Grouping.fields('sha256_random')})
 
     phishing = Phishing.spec(
         name="phishing",
         inputs={
-            tokenizer['mail']: Grouping.fields('sha256_random'),
             attachments: Grouping.fields('sha256_random'),
-            urls_body: Grouping.fields('sha256_random'),
-            urls_attachments: Grouping.fields('sha256_random')})
-
-    forms = Forms.spec(
-        name="forms",
-        inputs={tokenizer['body']: Grouping.fields('sha256_random')})
+            tokenizer['mail']: Grouping.fields('sha256_random'),
+            urls: Grouping.fields('sha256_random')})
 
     network = Network.spec(
         name="network",
         inputs={tokenizer['network']: Grouping.fields('sha256_random')},
         par=2)
 
-    json = JsonMaker.spec(
-        name="json",
+    raw_mail = RawMail.spec(
+        name="raw_mail",
+        inputs={tokenizer['raw_mail']: Grouping.fields('sha256_random')},
+        par=2)
+
+    json_maker = JsonMaker.spec(
+        name="json_maker",
         inputs={
-            tokenizer['mail']: Grouping.fields('sha256_random'),
-            phishing: Grouping.fields('sha256_random'),
             attachments: Grouping.fields('sha256_random'),
-            forms: Grouping.fields('sha256_random'),
             network: Grouping.fields('sha256_random'),
-            urls_body: Grouping.fields('sha256_random'),
-            urls_attachments: Grouping.fields('sha256_random')})
+            phishing: Grouping.fields('sha256_random'),
+            raw_mail: Grouping.fields('sha256_random'),
+            tokenizer['mail']: Grouping.fields('sha256_random'),
+            urls: Grouping.fields('sha256_random')})
 
     output_debug = OutputDebug.spec(
         name="output-debug",
-        inputs=[json])
+        inputs=[json_maker])

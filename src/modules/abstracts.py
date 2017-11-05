@@ -19,15 +19,12 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 from abc import ABCMeta
-from datetime import datetime
 import os
 
 from streamparse.bolt import Bolt
 from streamparse.spout import Spout
-from pyfaup.faup import Faup
 
-from .exceptions import ImproperlyConfigured
-from .utils import load_config, urls_extractor
+from .utils import load_config
 
 try:
     # import for streamparse
@@ -40,6 +37,12 @@ try:
     from collections import ChainMap
 except ImportError:
     from chainmap import ChainMap
+
+
+# Constants mail types
+MAIL_PATH = 0
+MAIL_STRING = 1
+MAIL_PATH_OUTLOOK = 2
 
 
 class AbstractComponentMixin(object):
@@ -88,61 +91,3 @@ class AbstractSpout(Spout, AbstractComponentMixin):
 
     def initialize(self, stormconf, context):
         self._conf_loader()
-
-
-class AbstractUrlsHandlerBolt(AbstractBolt):
-
-    __metaclass__ = ABCMeta
-
-    def initialize(self, stormconf, context):
-        super(AbstractUrlsHandlerBolt, self).initialize(stormconf, context)
-        self._load_whitelist()
-        self._parser_faup = Faup()
-
-    def process_tick(self, freq):
-        """Every freq seconds you reload the whitelist """
-        super(AbstractUrlsHandlerBolt, self).process_tick(freq)
-        self._load_whitelist()
-
-    def _load_whitelist(self):
-        self._whitelist = set()
-
-        for k, v in self.conf["whitelists"].iteritems():
-            expiry = v.get('expiry')
-            reload_ = True
-
-            if expiry:
-                now = datetime.utcnow()
-                reload_ = bool(datetime.strptime(
-                    expiry, "%Y-%m-%dT%H:%M:%S.%fZ") > now)
-
-            if reload_:
-                domains = load_config(v["path"])
-
-                if not isinstance(domains, list):
-                    raise ImproperlyConfigured(
-                        "Whitelist {!r} for {!r} not loaded".format(
-                            k, self.component_name))
-
-                domains = {i.lower() for i in domains}
-                self._whitelist |= domains
-
-                self.log("Reloded whitelist domains {!r} for {!r}".format(
-                    k, self.component_name))
-
-    def _extract_urls(self, text):
-        with_urls = False
-        urls = dict()
-
-        if text:
-            urls = urls_extractor(self._parser_faup, text)
-            domains = urls.keys()
-
-            for d in domains:
-                if d.lower() in self._whitelist:
-                    urls.pop(d)
-
-        if urls:
-            with_urls = True
-
-        return with_urls, urls

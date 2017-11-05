@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
-class ImproperlyConfigured(Exception):
-    pass
+from .post_processing import processors, spamassassin
+from .phishing import check_form, check_urls, check_phishing

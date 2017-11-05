@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .abstracts import AbstractBolt, AbstractSpout, AbstractUrlsHandlerBolt
+from .abstracts import AbstractBolt, AbstractSpout, MAIL_PATH, MAIL_STRING, MAIL_PATH_OUTLOOK
 from .utils import *
-from .redis_client import Redis
-from .exceptions import *
+from .redis_client import Redis, RedisConnectionFailed

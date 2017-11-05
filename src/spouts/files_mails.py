@@ -24,16 +24,13 @@ import glob
 import os
 import shutil
 import time
-from modules import AbstractSpout, MailItem
-from modules.exceptions import ImproperlyConfigured
 
-
-MAIL_PATH = "path"
+from modules import AbstractSpout, MailItem, MAIL_PATH, MAIL_PATH_OUTLOOK
 
 
 class FilesMailSpout(AbstractSpout):
-    outputs = ['mail_path', 'mail_server', 'mailbox',
-               'priority', 'trust', 'kind_data']
+    outputs = ['raw_mail', 'mail_server', 'mailbox',
+               'priority', 'trust', 'mail_type', 'headers']
 
     def initialize(self, stormconf, context):
         super(FilesMailSpout, self).initialize(stormconf, context)
@@ -49,13 +46,13 @@ class FilesMailSpout(AbstractSpout):
     def _check_conf(self):
         self._where = self.conf["post_processing"]["where"]
         if not self._where:
-            raise ImproperlyConfigured(
+            raise RuntimeError(
                 "where in {!r} is not configurated".format(
                     self.component_name))
 
         self._where_failed = self.conf["post_processing"]["where.failed"]
         if not self._where_failed:
-            raise ImproperlyConfigured(
+            raise RuntimeError(
                 "where.failed in {!r} is not configurated".format(
                     self.component_name))
 
@@ -73,7 +70,7 @@ class FilesMailSpout(AbstractSpout):
         mailboxes = self.conf["mailboxes"]
         for k, v in mailboxes.iteritems():
             if not os.path.exists(v["path_mails"]):
-                raise ImproperlyConfigured(
+                raise RuntimeError(
                     "Mail path {!r} does not exist".format(v["path_mails"]))
 
             all_mails = set(
@@ -81,6 +78,9 @@ class FilesMailSpout(AbstractSpout):
 
             # put new mails in queue
             for mail in (all_mails - self._queue_tail):
+                mail_type = MAIL_PATH_OUTLOOK \
+                    if v.get("outlook", False) else MAIL_PATH
+
                 self._queue_tail.add(mail)
                 self._queue.put(
                     MailItem(
@@ -88,7 +88,9 @@ class FilesMailSpout(AbstractSpout):
                         mail_server=v["mail_server"],
                         mailbox=k,
                         priority=v["priority"],
-                        trust=v["trust_string"]))
+                        trust=v["trust_string"],
+                        mail_type=mail_type,
+                        headers=v.get("headers", [])))
 
     def next_tuple(self):
 
@@ -111,12 +113,13 @@ class FilesMailSpout(AbstractSpout):
             mail = self._queue.get(block=True)
 
             self.emit([
-                mail.filename,
-                mail.mail_server,
-                mail.mailbox,
-                mail.priority,
-                mail.trust,
-                MAIL_PATH],
+                mail.filename,  # 0
+                mail.mail_server,  # 1
+                mail.mailbox,  # 2
+                mail.priority,  # 3
+                mail.trust,  # 4
+                mail.mail_type,  # 5
+                mail.headers],  # 6
                 tup_id=mail.filename)
 
         # If queue is empty
