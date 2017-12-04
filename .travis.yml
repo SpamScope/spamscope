@@ -1,3 +1,4 @@
+---
 sudo: required
 
 services:
@@ -10,16 +11,22 @@ python:
 
 env:
     - TIKA_VER=1.15
-      TIKA_APP_JAR=/tmp/tika-app-${TIKA_VER}.jar 
-      FAUP_PATH=/tmp/faup 
-      ZEMANA_PATH=/tmp/zemana 
-      DOCKER_ROOT_PATH=/tmp/docker-root 
+      TIKA_APP_JAR=/tmp/tika-app-${TIKA_VER}.jar
+      FAUP_PATH=/tmp/faup
+      ZEMANA_PATH=/tmp/zemana
+      DOCKER_ROOT_PATH=/tmp/docker-root
       DOCKER_ELASTICSEARCH_PATH=/tmp/docker-elasticsearch
 
 before_install:
     - sudo apt-get -qq update
-    - sudo apt-get install -y build-essential cmake libfuzzy-dev unrar spamassassin
-    
+    - >
+        sudo apt-get install -y
+        build-essential
+        cmake
+        libfuzzy-dev
+        spamassassin
+        unrar
+
     # Build latest images spamscope-root, spamscope-elasticsearch
 
     # make images
@@ -31,7 +38,7 @@ before_install:
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH &&
         cd $DOCKER_ELASTICSEARCH_PATH && docker build -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -;
       fi
-      
+
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH &&
         cd $DOCKER_ROOT_PATH && docker build -t $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH . && cd - &&
@@ -42,18 +49,17 @@ before_install:
       fi
 
 # command to install dependencies
-install: 
-    - pip install -r requirements.txt && python setup.py install
+install:
+    - python setup.py install
     - git clone https://$BITBUCKET_USER:$BITBUCKET_ROBOT_KEY@bitbucket.org/$BITBUCKET_USER/zemana-api.git $ZEMANA_PATH && cd $ZEMANA_PATH && python setup.py install && cd -
-    - src/cli/faup.sh
-    - cd ${FAUP_PATH}/src/lib/bindings/python && python setup.py install && cd -
+    - src/cli/faup.sh && cd -
     - pip install coveralls
 
 before_script:
     - curl -o ${TIKA_APP_JAR} https://archive.apache.org/dist/tika/tika-app-${TIKA_VER}.jar
 
 # command to run tests
-script: 
+script:
     # Unittests and coverage
     - coverage run --include=src/modules/* --omit=src/modules/abstracts.py -m unittest discover -s tests -f -v
     # - python -m unittest discover -s tests -f -v

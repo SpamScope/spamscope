@@ -20,6 +20,7 @@ limitations under the License.
 import os
 import runpy
 from setuptools import setup, find_packages
+from setuptools.command.install import install as SetupToolsInstall
 
 
 current = os.path.realpath(os.path.dirname(__file__))
@@ -29,6 +30,19 @@ __version__ = runpy.run_path(
 
 with open(os.path.join(current, 'requirements.txt')) as f:
     requires = f.read().splitlines()
+
+with open(os.path.join(current, 'requirements_editable.txt')) as f:
+    requirements_editable = f.read().splitlines()
+
+
+class Install(SetupToolsInstall):
+    """Customized setuptools install command which uses pip. """
+
+    def run(self, *args, **kwargs):
+        import pip
+        pip.main(["install", "-e"] + requirements_editable)
+        pip.main(['install', '.'])
+        SetupToolsInstall.run(self, *args, **kwargs)
 
 
 setup(
@@ -44,7 +58,8 @@ setup(
     packages=find_packages(),
     platforms=["Linux"],
     keywords=["spam-analyzer", "email", "mail", "cli"],
-    # install_requires=requires,
+    install_requires=requires,
+    cmdclass={'install': Install},
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Intended Audience :: Developers",
