@@ -76,7 +76,7 @@ class Tokenizer(AbstractBolt):
         mail_type = tup.values[5]
         rand = '_' + ''.join(random.choice('0123456789') for i in range(10))
         self.parser = self.mailparser[mail_type](raw_mail)
-        mail = self.parser.parsed_mail_obj
+        mail = self.parser.mail
 
         # Data mail sources
         mail["mail_server"] = tup.values[1]
@@ -145,10 +145,10 @@ class Tokenizer(AbstractBolt):
                 # Update database mails analyzed
                 self.mails_analyzed.append(mail["sha1"])
 
-            if self.parser.attachments_list:
+            if self.parser.attachments:
                 with_attachments = True
                 attachments = MailAttachments.withhashes(
-                    self.parser.attachments_list)
+                    self.parser.attachments)
 
                 # If filter attachments is enabled
                 if self.filter_attachments_enabled:

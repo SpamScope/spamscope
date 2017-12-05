@@ -41,11 +41,11 @@ class TestPhishing(unittest.TestCase):
 
     def setUp(self):
         parser = mailparser.parse_from_file(mail_thug)
-        self.email = parser.parsed_mail_obj
-        self.attachments = parser.attachments_list
+        self.email = parser.mail
+        self.attachments = parser.attachments
 
         parser = mailparser.parse_from_file(mail_form)
-        self.email_form = parser.parsed_mail_obj
+        self.email_form = parser.mail
 
         body = self.email_form.get("body")
         self.urls = utils.urls_extractor(body, self.faup)
@@ -69,7 +69,7 @@ class TestPhishing(unittest.TestCase):
 
     def test_form_value_error(self):
         parser = mailparser.parse_from_file(mail_test_5)
-        body = parser.parsed_mail_obj.get("body")
+        body = parser.mail.get("body")
         flag_form = phishing.check_form(body)
         self.assertFalse(flag_form)
 

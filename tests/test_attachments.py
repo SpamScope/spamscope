@@ -21,7 +21,8 @@ import os
 import sys
 import unittest
 from collections import deque
-from mailparser import MailParser
+
+import mailparser
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
@@ -43,7 +44,7 @@ except ImportError:
 # Set environment variables to change defaults:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
-DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.15.jar",
+DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.16.jar",
             "VIRUSTOTAL_ENABLED": "False",
             "ZEMANA_ENABLED": "False",
             "THUG_ENABLED": "False"}
@@ -55,21 +56,20 @@ class TestAttachments(unittest.TestCase):
 
     def setUp(self):
         # Init
-        p = MailParser()
-        p.parse_from_file(mail)
-        self.attachments = p.attachments_list
+        p = mailparser.parse_from_file(mail)
+        self.attachments = p.attachments
 
-        p.parse_from_file(mail_thug)
-        self.attachments_thug = p.attachments_list
+        p = mailparser.parse_from_file(mail_thug)
+        self.attachments_thug = p.attachments
 
-        p.parse_from_file(mail_test_1)
-        self.attachments_test_1 = p.attachments_list
+        p = mailparser.parse_from_file(mail_test_1)
+        self.attachments_test_1 = p.attachments
 
-        p.parse_from_file(mail_test_2)
-        self.attachments_test_2 = p.attachments_list
+        p = mailparser.parse_from_file(mail_test_2)
+        self.attachments_test_2 = p.attachments
 
-        p.parse_from_file(mail_test_3)
-        self.attachments_test_3 = p.attachments_list
+        p = mailparser.parse_from_file(mail_test_3)
+        self.attachments_test_3 = p.attachments
 
     def test_error_base64(self):
         t = MailAttachments.withhashes(self.attachments_test_1)

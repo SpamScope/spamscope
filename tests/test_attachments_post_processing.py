@@ -20,7 +20,7 @@ limitations under the License.
 import os
 import sys
 import unittest
-from mailparser import MailParser
+import mailparser
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
@@ -38,7 +38,7 @@ except ImportError:
 # Set environment variables to change defaults:
 # Example export VIRUSTOTAL_APIKEY=your_api_key
 
-DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.15.jar",
+DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.16.jar",
             "VIRUSTOTAL_ENABLED": "False",
             "ZEMANA_ENABLED": "False",
             "THUG_ENABLED": "False"}
@@ -52,12 +52,11 @@ class TestPostProcessing(unittest.TestCase):
 
         # Init
 
-        p = MailParser()
-        p.parse_from_file(mail)
-        self.attachments = p.attachments_list
+        p = mailparser.parse_from_file(mail)
+        self.attachments = p.attachments
 
-        p.parse_from_file(mail_thug)
-        self.attachments_thug = p.attachments_list
+        p = mailparser.parse_from_file(mail_thug)
+        self.attachments_thug = p.attachments
 
     @unittest.skipIf(OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
                      "VirusTotal test skipped: "
@@ -176,9 +175,8 @@ class TestPostProcessing(unittest.TestCase):
                 "memory_allocation": None,
                 "whitelist_cont_types": ["application/zip"]}
 
-        p = MailParser()
-        p.parse_from_file(mail_test_4)
-        attachments = MailAttachments.withhashes(p.attachments_list)
+        p = mailparser.parse_from_file(mail_test_4)
+        attachments = MailAttachments.withhashes(p.attachments)
         attachments(intelligence=False, filtercontenttypes=False)
         tika(conf, attachments)
 

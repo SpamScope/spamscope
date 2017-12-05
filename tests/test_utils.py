@@ -27,8 +27,8 @@ base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 sys.path.append(root)
 
+import mailparser
 import src.modules.utils as utils
-from mailparser import MailParser
 from src.modules.attachments import MailAttachments, fingerprints
 from pyfaup.faup import Faup
 
@@ -42,12 +42,11 @@ class TestSearchText(unittest.TestCase):
     def setUp(self):
         self.f = utils.reformat_output
 
-        p = MailParser()
-        p.parse_from_file(mail)
-        self.mail_obj = p.parsed_mail_obj
+        p = mailparser.parse_from_file(mail)
+        self.mail_obj = p.mail
         self.mail_obj['analisys_date'] = datetime.datetime.utcnow().isoformat()
 
-        self.attachments = MailAttachments.withhashes(p.attachments_list)
+        self.attachments = MailAttachments.withhashes(p.attachments)
         self.attachments.run()
 
         self.parameters = {

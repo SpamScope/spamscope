@@ -21,6 +21,7 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 from functools import partial
 
+import json
 from lxml import html
 
 from ..utils import (search_words_in_text as swt,
@@ -101,7 +102,9 @@ def check_phishing(**kwargs):
     # Get all data
     body = email.get('body')
     subject = email.get('subject')
+    # from mailparser 3.0.0 from is an object
     from_ = email.get('from')
+    from_ = json.dumps(from_, ensure_ascii=False)
 
     # TODO: if an attachment is filtered, the score is not complete
     # many different mails can have the same attachment
