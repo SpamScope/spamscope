@@ -89,11 +89,15 @@ Clone repository
 git clone https://github.com/SpamScope/spamscope.git
 ```
 
-Enter in SpamScope directory install it:
+then enter in SpamScope directory and install it:
 
 ```
-pip install -r requirements.txt
 python setup.py install
+```
+or
+
+```
+pip install SpamScope
 ```
 
 ### Faup

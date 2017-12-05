@@ -28,6 +28,9 @@ current = os.path.realpath(os.path.dirname(__file__))
 __version__ = runpy.run_path(
     os.path.join(current, "src", "options.py"))["__version__"]
 
+with open(os.path.join(current, 'README.rst')) as f:
+    long_description = f.read()
+
 with open(os.path.join(current, 'requirements.txt')) as f:
     requires = f.read().splitlines()
 
@@ -50,6 +53,7 @@ setup(
     description="Fast Advanced Spam Analysis tool",
     license="Apache License, Version 2.0",
     url="https://github.com/SpamScope/spamscope",
+    long_description=long_description,
     version=__version__,
     author="Fedele Mantuano",
     author_email="mantuano.fedele@gmail.com",
@@ -57,7 +61,7 @@ setup(
     maintainer_email='mantuano.fedele@gmail.com',
     packages=find_packages(),
     platforms=["Linux"],
-    keywords=["spam-analyzer", "email", "mail", "cli"],
+    keywords=["spam", "email", "mail", "apache", "apache-storm"],
     install_requires=requires,
     cmdclass={'install': Install},
     classifiers=[
