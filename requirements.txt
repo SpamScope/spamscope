@@ -1,15 +1,15 @@
 PyYAML
-astropy>=1.3.3, <2
-backports.functools-lru-cache>=1.3, <2
+astropy>=1.3.3
+backports.functools-lru-cache>=1.3
 chainmap
 elasticsearch>=6.0.0, <7
-lxml>=3.8.0, <4
+lxml
 mail-parser>=3
 patool
 pyparsing
 python-magic
 redis>=2.10.5, <3
-shodan>=1.7.5, <2
+shodan
 simplejson
 six
 ssdeep

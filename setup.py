@@ -32,7 +32,7 @@ with open(os.path.join(current, 'README.rst')) as f:
     long_description = f.read()
 
 with open(os.path.join(current, 'requirements.txt')) as f:
-    requires = f.read().splitlines()
+    requirements = f.read().splitlines()
 
 with open(os.path.join(current, 'requirements_editable.txt')) as f:
     requirements_editable = f.read().splitlines()
@@ -44,7 +44,7 @@ class Install(SetupToolsInstall):
     def run(self, *args, **kwargs):
         import pip
         pip.main(["install", "-e"] + requirements_editable)
-        pip.main(['install', '.'])
+        pip.main(['install'] + requirements)
         SetupToolsInstall.run(self, *args, **kwargs)
 
 
@@ -62,7 +62,7 @@ setup(
     packages=find_packages(),
     platforms=["Linux"],
     keywords=["spam", "email", "mail", "apache", "apache-storm"],
-    install_requires=requires,
+    install_requires=requirements,
     cmdclass={'install': Install},
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
