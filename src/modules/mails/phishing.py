@@ -23,6 +23,7 @@ from functools import partial
 import json
 
 from lxml import html
+from lxml.etree import ParserError
 import six
 
 from ..utils import (search_words_in_text as swt,
@@ -46,10 +47,15 @@ def check_form(body):
     body = body.encode("utf-8")
 
     if body.strip():
-        tree = html.fromstring(body)
-        results = tree.xpath('//form')
-        if results:
-            return True
+        try:
+            tree = html.fromstring(body)
+        except ParserError:
+            return False
+        else:
+            results = tree.xpath('//form')
+            if results:
+                return True
+
     return False
 
 
