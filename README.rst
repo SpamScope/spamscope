@@ -1,4 +1,4 @@
-|Build Status| |Coverage Status| |BCH compliance|
+|PyPI version| |Build Status| |Coverage Status| |BCH compliance|
 
 .. figure:: https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png
    :alt: SpamScope
@@ -324,6 +324,8 @@ Screenshots
 
    SpamScope Map
 
+.. |PyPI version| image:: https://badge.fury.io/py/SpamScope.svg
+   :target: https://badge.fury.io/py/SpamScope
 .. |Build Status| image:: https://travis-ci.org/SpamScope/spamscope.svg?branch=master
    :target: https://travis-ci.org/SpamScope/spamscope
 .. |Coverage Status| image:: https://coveralls.io/repos/github/SpamScope/spamscope/badge.svg?branch=develop

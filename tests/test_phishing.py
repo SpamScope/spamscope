@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import copy
 import os
 import sys
 import unittest
@@ -57,6 +58,20 @@ class TestPhishing(unittest.TestCase):
         d = {"generic": "conf/keywords/subjects.example.yml",
              "custom": "conf/keywords/subjects_english.example.yml"}
         self.subjects = utils.load_keywords_list(d)
+
+    def test_none_values(self):
+        email = copy.deepcopy(self.email)
+        email.pop("body", None)
+        email.pop("subjects", None)
+        email.pop("from", None)
+
+        phishing.check_phishing(
+            email=email,
+            attachments=self.attachments,
+            urls_body=self.urls,
+            urls_attachments=self.urls,
+            target_keys=self.targets,
+            subject_keys=self.subjects)
 
     def test_check_form(self):
         body = self.email_form.get("body")
