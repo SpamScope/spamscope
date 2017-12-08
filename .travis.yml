@@ -35,7 +35,7 @@ before_install:
         docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python -m unittest discover -s tests -f -v' &&
         docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v' &&
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH &&
-        cd $DOCKER_ELASTICSEARCH_PATH && docker build --build-arg SPAMSCOPE_VER=$TRAVIS_BRANCH -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -;
+        cd $DOCKER_ELASTICSEARCH_PATH && docker build --build-arg SPAMSCOPE_VER=latest -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -;
       fi
 
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
