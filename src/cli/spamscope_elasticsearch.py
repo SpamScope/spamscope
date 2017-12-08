@@ -23,6 +23,7 @@ import os
 import runpy
 import sys
 import time
+import warnings
 
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionError, NotFoundError
@@ -46,20 +47,32 @@ ch.setFormatter(formatter)
 log.addHandler(ch)
 
 
+warnings.filterwarnings("ignore")
+
+
 def get_args():
     parser = argparse.ArgumentParser(
-        description="It manages SpamScope topologies",
+        description="Tool to manage Elasticsearch for SpamScope",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     subparsers = parser.add_subparsers(help="sub-commands", dest="subparser")
+    connection = parser.add_mutually_exclusive_group()
 
     # Common args
-    parser.add_argument(
+    connection.add_argument(
         "-c",
         "--client-host",
-        default="elasticsearch",
+        default=None,
         help="Elasticsearch client host",
         dest="client_host")
+
+    # Common args
+    connection.add_argument(
+        "-u",
+        "--url",
+        default=None,
+        help="RFC-1738 formatted URLs: https://user:secret@other_host:443/prd",
+        dest="url")
 
     # Common args
     parser.add_argument(
@@ -143,8 +156,7 @@ def get_args():
     return parser.parse_args()
 
 
-def get_payload(client_host, index, hash_value, file_output):
-    es = Elasticsearch(hosts=client_host)
+def get_payload(es, index, hash_value, file_output):
     len_hashes = dict(
         [(32, "md5"), (40, "sha1"), (64, "sha256"),
          (128, "sha512")])
@@ -183,9 +195,7 @@ def get_payload(client_host, index, hash_value, file_output):
             hash_value, file_output))
 
 
-def update_nr_replicas(client_host, max_retry, nr_replicas, index):
-    es = Elasticsearch(hosts=client_host)
-
+def update_nr_replicas(es, max_retry, nr_replicas, index):
     for i in range(max_retry, 0, -1):
         try:
             es.indices.put_settings(
@@ -202,9 +212,7 @@ def update_nr_replicas(client_host, max_retry, nr_replicas, index):
     log.error("Updating replicas definitely failed")
 
 
-def update_template(client_host, max_retry, template_path, template_name):
-    es = Elasticsearch(hosts=client_host)
-
+def update_template(es, max_retry, template_path, template_name):
     with open(template_path) as f:
         body = f.read()
 
@@ -227,10 +235,15 @@ def main():
     # Command line args
     args = get_args()
 
+    if args.client_host:
+        es = Elasticsearch(args.client_host)
+    elif args.url:
+        es = Elasticsearch(args.url, verify_certs=False)
+
     # replicas
     if args.subparser == "replicas":
         update_nr_replicas(
-            client_host=args.client_host,
+            es=es,
             max_retry=args.max_retry,
             nr_replicas=args.nr_replicas,
             index=args.index)
@@ -238,7 +251,7 @@ def main():
     # template
     elif args.subparser == "template":
         update_template(
-            client_host=args.client_host,
+            es=es,
             max_retry=args.max_retry,
             template_path=args.template_path,
             template_name=args.template_name)
@@ -246,7 +259,7 @@ def main():
     # get_payload
     elif args.subparser == "get-payload":
         get_payload(
-            client_host=args.client_host,
+            es=es,
             index=args.index,
             hash_value=args.hash_value,
             file_output=args.file_output)

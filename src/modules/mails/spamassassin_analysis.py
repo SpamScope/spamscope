@@ -51,7 +51,7 @@ def obj_report(s):
         t = message.epilogue
         t = t[t.index("pts rule name"):].strip()
     except (ValueError, AttributeError):
-        return
+        return {}
 
     details = convert_ascii2json(t)
     spam_checker_version = message.get("X-Spam-Checker-Version")

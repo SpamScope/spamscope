@@ -20,6 +20,7 @@ limitations under the License.
 import os
 import runpy
 from setuptools import setup, find_packages
+from setuptools.command.install import install as SetupToolsInstall
 
 
 current = os.path.realpath(os.path.dirname(__file__))
@@ -27,8 +28,24 @@ current = os.path.realpath(os.path.dirname(__file__))
 __version__ = runpy.run_path(
     os.path.join(current, "src", "options.py"))["__version__"]
 
+with open(os.path.join(current, 'README.rst')) as f:
+    long_description = f.read()
+
 with open(os.path.join(current, 'requirements.txt')) as f:
-    requires = f.read().splitlines()
+    requirements = f.read().splitlines()
+
+with open(os.path.join(current, 'requirements_editable.txt')) as f:
+    requirements_editable = f.read().splitlines()
+
+
+class Install(SetupToolsInstall):
+    """Customized setuptools install command which uses pip. """
+
+    def run(self, *args, **kwargs):
+        import pip
+        pip.main(["install", "-e"] + requirements_editable)
+        pip.main(['install'] + requirements)
+        SetupToolsInstall.run(self, *args, **kwargs)
 
 
 setup(
@@ -36,6 +53,7 @@ setup(
     description="Fast Advanced Spam Analysis tool",
     license="Apache License, Version 2.0",
     url="https://github.com/SpamScope/spamscope",
+    long_description=long_description,
     version=__version__,
     author="Fedele Mantuano",
     author_email="mantuano.fedele@gmail.com",
@@ -43,8 +61,9 @@ setup(
     maintainer_email='mantuano.fedele@gmail.com',
     packages=find_packages(),
     platforms=["Linux"],
-    keywords=["spam-analyzer", "email", "mail", "cli"],
-    # install_requires=requires,
+    keywords=["spam", "email", "mail", "apache", "apache-storm"],
+    install_requires=requirements,
+    cmdclass={'install': Install},
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Intended Audience :: Developers",

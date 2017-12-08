@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import copy
 import os
 import sys
 import unittest
@@ -34,6 +35,7 @@ from pyfaup.faup import Faup
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_form = os.path.join(base_path, 'samples', 'mail_form')
 mail_test_5 = os.path.join(base_path, 'samples', 'mail_test_5')
+mail_test_6 = os.path.join(base_path, 'samples', 'mail_test_6')
 
 
 class TestPhishing(unittest.TestCase):
@@ -41,11 +43,11 @@ class TestPhishing(unittest.TestCase):
 
     def setUp(self):
         parser = mailparser.parse_from_file(mail_thug)
-        self.email = parser.parsed_mail_obj
-        self.attachments = parser.attachments_list
+        self.email = parser.mail
+        self.attachments = parser.attachments
 
         parser = mailparser.parse_from_file(mail_form)
-        self.email_form = parser.parsed_mail_obj
+        self.email_form = parser.mail
 
         body = self.email_form.get("body")
         self.urls = utils.urls_extractor(body, self.faup)
@@ -58,6 +60,26 @@ class TestPhishing(unittest.TestCase):
              "custom": "conf/keywords/subjects_english.example.yml"}
         self.subjects = utils.load_keywords_list(d)
 
+    def test_ParserError(self):
+        parser = mailparser.parse_from_file(mail_test_6)
+        body = parser.mail.get("body")
+        flag_form = phishing.check_form(body)
+        self.assertFalse(flag_form)
+
+    def test_none_values(self):
+        email = copy.deepcopy(self.email)
+        email.pop("body", None)
+        email.pop("subjects", None)
+        email.pop("from", None)
+
+        phishing.check_phishing(
+            email=email,
+            attachments=self.attachments,
+            urls_body=self.urls,
+            urls_attachments=self.urls,
+            target_keys=self.targets,
+            subject_keys=self.subjects)
+
     def test_check_form(self):
         body = self.email_form.get("body")
         flag_form = phishing.check_form(body)
@@ -69,7 +91,7 @@ class TestPhishing(unittest.TestCase):
 
     def test_form_value_error(self):
         parser = mailparser.parse_from_file(mail_test_5)
-        body = parser.parsed_mail_obj.get("body")
+        body = parser.mail.get("body")
         flag_form = phishing.check_form(body)
         self.assertFalse(flag_form)
 

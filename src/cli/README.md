@@ -58,10 +58,11 @@ optional arguments:
 General options:
 
 ```
-usage: spamscope-elasticsearch [-h] [-c CLIENT_HOST] [-m MAX_RETRY] [-v]
-                               {replicas,template,get-payload} ...
+usage: spamscope-elasticsearch [-h] [-c CLIENT_HOST | -u URL]
+                                  [-m MAX_RETRY] [-v]
+                                  {replicas,template,get-payload} ...
 
-It manages SpamScope topologies
+Tool to manage Elasticsearch for SpamScope
 
 positional arguments:
   {replicas,template,get-payload}
@@ -73,7 +74,9 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -c CLIENT_HOST, --client-host CLIENT_HOST
-                        Elasticsearch client host (default: elasticsearch)
+                        Elasticsearch client host (default: None)
+  -u URL, --url URL     RFC-1738 formatted URLs:
+                        https://user:secret@other_host:443/prd (default: None)
   -m MAX_RETRY, --max-retry MAX_RETRY
                         Max retry for action (default: 10)
   -v, --version         show program's version number and exit

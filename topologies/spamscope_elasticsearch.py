@@ -32,7 +32,7 @@ class OutputElasticsearchTopology(Topology):
     tokenizer = Tokenizer.spec(
         name="tokenizer",
         inputs=[files_spout],
-        par=1)
+        par=2)
 
     attachments = Attachments.spec(
         name="attachments",
@@ -55,12 +55,12 @@ class OutputElasticsearchTopology(Topology):
     network = Network.spec(
         name="network",
         inputs={tokenizer['network']: Grouping.fields('sha256_random')},
-        par=2)
+        par=1)
 
     raw_mail = RawMail.spec(
         name="raw_mail",
         inputs={tokenizer['raw_mail']: Grouping.fields('sha256_random')},
-        par=2)
+        par=1)
 
     json_maker = JsonMaker.spec(
         name="json_maker",

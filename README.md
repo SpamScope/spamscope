@@ -1,3 +1,4 @@
+[![PyPI version](https://badge.fury.io/py/SpamScope.svg)](https://badge.fury.io/py/SpamScope)
 [![Build Status](https://travis-ci.org/SpamScope/spamscope.svg?branch=master)](https://travis-ci.org/SpamScope/spamscope)
 [![Coverage Status](https://coveralls.io/repos/github/SpamScope/spamscope/badge.svg?branch=develop)](https://coveralls.io/github/SpamScope/spamscope?branch=develop)
 [![BCH compliance](https://bettercodehub.com/edge/badge/SpamScope/spamscope?branch=develop)](https://bettercodehub.com/)
@@ -89,11 +90,15 @@ Clone repository
 git clone https://github.com/SpamScope/spamscope.git
 ```
 
-Enter in SpamScope directory install it:
+then enter in SpamScope directory and install it:
 
 ```
-pip install -r requirements.txt
 python setup.py install
+```
+or
+
+```
+pip install SpamScope
 ```
 
 ### Faup
