@@ -1,6 +1,6 @@
 {
   "order": 10,
-  "template": "*",
+  "index_patterns": "*",
   "settings": {
     "index.codec": "best_compression",
     "index.number_of_replicas": 0,
