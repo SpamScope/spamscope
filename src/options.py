@@ -19,7 +19,7 @@ limitations under the License.
 
 from os.path import join
 
-__version__ = "2.1.1"
+__version__ = "2.1.2"
 __configuration_path__ = "/etc/spamscope"
 
 __defaults__ = {
