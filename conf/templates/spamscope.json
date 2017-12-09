@@ -1,7 +1,7 @@
 {
   "order": 0,
   "version": 4,
-  "template": "spamscope_*-*",
+  "index_patterns": "spamscope_*-*",
   "settings": {
     "analysis": {
       "analyzer": {
@@ -34,7 +34,7 @@
     "index.refresh_interval": "5s"
   },
   "mappings": {
-    "_default_": {
+    "analysis": {
       "dynamic_templates": [
         {
           "cert_serial": {
@@ -127,10 +127,6 @@
           }
         }
       ],
-      "_all": {
-        "norms": false,
-        "enabled": true
-      },
       "properties": {
         "@timestamp": {
           "type": "date"
