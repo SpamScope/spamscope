@@ -13,6 +13,6 @@ shodan
 simplejson
 six
 ssdeep
-streamparse==3.11.0
+streamparse==3.12.0
 tika-app
 virustotal-api
