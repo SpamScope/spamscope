@@ -36,7 +36,7 @@ import patoolib
 from patoolib.util import PatoolError
 import six
 
-from .exceptions import HashError, ContentTypeError
+from .exceptions import HashError, ContentTypeError, ThugAnalysisFailed
 from .post_processing import processors
 from .utils import fingerprints, check_archive, contenttype, extension
 
@@ -68,6 +68,8 @@ class Attachments(UserList):
             except AttributeError:
                 log.warning(
                     "AttributeError: {!r} doesn't exist".format(p.__name__))
+            except ThugAnalysisFailed as e:
+                log.exception(six.text_type(e))
 
     def removeall(self):
         """Remove all items from object. """
