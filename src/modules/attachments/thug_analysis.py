@@ -79,7 +79,8 @@ class ThugAnalysis(ThugAPI):
         # Thug analysis
         for u in conf["user_agents"]:
             try:
-                analysis = self.analyze(local_file, u, conf["referer"])
+                analysis = self.analyze(
+                    local_file, u, conf["referer"], conf["timeout"])
                 results.append(analysis)
             except:
                 msg = "Thug analysis failed for sample sha1 {!r}".format(
@@ -94,8 +95,11 @@ class ThugAnalysis(ThugAPI):
 
             return results
 
-    def analyze(self, local_file, useragent="win7ie90",
-                referer="http://www.google.com/"):
+    def analyze(self,
+                local_file,
+                useragent="win7ie90",
+                referer="http://www.google.com/",
+                timeout=180):
         """ It performs the Thug analysis agaist a loca file
 
         Args:
@@ -111,6 +115,9 @@ class ThugAnalysis(ThugAPI):
 
         # Set referer
         self.set_referer(referer)
+
+        # Set timeout
+        self.set_timeout(timeout)
 
         # No console log
         self.set_log_quiet()

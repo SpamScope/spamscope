@@ -1,3 +1,4 @@
+---
 # Spouts configurations
 # Spout file on file system
 files-mails:
@@ -8,12 +9,12 @@ files-mails:
     # Waiting new mails, sleep seconds
     waiting.sleep: 1
 
-    # Post processing 
+    # Post processing
     post_processing:
 
         # move or remove mails?
-        what: remove 
-            
+        what: remove
+
         # if move where
         where: /mnt/testing/spamscope/mails/moved
 
@@ -21,42 +22,43 @@ files-mails:
         where.failed: /mnt/testing/spamscope/mails/failed
 
     # Mailboxes
-    mailboxes: 
-        test: 
+    mailboxes:
+        test:
             mail_server: hostname
             # Trust string is used to get sender IP address from mail server.
-            # More details: https://github.com/SpamScope/mail-parser/blob/v0.4.6/mailparser/__init__.py#L221
+            # More details:
+            # https://github.com/SpamScope/mail-parser/blob/v0.4.6/mailparser/__init__.py#L221
             trust_string: "test_trust_string"
             files_pattern: "*untroubled*"
             priority: 1
             path_mails: /path/mails1
 
             # This flag enables Outlook msg parsing for every mails in mailbox
-            # Default value is False
-            outlook: False
+            # Default value is "false"
+            outlook: "false"
 
             # List of others headers to get
             headers:
                 - custom_one
                 - custom_two
-        test1: 
+        test1:
             mail_server: hostname
             trust_string: "test1_trust_string"
             files_pattern: "*"
             priority: 2
             path_mails: /path/mails2
 
-                
+
 # Bolts configurations
 # Phishing bolt configuration
 phishing:
     lists:
-        subjects: 
+        subjects:
             # Suspect subjects
             # Example in conf/keywords/subjects.example.yml
             generic: /path/to/generic_subjects
             custom: /path/to/custom_subjects
-        
+
         targets:
             # Keyword for every targets
             # Example in conf/keywords/targets.example.yml
@@ -65,22 +67,22 @@ phishing:
 
 
 tokenizer:
-    # If True mails with same hash are filtered and not analyzed.
+    # If "true" mails with same hash are filtered and not analyzed.
     # Only the body will not saved
-    filter_mails: True
+    filter_mails: "true"
 
     # Max number of hashes saved for filter function
     maxlen_mails: 1000000
 
-    # If True attachments with same hash are filtered and not analyzed.
+    # If "true" attachments with same hash are filtered and not analyzed.
     # Only hashes will be saved
-    filter_attachments: True
+    filter_attachments: "true"
 
     # Max number of hashes saved for filter function
     maxlen_attachments: 1000000
 
-    # If True the same ip address is filtered and not analyzed.
-    filter_network: True
+    # If "true" the same ip address is filtered and not analyzed.
+    filter_network: "true"
 
     # Max number of hashes saved for filter function
     maxlen_network: 1000000
@@ -90,12 +92,12 @@ tokenizer:
 network:
     # Shodan analysis https://www.shodan.io/
     shodan:
-        enabled: False
+        enabled: "false"
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
     # VirusTotal analysis https://www.virustotal.com/
     virustotal:
-        enabled: False
+        enabled: "false"
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
@@ -103,7 +105,7 @@ network:
 raw_mail:
     # SpamAssassin analysis: https://spamassassin.apache.org/
     spamassassin:
-        enabled: False
+        enabled: "false"
 
 
 # Attachments bolt configuration
@@ -117,7 +119,7 @@ attachments:
     # Apache Tika analysis: https://tika.apache.org/
     tika:
         # Enable Tika but it's very slow:
-        enabled: False
+        enabled: "false"
 
         path_jar: /path/to/tika_jar
 
@@ -132,7 +134,7 @@ attachments:
 
     # VirusTotal analysis: https://www.virustotal.com/
     virustotal:
-        enabled: False
+        enabled: "false"
 
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -145,7 +147,7 @@ attachments:
 
     # Thug analysis: https://github.com/buffer/thug
     thug:
-        enabled: False
+        enabled: "false"
 
         # File extensions to submit to thug
         extensions:
@@ -160,10 +162,13 @@ attachments:
 
         referer: http://www.google.com/
 
+        # Set the analysis timeout
+        timeout: 120
+
     # Zemana Antimalware analysis: https://www.zemana.com/
     # only premium users
     zemana:
-        enabled: False
+        enabled: "false"
 
         PartnerId: xxxxx
         UserId: xxxxx
@@ -178,7 +183,7 @@ urls:
         # Example in conf/whitelists/generic.example.yml
         alexa:
             path: /path/to/alexa
-            expiry: 2016-06-28T12:33:00.000Z # date ISO 8601 only UTC
+            expiry: 2016-06-28T12:33:00.000Z  # date ISO 8601 only UTC
         test1:
             path: /path/to/test1
             expiry:
@@ -193,47 +198,47 @@ output-debug:
 
 
 # Output Redis
-#hosts:
-#The hostname(s) of your Redis server(s). Ports may be specified on any
-#hostname, which will override the global port config.
-#If the hosts list is an array, it will pick one random host to connect to,
-#if that host is disconnected it will then pick another.
+# hosts:
+# The hostname(s) of your Redis server(s). Ports may be specified on any
+# hostname, which will override the global port config.
+# If the hosts list is an array, it will pick one random host to connect to,
+# if that host is disconnected it will then pick another.
 
-#For example:
-    #"127.0.0.1"
-    #["127.0.0.1", "127.0.0.2"]
-    #["127.0.0.1:6380", "127.0.0.1"]
+# For example:
+# "127.0.0.1"
+# ["127.0.0.1", "127.0.0.2"]
+# ["127.0.0.1:6380", "127.0.0.1"]
 
-#shuffle_hosts:
-#Shuffle the host list during connection.
+# shuffle_hosts:
+# Shuffle the host list during connection.
 
-#port:
-#The default port to connect on. Can be overridden on any host.
+# port:
+# The default port to connect on. Can be overridden on any host.
 
-#db:
-#The Redis database number.
+# db:
+# The Redis database number.
 
-#password:
-#Password to authenticate with.  There is no authentication by default.
+# password:
+# Password to authenticate with.  There is no authentication by default.
 
-#reconnect_interval:
-#Interval for reconnecting to failed Redis connections.
+# reconnect_interval:
+# Interval for reconnecting to failed Redis connections.
 
-#max_retry:
-#number of connect retries
+# max_retry:
+# number of connect retries
 
-#flush_size:
-#max number of json to send in a bulk
+# flush_size:
+# max number of json to send in a bulk
 
-#queue_name:
-#name of Redis server list
+# queue_name:
+# name of Redis server list
 
 output-redis:
     servers:
         hosts:
             - "localhost:6379"
             - "localhost:6380"
-        shuffle_hosts: True
+        shuffle_hosts: "true"
         port: 6379
         db: 0
         password:
