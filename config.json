@@ -13,12 +13,29 @@
             "log": {
                 "path": "/var/log/spamscope",
                 "max_bytes": 5000000,
-                "backup_count": 10,
+                "backup_count": 3,
                 "level": "info"
             },
             "use_virtualenv": false,
             "use_ssh_for_nimbus": false,
             "virtualenv_root": ""
+        },
+        "debug": {
+            "user": "fedelemantuano",
+            "nimbus": "localhost",
+            "workers": [
+                "localhost"
+            ],
+            "log": {
+                "path": "/tmp/logs/",
+                "max_bytes": 5000000,
+                "backup_count": 1,
+                "level": "debug"
+            },
+            "use_virtualenv": true,
+            "install_virtualenv": false,
+            "use_ssh_for_nimbus": false,
+            "virtualenv_root": "venv/"
         }
     }
 }

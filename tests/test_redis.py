@@ -25,7 +25,7 @@ base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
 sys.path.append(root)
 
-from src.modules import Redis, RedisConnectionFailed
+from src.modules.redis_client import Redis, RedisConnectionFailed
 
 
 class TestRedis(unittest.TestCase):

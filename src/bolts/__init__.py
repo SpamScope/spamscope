@@ -18,8 +18,6 @@ from .attachments import Attachments
 from .json_maker import JsonMaker
 from .network import Network
 from .output_debug import OutputDebug
-from .output_elasticsearch import OutputElasticsearch
-from .output_redis import OutputRedis
 from .phishing import Phishing
 from .raw_mail import RawMail
 from .tokenizer import Tokenizer

@@ -16,4 +16,3 @@ limitations under the License.
 
 from .abstracts import AbstractBolt, AbstractSpout, MAIL_PATH, MAIL_STRING, MAIL_PATH_OUTLOOK
 from .utils import *
-from .redis_client import Redis, RedisConnectionFailed

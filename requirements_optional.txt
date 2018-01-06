@@ -1,0 +1,5 @@
+elasticsearch>=6.0.0, <7
+redis>=2.10.5, <3
+shodan
+tika-app
+virustotal-api

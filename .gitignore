@@ -11,4 +11,4 @@ _resources
 build/
 dist/
 logs
-virtualenvs
+venv/

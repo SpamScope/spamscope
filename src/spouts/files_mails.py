@@ -23,7 +23,6 @@ import Queue
 import glob
 import os
 import shutil
-import time
 
 from modules import AbstractSpout, MailItem, MAIL_PATH, MAIL_PATH_OUTLOOK
 
@@ -40,7 +39,6 @@ class FilesMailSpout(AbstractSpout):
         self._queue_tail = set()
         self._count = 1
         self._what = self.conf["post_processing"]["what"].lower()
-        self._waiting_sleep = float(self.conf["waiting.sleep"])
         self._load_mails()
 
     def _check_conf(self):
@@ -95,7 +93,6 @@ class FilesMailSpout(AbstractSpout):
     def next_tuple(self):
 
         # After reload.mails next_tuple reload spout config
-        # About reload.mails * waiting_sleep seconds
         if (self._count % self.conf["reload.mails"]):
             self._count += 1
 
@@ -121,13 +118,6 @@ class FilesMailSpout(AbstractSpout):
                 mail.mail_type,  # 5
                 mail.headers],  # 6
                 tup_id=mail.filename)
-
-        # If queue is empty
-        else:
-            self.log("Queue mails for {!r} is empty".format(
-                self.component_name), "debug")
-            time.sleep(self._waiting_sleep)
-            self._load_mails()
 
     def ack(self, tup_id):
         """Acknowledge tup_id, that is the path_mail. """

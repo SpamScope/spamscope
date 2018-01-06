@@ -20,7 +20,8 @@ limitations under the License.
 
 from spouts import FilesMailSpout
 from bolts import (Attachments, JsonMaker, Phishing, Tokenizer,
-                   Urls, Network, RawMail, OutputElasticsearch)
+                   Urls, Network, RawMail)
+from bolts.output_elasticsearch import OutputElasticsearch
 from streamparse import Grouping, Topology
 
 
