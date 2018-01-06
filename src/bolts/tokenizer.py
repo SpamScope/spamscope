@@ -26,6 +26,7 @@ from collections import deque
 
 from streamparse import Stream
 import mailparser
+from mailparser import get_header
 from modules import AbstractBolt, MAIL_PATH, MAIL_STRING, MAIL_PATH_OUTLOOK
 from modules.attachments import fingerprints, MailAttachments
 
@@ -103,7 +104,7 @@ class Tokenizer(AbstractBolt):
 
         # Adding custom headers
         for h in tup.values[6]:
-            mail["custom_" + h] = self.parser.message.get(h)
+            mail["custom_" + h] = get_header(self.parser.message, h)
 
         # Remove attachments
         mail.pop("attachments", None)
