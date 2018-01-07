@@ -87,18 +87,25 @@ For more details please visit the [wiki page](https://github.com/SpamScope/spams
 Clone repository
 
 ```
-git clone https://github.com/SpamScope/spamscope.git
+$ git clone https://github.com/SpamScope/spamscope.git
 ```
 
 then enter in SpamScope directory and install it:
 
 ```
-python setup.py install
+$ python setup.py install
 ```
 or
 
 ```
-pip install SpamScope
+$ pip install SpamScope
+```
+
+If you want to install all optional packages:
+
+```
+$ git clone https://github.com/SpamScope/spamscope.git
+$ pip install -r requirements_optional
 ```
 
 ### Faup
