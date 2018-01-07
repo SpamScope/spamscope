@@ -51,7 +51,7 @@ before_install:
 install:
     - pip install --upgrade pip setuptools
     - python setup.py install
-    - pip install -r requirements_optional
+    - pip install -r requirements_optional.txt
     - git clone https://$BITBUCKET_USER:$BITBUCKET_ROBOT_KEY@bitbucket.org/$BITBUCKET_USER/zemana-api.git $ZEMANA_PATH && cd $ZEMANA_PATH && python setup.py install && cd -
     - src/cli/faup.sh
     - pip install coveralls

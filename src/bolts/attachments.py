@@ -47,15 +47,15 @@ class Attachments(AbstractBolt):
 
         # Load content types to filter
         self._filter_cont_types = load_keywords_list(
-            self.conf["content_types_blacklist"], lower=False)
-        self.log("Content types to filter reloaded")
+            self.conf.get("content_types_blacklist", {}), lower=False)
+        self.log("Content types to filter reloaded", "debug")
 
         # Load Tika content types to analyze
         self._tika_whitelist_cont_types = set()
         if self.conf["tika"]["enabled"]:
             self._tika_whitelist_cont_types = load_keywords_list(
-                self.conf["tika"]["valid_content_types"], lower=False)
-            self.log("Whitelist Tika content types reloaded")
+                self.conf["tika"].get("valid_content_types", {}), lower=False)
+            self.log("Whitelist Tika content types reloaded", "debug")
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """

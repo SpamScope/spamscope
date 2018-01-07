@@ -187,6 +187,9 @@ def load_config(config_file):
 def load_keywords_list(obj_paths, lower=True):
     keywords = set()
 
+    if not obj_paths:
+        return keywords
+
     for k, v in obj_paths.iteritems():
         temp = load_config(v)
 
@@ -203,6 +206,9 @@ def load_keywords_list(obj_paths, lower=True):
 
 def load_keywords_dict(obj_paths, lower=True):
     keywords = {}
+
+    if not obj_paths:
+        return keywords
 
     for k, v in obj_paths.iteritems():
         temp = load_config(v)
@@ -377,6 +383,9 @@ def load_whitelist(whitelists):
     """
 
     whitelist = set()
+
+    if not whitelists:
+        return whitelist
 
     for k, v in whitelists.iteritems():
         expiry = v.get('expiry')

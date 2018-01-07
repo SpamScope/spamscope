@@ -42,13 +42,13 @@ class Phishing(AbstractBolt):
 
         # Load subjects keywords
         self.subject_keys = load_keywords_list(
-            self.conf["lists"]["subjects"])
-        self.log("Phishing subjects keywords reloaded")
+            self.conf["lists"].get("subjects", {}))
+        self.log("Phishing subjects keywords reloaded", "debug")
 
         # Load targets keywords
         self.target_keys = load_keywords_dict(
-            self.conf["lists"]["targets"])
-        self.log("Phishing targets keywords reloaded")
+            self.conf["lists"].get("targets", {}))
+        self.log("Phishing targets keywords reloaded", "debug")
 
     def _phishing(self, greedy_data):
 
