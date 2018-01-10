@@ -20,32 +20,54 @@ limitations under the License.
 import logging
 import os
 import tempfile
+import sys
 
 try:
     from modules import write_payload
 except ImportError:
     from ...modules import write_payload
 
-from .exceptions import ThugAnalysisFailed
-
 try:
     from thug.ThugAPI import ThugAPI
+    from thug.ThugAPI.Watchdog import Watchdog
+    from thug.DOM.DFT import DFT
 except ImportError:
     raise ImportError(
         "Thug is not installed. Follow these instructions:"
         " http://buffer.github.io/thug/doc/build.html")
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import PyV8
+import simplejson as json
+
 
 log = logging.getLogger("Thug")
+
+
+class CustomWatchdog(Watchdog):
+    def handler(self, signum, frame):
+        msg = "The analysis took more than {} seconds.".format(self.time)
+        log.critical(msg)
+
+        if self.callback:
+            self.callback(signum, frame)
+
+        log.ThugLogging.log_event()
+        raise BaseException(msg)
 
 
 class ThugAnalysis(ThugAPI):
     def __init__(self):
         ThugAPI.__init__(self)
+
+    def _ThugAPI__run(self, window):
+        if log.Trace:
+            sys.settrace(log.Trace)
+
+        with PyV8.JSLocker():
+            with CustomWatchdog(log.ThugOpts.timeout,
+                                callback=self.watchdog_cb):
+                dft = DFT(window)
+                dft.run()
 
     def generate_json_report(self):
         if not log.ThugOpts.json_logging:
@@ -82,11 +104,8 @@ class ThugAnalysis(ThugAPI):
                 analysis = self.analyze(
                     local_file, u, conf["referer"], conf["timeout"])
                 results.append(analysis)
-            except:
-                msg = "Thug analysis failed for sample sha1 {!r}".format(
-                    attachment["sha1"])
-                log.error(msg)
-                raise ThugAnalysisFailed(msg)
+            except UnicodeDecodeError:
+                log.warning("UnicodeDecodeError for in Thug analysis")
         else:
             try:
                 os.remove(local_file)
@@ -99,7 +118,7 @@ class ThugAnalysis(ThugAPI):
                 local_file,
                 useragent="win7ie90",
                 referer="http://www.google.com/",
-                timeout=180):
+                timeout=5):
         """ It performs the Thug analysis agaist a loca file
 
         Args:
@@ -129,9 +148,12 @@ class ThugAnalysis(ThugAPI):
         self.log_init(local_file)
 
         # Run analysis
-        self.run_local(local_file)
+        try:
+            self.run_local(local_file)
+        finally:
+            # catch timeout exception to get partial result
 
-        # Log analysis results
-        self.log_event()
+            # Log analysis results
+            self.log_event()
 
-        return self.generate_json_report()
+            return self.generate_json_report()
