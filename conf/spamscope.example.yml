@@ -31,8 +31,8 @@ files-mails:
             path_mails: /path/mails1
 
             # This flag enables Outlook msg parsing for every mails in mailbox
-            # Default value is "false"
-            outlook: "false"
+            # Default value is false
+            outlook: false
 
             # List of others headers to get
             headers:
@@ -64,22 +64,22 @@ phishing:
 
 
 tokenizer:
-    # If "true" mails with same hash are filtered and not analyzed.
+    # If true mails with same hash are filtered and not analyzed.
     # Only the body will not saved
-    filter_mails: "true"
+    filter_mails: true
 
     # Max number of hashes saved for filter function
     maxlen_mails: 1000000
 
-    # If "true" attachments with same hash are filtered and not analyzed.
+    # If true attachments with same hash are filtered and not analyzed.
     # Only hashes will be saved
-    filter_attachments: "true"
+    filter_attachments: true
 
     # Max number of hashes saved for filter function
     maxlen_attachments: 1000000
 
-    # If "true" the same ip address is filtered and not analyzed.
-    filter_network: "true"
+    # If true the same ip address is filtered and not analyzed.
+    filter_network: true
 
     # Max number of hashes saved for filter function
     maxlen_network: 1000000
@@ -89,12 +89,12 @@ tokenizer:
 network:
     # Shodan analysis https://www.shodan.io/
     shodan:
-        enabled: "false"
+        enabled: false
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
     # VirusTotal analysis https://www.virustotal.com/
     virustotal:
-        enabled: "false"
+        enabled: false
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
@@ -102,7 +102,7 @@ network:
 raw_mail:
     # SpamAssassin analysis: https://spamassassin.apache.org/
     spamassassin:
-        enabled: "false"
+        enabled: false
 
 
 # Attachments bolt configuration
@@ -116,7 +116,7 @@ attachments:
     # Apache Tika analysis: https://tika.apache.org/
     tika:
         # Enable Tika but it's very slow:
-        enabled: "false"
+        enabled: false
 
         path_jar: /path/to/tika_jar
 
@@ -131,7 +131,7 @@ attachments:
 
     # VirusTotal analysis: https://www.virustotal.com/
     virustotal:
-        enabled: "false"
+        enabled: false
 
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -144,7 +144,7 @@ attachments:
 
     # Thug analysis: https://github.com/buffer/thug
     thug:
-        enabled: "false"
+        enabled: false
 
         # File extensions to submit to thug
         extensions:
@@ -181,7 +181,7 @@ attachments:
     # Zemana Antimalware analysis: https://www.zemana.com/
     # only premium users
     zemana:
-        enabled: "false"
+        enabled: false
 
         PartnerId: xxxxx
         UserId: xxxxx
@@ -251,7 +251,7 @@ output-redis:
         hosts:
             - "localhost:6379"
             - "localhost:6380"
-        shuffle_hosts: "true"
+        shuffle_hosts: true
         port: 6379
         db: 0
         password:
