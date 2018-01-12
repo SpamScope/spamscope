@@ -154,13 +154,29 @@ attachments:
 
         # More details:
         # http://buffer.github.io/thug/doc/usage.html#basic-usage
+        #
+        # list of user agents to use for analysis
+        # SpamScope gets start an analysis for user agent
         user_agents:
             - win7ie90
 
         referer: http://www.google.com/
 
-        # Set the analysis timeout
-        timeout: 120
+        # Set the singe analysis timeout in seconds
+        # This value MUST be lower than supervisor.worker.timeout.secs
+        # of SpamScope:
+        # nr. user agents * timeout < supervisor.worker.timeout.secs
+        timeout: 10
+
+        # Set the connect timeout in seconds
+        connect_timeout: 1
+
+        disable_cert_logging: true
+        disable_code_logging: true
+
+        # Maximum pages to fetch
+        # For SpamScope a good value is 1 to have short analysis
+        threshold: 1
 
     # Zemana Antimalware analysis: https://www.zemana.com/
     # only premium users
