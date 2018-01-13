@@ -108,6 +108,8 @@ $ git clone https://github.com/SpamScope/spamscope.git
 $ pip install -r requirements_optional
 ```
 
+Thug is not in requirements_optional. To install it go in Thug section.
+
 ### Faup
 [Faup](https://github.com/stricaud/faup) stands for Finally An Url Parser and is a library and command line tool to parse URLs and normalize fields.
 To install it follow the [wiki](https://github.com/SpamScope/spamscope/wiki/Installation#faup).
@@ -131,6 +133,15 @@ Thug is a Python low-interaction honeyclient aimed at mimicing the behavior of a
 ```
 
 You can see a complete SpamScope report with Thug analysis [here](https://goo.gl/Y4kWCv).
+
+Thug analysis can be very slow and you can have `heartbeat timeout` in Apache Storm.
+To avoid any issue set `supervisor.worker.timeout.secs`:
+
+```
+nr. user agents * timeout_thug < supervisor.worker.timeout.secs
+```
+
+The best value for `threshold` is 1.
 
 ### VirusTotal (optional)
 It's possible add to results (for mail attachments and sender ip address) the VirusTotal report. You need a private API key.

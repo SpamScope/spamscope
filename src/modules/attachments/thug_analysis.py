@@ -135,7 +135,7 @@ class ThugAnalysis(ThugAPI):
 
     def analyze(self,
                 local_file,
-                connect_timeout=2,
+                connect_timeout=1,
                 disable_cert_logging=True,
                 disable_code_logging=True,
                 referer="http://www.google.com/",
