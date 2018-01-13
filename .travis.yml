@@ -24,7 +24,6 @@ before_install:
         build-essential
         cmake
         libfuzzy-dev
-        spamassassin
         unrar
     #- sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
@@ -63,7 +62,7 @@ before_script:
 # command to run tests
 script:
     # Unittests and coverage
-    - coverage run --include=src/modules/* --omit=src/modules/abstracts.py -m unittest discover -s tests -f -v
+    - coverage run --include=src/modules/* --omit=src/modules/abstracts.py,src/modules/mails/spamassassin_analysis.py -m unittest discover -s tests -f -v
 
     # timing
     - python tests/timing_test_search_keywords.py
