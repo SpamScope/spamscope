@@ -17,16 +17,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-__all__ = ["ThugAnalysisFailed", "HashError", "ContentTypeError"]
+__all__ = [
+    "ContentTypeError",
+    "HashError",
+]
 
 
-class ThugAnalysisFailed(Exception):
+class ContentTypeError(IndexError):
     pass
 
 
 class HashError(IndexError):
-    pass
-
-
-class ContentTypeError(IndexError):
     pass

@@ -64,6 +64,13 @@ def get_args():
         dest="topology")
 
     submit.add_argument(
+        "-e",
+        "--environment",
+        default="prod",
+        help="The environment to use for the command.",
+        dest="environment")
+
+    submit.add_argument(
         "-w",
         "--workers",
         default=1,
@@ -98,7 +105,7 @@ def get_args():
     submit.add_argument(
         "-t",
         "--timeout",
-        default=720,
+        default=45,
         type=int,
         help=("How long (in s) between heartbeats until supervisor considers "
               "that worker dead."),
@@ -111,17 +118,18 @@ def create_jar():
     pass
 
 
-def submit_topology(topology, nr_worker, tick, max_pending,
-                    spout_sleep, timeout):
+def submit_topology(topology, environment, nr_worker, tick,
+                    max_pending, spout_sleep, timeout):
     command_line = (
-        "sparse submit -f -n {topology} -w {nr_worker} "
+        "sparse submit -f -n {topology} -w {nr_worker} -e {environment} "
         "-o topology.tick.tuple.freq.secs={tick} "
         "-o topology.max.spout.pending={max_pending} "
         "-o topology.sleep.spout.wait.strategy.time.ms={spout_sleep} "
         "-o supervisor.worker.timeout.secs={timeout} "
         "-o topology.message.timeout.secs={timeout}".format(
-            topology=topology, nr_worker=nr_worker, tick=tick,
-            max_pending=max_pending, spout_sleep=spout_sleep, timeout=timeout))
+            topology=topology, environment=environment, nr_worker=nr_worker,
+            tick=tick, max_pending=max_pending, spout_sleep=spout_sleep,
+            timeout=timeout))
 
     args = shlex.split(command_line)
     proc = Popen(args, stderr=STDOUT)
@@ -138,6 +146,7 @@ def main():
     if args.subparser == "submit":
         submit_topology(
             topology=args.topology,
+            environment=args.environment,
             nr_worker=args.workers,
             tick=args.tick,
             max_pending=args.max_pending,

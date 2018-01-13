@@ -46,8 +46,8 @@ class Urls(AbstractBolt):
     def _load_lists(self):
 
         # Load subjects keywords
-        self.whitelists = load_whitelist(self.conf["whitelists"])
-        self.log("Whitelists domains reloaded")
+        self.whitelists = load_whitelist(self.conf.get("whitelists", {}))
+        self.log("Whitelists domains reloaded", "debug")
 
     def _get_urls(self, greedy_data):
 

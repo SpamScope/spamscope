@@ -195,7 +195,8 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True,
                 "extensions": [".html", ".js", ".jse"],
                 "user_agents": ["win7ie90", "winxpie80"],
-                "referer": "http://www.google.com/"}
+                "referer": "http://www.google.com/",
+                "timeout": 300}
         attachments = MailAttachments.withhashes(self.attachments_thug)
         attachments(intelligence=False, filtercontenttypes=False)
 

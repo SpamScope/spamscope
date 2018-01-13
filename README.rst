@@ -126,19 +126,28 @@ Clone repository
 
 ::
 
-    git clone https://github.com/SpamScope/spamscope.git
+    $ git clone https://github.com/SpamScope/spamscope.git
 
 then enter in SpamScope directory and install it:
 
 ::
 
-    python setup.py install
+    $ python setup.py install
 
 or
 
 ::
 
-    pip install SpamScope
+    $ pip install SpamScope
+
+If you want to install all optional packages:
+
+::
+
+    $ git clone https://github.com/SpamScope/spamscope.git
+    $ pip install -r requirements_optional
+
+Thug is not in requirements\_optional. To install it go in Thug section.
 
 Faup
 ~~~~
@@ -182,6 +191,15 @@ What is Thug? From README project:
 
 You can see a complete SpamScope report with Thug analysis
 `here <https://goo.gl/Y4kWCv>`__.
+
+Thug analysis can be very slow and you can have ``heartbeat timeout`` in
+Apache Storm. To avoid any issue set ``supervisor.worker.timeout.secs``:
+
+::
+
+    nr. user agents * timeout_thug < supervisor.worker.timeout.secs
+
+The best value for ``threshold`` is 1.
 
 VirusTotal (optional)
 ~~~~~~~~~~~~~~~~~~~~~

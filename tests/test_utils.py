@@ -21,6 +21,7 @@ import copy
 import datetime
 import os
 import sys
+import time
 import unittest
 
 base_path = os.path.realpath(os.path.dirname(__file__))
@@ -34,6 +35,11 @@ from pyfaup.faup import Faup
 
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
+
+
+@utils.timeout(2)
+def sleeping():
+    time.sleep(30)
 
 
 class TestSearchText(unittest.TestCase):
@@ -405,6 +411,10 @@ class TestSearchText(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             utils.reformat_urls(dict)
+
+    def test_timeout(self):
+        with self.assertRaises(utils.TimeoutError):
+            sleeping()
 
 
 if __name__ == '__main__':

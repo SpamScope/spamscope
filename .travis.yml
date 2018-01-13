@@ -20,12 +20,12 @@ env:
 before_install:
     - sudo apt-get -qq update
     - >
-        sudo apt-get install -y
+        sudo apt-get -yqq --no-install-recommends install
         build-essential
         cmake
         libfuzzy-dev
         unrar
-    - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+    #- sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
     # Build latest images spamscope-root, spamscope-elasticsearch
     # make images
@@ -51,6 +51,7 @@ before_install:
 install:
     - pip install --upgrade pip setuptools
     - python setup.py install
+    - pip install -r requirements_optional.txt
     - git clone https://$BITBUCKET_USER:$BITBUCKET_ROBOT_KEY@bitbucket.org/$BITBUCKET_USER/zemana-api.git $ZEMANA_PATH && cd $ZEMANA_PATH && python setup.py install && cd -
     - src/cli/faup.sh
     - pip install coveralls
@@ -61,7 +62,7 @@ before_script:
 # command to run tests
 script:
     # Unittests and coverage
-    - coverage run --include=src/modules/* --omit=src/modules/abstracts.py -m unittest discover -s tests -f -v
+    - coverage run --include=src/modules/* --omit=src/modules/abstracts.py,src/modules/mails/spamassassin_analysis.py -m unittest discover -s tests -f -v
 
     # timing
     - python tests/timing_test_search_keywords.py

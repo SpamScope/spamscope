@@ -20,7 +20,8 @@ limitations under the License.
 
 from spouts import FilesMailSpout
 from bolts import (Attachments, JsonMaker, Phishing, Tokenizer,
-                   Urls, Network, RawMail, OutputRedis)
+                   Urls, Network, RawMail)
+from bolts.output_redis import OutputRedis
 from streamparse import Grouping, Topology
 
 
