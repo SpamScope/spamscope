@@ -21,10 +21,13 @@ from __future__ import unicode_literals
 
 import copy
 import datetime
+import errno
 import logging
 import os
 import re
+import signal
 import tempfile
+from functools import wraps
 
 import six
 import yaml
@@ -67,6 +70,35 @@ class MailItem(object):
             return -1
 
         return 0
+
+
+class TimeoutError(Exception):
+    pass
+
+
+def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+    """
+    This decorator raise an TimeoutError exception if the function
+    takes more than 'seconds' seconds to terminate
+
+    From: https://stackoverflow.com/questions/2281850/
+    """
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wraps(func)(wrapper)
+
+    return decorator
 
 
 def write_payload(payload, extension, content_transfer_encoding="base64"):

@@ -21,12 +21,7 @@ import os
 import sys
 import unittest
 
-from virus_total_apis import PublicApi as VirusTotalPublicApi
-
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
+import simplejson as json
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
@@ -37,13 +32,7 @@ from src.modules.attachments import (
 
 sample_zip = os.path.join(base_path, 'samples', 'test.zip')
 sample_txt = os.path.join(base_path, 'samples', 'test.txt')
-
-# Set environment variables to change defaults:
-# Example export VIRUSTOTAL_APIKEY=your_api_key
-
-DEFAULTS = {"VIRUSTOTAL_ENABLED": "False"}
-
-OPTIONS = ChainMap(os.environ, DEFAULTS)
+vt_report = os.path.join(base_path, 'samples', 'vt_report.json')
 
 
 class TestAttachmentsUtils(unittest.TestCase):
@@ -128,13 +117,10 @@ class TestAttachmentsUtils(unittest.TestCase):
         ext = extension(no_ext)
         self.assertFalse(ext)
 
-    @unittest.skipIf(OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
-                     "VirusTotal test skipped: "
-                     "set env variable 'VIRUSTOTAL_ENABLED' to True")
     def test_reformat_virustotal(self):
-        vt = VirusTotalPublicApi(OPTIONS["VIRUSTOTAL_APIKEY"])
+        with open(vt_report) as f:
+            report = json.load(f)
 
-        report = vt.get_file_report("2a7cee8c214ac76ba6fdbc3031e73dbede95b803")
         self.assertIsInstance(report["results"]["scans"], dict)
         for k, v in report["results"]["scans"].items():
             self.assertIn("detected", v)
