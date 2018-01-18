@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 import copy
 import datetime
 import os
@@ -35,6 +36,8 @@ from pyfaup.faup import Faup
 
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
+
+logging.getLogger().addHandler(logging.NullHandler())
 
 
 @utils.timeout(2)

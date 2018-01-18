@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 import os
 import sys
 import unittest
@@ -27,6 +28,8 @@ sys.path.append(root)
 
 import src.modules.bitmap as bitmap
 from src.modules.bitmap import PhishingBitMap
+
+logging.getLogger().addHandler(logging.NullHandler())
 
 
 class ValidBitMap(bitmap.BitMap):

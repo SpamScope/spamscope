@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 import os
 import sys
 import unittest
@@ -33,6 +34,8 @@ from src.modules.attachments import (
 sample_zip = os.path.join(base_path, 'samples', 'test.zip')
 sample_txt = os.path.join(base_path, 'samples', 'test.txt')
 vt_report = os.path.join(base_path, 'samples', 'vt_report.json')
+
+logging.getLogger().addHandler(logging.NullHandler())
 
 
 class TestAttachmentsUtils(unittest.TestCase):

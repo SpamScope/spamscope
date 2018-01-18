@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 import os
 import six
 import sys
@@ -39,6 +40,8 @@ DEFAULTS = {"VIRUSTOTAL_ENABLED": "False",
             "SHODAN_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
+
+logging.getLogger().addHandler(logging.NullHandler())
 
 
 class TestPostProcessing(unittest.TestCase):

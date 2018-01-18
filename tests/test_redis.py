@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 import os
 import sys
 import unittest
@@ -26,6 +27,8 @@ root = os.path.join(base_path, '..')
 sys.path.append(root)
 
 from src.modules.redis_client import Redis, RedisConnectionFailed
+
+logging.getLogger().addHandler(logging.NullHandler())
 
 
 class TestRedis(unittest.TestCase):
