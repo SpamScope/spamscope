@@ -226,11 +226,8 @@ $ export SPAMASSASSIN_ENABLED=True
 ## Docker images
 It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
- - [Root](https://hub.docker.com/r/fmantuano/spamscope-root/)
- - [Elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
-
-For each image there are two tags: **develop** and **latest**.
-
+ - [Deps](https://hub.docker.com/r/fmantuano/spamscope-deps/): to use as base image
+ - [Elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/): integrated with Elasticsearch
 
 
 ## Screenshots
