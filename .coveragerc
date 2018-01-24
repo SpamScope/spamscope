@@ -4,6 +4,8 @@ source = src/modules/
 [report]
 omit = src/modules/abstracts.py
     src/modules/mails/spamassassin_analysis.py
+    src/modules/rabbitmq_client.py
+    src/modules/attachments/thug_analysis.py
 
 exclude_lines =
     pragma: no cover

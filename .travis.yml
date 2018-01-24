@@ -68,6 +68,17 @@ script:
     - spamscope-elasticsearch -v
     - spamscope-topology -v
 
+deploy:
+    provider: pypi
+    user: fmantuano
+    password:
+        secure: "lPuvh9if9jZrtgk/i9++D7v1BGfyEj9kalJy52yfjOARZ3xskrvHLjJMIxu9wFndYYdUAz8J1Y2WsKLDyYyfMwiAFadU2xmsobNunGO95CNUadbfJojaH7LartWQN+gnw98svJTms9GLHLmO8eH2j5BsH2mubOaWm8T0lF3Pjs0NncXdi6HzSQ63qGj6ctjFzAmTqoK14EzbGVAu1KRBzO6hdu41/nhWx1ufRZYBNeEjtNCZfIl74ALdCpEEQfqTl5hgMA9ybuXvcAmZMOWVjBQiXjSeAUoz+u2FYBkzSxx0Sst1MkKoC3iG6p+Z2E4WHya63ew1GQyyug7XSmq8JpaKRFtktU2b5g+AcqKmLsf0nw+2x/pjGxJIyy69OnX7oGr9fQTGGMHg36OU8vdyhOX+40nHEXC+M45rS/ma+tYSrL+j2Mn1kKreOjoC6kV1g+bgX2eSVFicFonB++ySFSt8D5b7zQibIx0BCxzN/WpNu99/0DTFpA0n9ox7+4F4Jzrn3a8IM56I/RyqBqh8ce7TjhOwsF6n8Egjk9ywVuZW8OuohBTxdosU+TAntlNCmGgECcdXzSGqTXLPWjfe2U7C4qtBVwHMlptYxZNs8XvlJksysM8Cyp+dUjXJCLqPH2n55aK9+x6Pzq/cSM1ldzXg+iZcO9XXoEDJ1bLXVDE="
+    on:
+        tags: true
+        distributions: sdist
+        repo: SpamScope/spamscope
+        branch: master
+
 after_success:
     - coveralls
 
