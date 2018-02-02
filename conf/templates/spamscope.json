@@ -1,6 +1,6 @@
 {
   "order": 0,
-  "version": 4,
+  "version": 5,
   "index_patterns": "spamscope_*-*",
   "settings": {
     "analysis": {
@@ -31,7 +31,8 @@
     "index.codec": "best_compression",
     "index.number_of_shards": 2,
     "index.number_of_replicas": 0,
-    "index.refresh_interval": "5s"
+    "index.refresh_interval": "5s",
+    "index.mapping.ignore_malformed": true
   },
   "mappings": {
     "analysis": {
