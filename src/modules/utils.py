@@ -164,7 +164,8 @@ def urls_extractor(text, faup):
     for i in set(match.group().strip() for match in RE_URL.finditer(text)):
         faup.decode(i)
         tokens = faup.get()
-        results.setdefault(tokens["domain"], []).append(tokens)
+        if tokens["domain"]:
+            results.setdefault(tokens["domain"], []).append(tokens)
     else:
         return results
 

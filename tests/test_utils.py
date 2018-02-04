@@ -36,6 +36,7 @@ from pyfaup.faup import Faup
 
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
+mail_test_7 = os.path.join(base_path, 'samples', 'mail_test_7')
 
 logging.getLogger().addHandler(logging.NullHandler())
 
@@ -391,6 +392,19 @@ class TestSearchText(unittest.TestCase):
         self.assertIsInstance(urls["python.org"], list)
         self.assertIn("twitter.com", urls)
         self.assertIsInstance(urls["twitter.com"], list)
+
+    def test_text2urls_whitelisted_nonetype_error(self):
+        p = mailparser.parse_from_file(mail_test_7)
+        body = p.body
+        urls = utils.urls_extractor(body, self.faup)
+
+        for k in urls:
+            self.assertIsNotNone(k)
+
+        d = {"generic": {"path": "conf/whitelists/generic.example.yml"}}
+        whitelist = utils.load_whitelist(d)
+
+        utils.text2urls_whitelisted(body, whitelist, self.faup)
 
     def test_reformat_urls(self):
 
