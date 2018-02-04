@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 import copy
 import os
 import sys
@@ -36,6 +37,8 @@ mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_form = os.path.join(base_path, 'samples', 'mail_form')
 mail_test_5 = os.path.join(base_path, 'samples', 'mail_test_5')
 mail_test_6 = os.path.join(base_path, 'samples', 'mail_test_6')
+
+logging.getLogger().addHandler(logging.NullHandler())
 
 
 class TestPhishing(unittest.TestCase):

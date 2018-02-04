@@ -14,7 +14,6 @@ env:
       TIKA_APP_JAR=/tmp/tika-app-${TIKA_VER}.jar
       FAUP_PATH=/tmp/faup
       ZEMANA_PATH=/tmp/zemana
-      DOCKER_ROOT_PATH=/tmp/docker-root
       DOCKER_ELASTICSEARCH_PATH=/tmp/docker-elasticsearch
 
 before_install:
@@ -25,26 +24,22 @@ before_install:
         cmake
         libfuzzy-dev
         unrar
-    #- sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+    - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+
+    - git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH
 
     # Build latest images spamscope-root, spamscope-elasticsearch
     # make images
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH &&
-        cd $DOCKER_ROOT_PATH && docker build --build-arg SPAMSCOPE_VER=$TRAVIS_BRANCH -t $DOCKER_USERNAME/spamscope-root . && cd - &&
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'python -m unittest discover -s tests -f -v' &&
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v' &&
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH &&
-        cd $DOCKER_ELASTICSEARCH_PATH && docker build --build-arg SPAMSCOPE_VER=latest -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -;
+        cd $DOCKER_ELASTICSEARCH_PATH && docker build --build-arg SPAMSCOPE_VER=master -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -;
+        docker run --rm -it $DOCKER_USERNAME/spamscope-elasticsearch /bin/sh -c 'python -m unittest discover -s tests -f -v';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-elasticsearch /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v';
       fi
 
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-root.git $DOCKER_ROOT_PATH &&
-        cd $DOCKER_ROOT_PATH && docker build --build-arg SPAMSCOPE_VER=$TRAVIS_BRANCH -t $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH . && cd - &&
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH /bin/sh -c 'python -m unittest discover -s tests -f -v' &&
-        docker run --rm -it $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v' &&
-        git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH &&
-        cd $DOCKER_ELASTICSEARCH_PATH && docker build --build-arg SPAMSCOPE_VER=$TRAVIS_BRANCH -t $DOCKER_USERNAME/spamscope-elasticsearch:$TRAVIS_BRANCH . && cd -;
+        cd $DOCKER_ELASTICSEARCH_PATH && docker build --build-arg SPAMSCOPE_VER=develop -t $DOCKER_USERNAME/spamscope-elasticsearch:develop . && cd -;
+        docker run --rm -it $DOCKER_USERNAME/spamscope-elasticsearch:develop /bin/sh -c 'python -m unittest discover -s tests -f -v';
+        docker run --rm -it $DOCKER_USERNAME/spamscope-elasticsearch:develop /bin/sh -c 'thug -V && spamscope-topology -v && spamscope-elasticsearch -v';
       fi
 
 # command to install dependencies
@@ -62,7 +57,7 @@ before_script:
 # command to run tests
 script:
     # Unittests and coverage
-    - coverage run --include=src/modules/* --omit=src/modules/abstracts.py,src/modules/mails/spamassassin_analysis.py -m unittest discover -s tests -f -v
+    - coverage run -m unittest discover -s tests -f -v
 
     # timing
     - python tests/timing_test_search_keywords.py
@@ -73,19 +68,27 @@ script:
     - spamscope-elasticsearch -v
     - spamscope-topology -v
 
+deploy:
+    provider: pypi
+    user: fmantuano
+    password:
+        secure: "lPuvh9if9jZrtgk/i9++D7v1BGfyEj9kalJy52yfjOARZ3xskrvHLjJMIxu9wFndYYdUAz8J1Y2WsKLDyYyfMwiAFadU2xmsobNunGO95CNUadbfJojaH7LartWQN+gnw98svJTms9GLHLmO8eH2j5BsH2mubOaWm8T0lF3Pjs0NncXdi6HzSQ63qGj6ctjFzAmTqoK14EzbGVAu1KRBzO6hdu41/nhWx1ufRZYBNeEjtNCZfIl74ALdCpEEQfqTl5hgMA9ybuXvcAmZMOWVjBQiXjSeAUoz+u2FYBkzSxx0Sst1MkKoC3iG6p+Z2E4WHya63ew1GQyyug7XSmq8JpaKRFtktU2b5g+AcqKmLsf0nw+2x/pjGxJIyy69OnX7oGr9fQTGGMHg36OU8vdyhOX+40nHEXC+M45rS/ma+tYSrL+j2Mn1kKreOjoC6kV1g+bgX2eSVFicFonB++ySFSt8D5b7zQibIx0BCxzN/WpNu99/0DTFpA0n9ox7+4F4Jzrn3a8IM56I/RyqBqh8ce7TjhOwsF6n8Egjk9ywVuZW8OuohBTxdosU+TAntlNCmGgECcdXzSGqTXLPWjfe2U7C4qtBVwHMlptYxZNs8XvlJksysM8Cyp+dUjXJCLqPH2n55aK9+x6Pzq/cSM1ldzXg+iZcO9XXoEDJ1bLXVDE="
+    on:
+        tags: true
+        repo: SpamScope/spamscope
+        branch: master
+
 after_success:
     - coveralls
 
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        docker push $DOCKER_USERNAME/spamscope-root;
         docker push $DOCKER_USERNAME/spamscope-elasticsearch;
       fi
 
     - if [ "$TRAVIS_BRANCH" == "develop" ]; then
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        docker push $DOCKER_USERNAME/spamscope-root:$TRAVIS_BRANCH;
-        docker push $DOCKER_USERNAME/spamscope-elasticsearch:$TRAVIS_BRANCH;
+        docker push $DOCKER_USERNAME/spamscope-elasticsearch:develop;
       fi
 
 notifications:

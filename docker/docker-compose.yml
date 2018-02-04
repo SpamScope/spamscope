@@ -4,28 +4,22 @@ version: '2.1'
 services:
 
   # SpamScope
-  spamscope:
-    image: ${SPAMSCOPE_IMAGE_NAME}
+  spamscope-debug:
+    image: spamscope-debug
+    build: .
     container_name: spamscope
-    mem_limit: ${SPAMSCOPE_MEM_LIMIT}
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    mem_limit: 4g
     ports:
-      - "${SPAMSCOPE_BIND_IP}:8080:8080"
-      - "${SPAMSCOPE_BIND_IP}:8000:8000"
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ${HOST_SPAMSCOPE_CONF}:/etc/spamscope
       - ${HOST_MAILS_FOLDER}:${DOCKER_MAILS_FOLDER}
     healthcheck:
       test: curl -fs http://localhost:8080/
     networks:
-      - ${NET_NAME}
-
-volumes:
-  esdata:
-    driver: local
+      - spamscope
 
 networks:
-  esnet:
+  spamscope:
     driver: bridge

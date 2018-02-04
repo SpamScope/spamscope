@@ -1,4 +1,5 @@
 |PyPI version| |Build Status| |Coverage Status| |BCH compliance|
+|image4|
 
 .. figure:: https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png
    :alt: SpamScope
@@ -314,10 +315,10 @@ Docker images
 It's possible to use complete Docker images with Apache Storm and
 SpamScope. Take the following images:
 
--  `Root <https://hub.docker.com/r/fmantuano/spamscope-root/>`__
--  `Elasticsearch <https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/>`__
-
-For each image there are two tags: **develop** and **latest**.
+-  `Deps <https://hub.docker.com/r/fmantuano/spamscope-deps/>`__: to use
+   as base image
+-  `Elasticsearch <https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/>`__:
+   integrated with Elasticsearch
 
 Screenshots
 -----------
@@ -350,5 +351,7 @@ Screenshots
    :target: https://coveralls.io/github/SpamScope/spamscope?branch=develop
 .. |BCH compliance| image:: https://bettercodehub.com/edge/badge/SpamScope/spamscope?branch=develop
    :target: https://bettercodehub.com/
+.. |image4| image:: https://images.microbadger.com/badges/image/fmantuano/spamscope-elasticsearch.svg
+   :target: https://microbadger.com/images/fmantuano/spamscope-elasticsearch
 .. |Donate| image:: https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif
    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2

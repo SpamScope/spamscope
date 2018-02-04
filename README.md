@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.org/SpamScope/spamscope.svg?branch=master)](https://travis-ci.org/SpamScope/spamscope)
 [![Coverage Status](https://coveralls.io/repos/github/SpamScope/spamscope/badge.svg?branch=develop)](https://coveralls.io/github/SpamScope/spamscope?branch=develop)
 [![BCH compliance](https://bettercodehub.com/edge/badge/SpamScope/spamscope?branch=develop)](https://bettercodehub.com/)
+[![](https://images.microbadger.com/badges/image/fmantuano/spamscope-elasticsearch.svg)](https://microbadger.com/images/fmantuano/spamscope-elasticsearch "Get your own image badge on microbadger.com")
 
 ![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 
@@ -225,11 +226,8 @@ $ export SPAMASSASSIN_ENABLED=True
 ## Docker images
 It's possible to use complete Docker images with Apache Storm and SpamScope. Take the following images:
 
- - [Root](https://hub.docker.com/r/fmantuano/spamscope-root/)
- - [Elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/)
-
-For each image there are two tags: **develop** and **latest**.
-
+ - [Deps](https://hub.docker.com/r/fmantuano/spamscope-deps/): to use as base image
+ - [Elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/): integrated with Elasticsearch
 
 
 ## Screenshots

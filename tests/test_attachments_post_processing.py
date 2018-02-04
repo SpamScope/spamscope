@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 import os
 import sys
 import unittest
@@ -44,6 +45,8 @@ DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.16.jar",
             "THUG_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
+
+logging.getLogger().addHandler(logging.NullHandler())
 
 
 class TestPostProcessing(unittest.TestCase):

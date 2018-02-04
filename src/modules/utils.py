@@ -27,7 +27,7 @@ import os
 import re
 import signal
 import tempfile
-from functools import wraps
+import functools
 
 import six
 import yaml
@@ -87,6 +87,7 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
         def _handle_timeout(signum, frame):
             raise TimeoutError(error_message)
 
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             signal.signal(signal.SIGALRM, _handle_timeout)
             signal.alarm(seconds)
@@ -96,7 +97,7 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
                 signal.alarm(0)
             return result
 
-        return wraps(func)(wrapper)
+        return wrapper
 
     return decorator
 
@@ -163,7 +164,8 @@ def urls_extractor(text, faup):
     for i in set(match.group().strip() for match in RE_URL.finditer(text)):
         faup.decode(i)
         tokens = faup.get()
-        results.setdefault(tokens["domain"], []).append(tokens)
+        if tokens["domain"]:
+            results.setdefault(tokens["domain"], []).append(tokens)
     else:
         return results
 

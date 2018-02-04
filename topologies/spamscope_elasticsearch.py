@@ -33,7 +33,7 @@ class OutputElasticsearchTopology(Topology):
     tokenizer = Tokenizer.spec(
         name="tokenizer",
         inputs=[files_spout],
-        par=2)
+        par=1)
 
     attachments = Attachments.spec(
         name="attachments",
