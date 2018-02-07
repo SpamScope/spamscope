@@ -19,6 +19,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 import logging
+import os
 
 try:
     from modules import register
@@ -201,3 +202,37 @@ def zemana(conf, attachments):
                     if i_result:
                         i["zemana"] = i_result.json
                         i["zemana"]["type"] = i_result.type
+
+
+@register(processors, active=True)
+def store_samples(conf, attachments):
+    """This method stores the attachments on file system.
+
+    Args:
+        attachments (list): all attachments of email
+        conf (dict): conf of this post processor
+
+    Returns:
+        This method updates the attachments list given
+    """
+
+    if conf["enabled"]:
+        for a in attachments:
+            if not a.get("is_filtered", False):
+                payload = a["payload"]
+                binary = a["binary"]
+                date_str = a["analisys_date"].split("T")[0]
+                base_path = conf["base_path"]
+                filename = "{}_{}".format(a["md5"], a["filename"])
+                file_path = os.path.join(base_path, date_str)
+                sample = os.path.join(file_path, filename)
+
+                if not os.path.exists(file_path):
+                    os.makedirs(file_path)
+
+                if binary:
+                    with open(sample, "wb") as f:
+                        f.write(payload.decode("base64"))
+                else:
+                    with open(sample, "w") as f:
+                        f.write(payload)

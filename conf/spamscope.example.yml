@@ -188,6 +188,12 @@ attachments:
         ApiKey: xxxxx
         useragent: SpamScope
 
+    # This plugin store the samples on file system
+    # in date format subfolders (YYYY-MM-DD)
+    store_samples:
+        enabled: false
+        base_path: /tmp
+
 
 # Urls
 urls:

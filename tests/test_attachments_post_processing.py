@@ -235,6 +235,29 @@ class TestPostProcessing(unittest.TestCase):
             first_thug_analysis['thug']['options']['referer'],
             'http://www.google.com/')
 
+    def test_store_samples(self):
+        """Test add store file system processing."""
+
+        import datetime
+        import shutil
+        from src.modules.attachments import store_samples
+
+        # Complete parameters
+        conf = {"enabled": True,
+                "base_path": "/tmp"}
+        attachments = MailAttachments.withhashes(self.attachments)
+        attachments(intelligence=False, filtercontenttypes=False)
+        store_samples(conf, attachments)
+
+        now = datetime.datetime.now().isoformat().split("T")[0]
+        sample = os.path.join(
+            "/tmp",
+            now,
+            "1e38e543279912d98cbfdc7b275a415e_20160523_916527.jpg_.zip")
+
+        self.assertTrue(os.path.exists(sample))
+        shutil.rmtree(os.path.join("/tmp", now))
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
