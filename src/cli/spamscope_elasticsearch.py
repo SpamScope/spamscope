@@ -200,7 +200,8 @@ def update_nr_replicas(es, max_retry, nr_replicas, index):
         try:
             es.indices.put_settings(
                 body={"index": {"number_of_replicas": int(nr_replicas)}},
-                index=index)
+                index=index,
+                allow_no_indices=True)
             log.info("Updating replicas done")
             return
 
