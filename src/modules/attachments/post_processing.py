@@ -217,22 +217,31 @@ def store_samples(conf, attachments):
     """
 
     if conf["enabled"]:
+        from .utils import write_sample
+
+        base_path = conf["base_path"]
+
         for a in attachments:
             if not a.get("is_filtered", False):
-                payload = a["payload"]
-                binary = a["binary"]
+
+                # commons
                 date_str = a["analisys_date"].split("T")[0]
-                base_path = conf["base_path"]
+                path = os.path.join(base_path, date_str)
+
+                # save attachment
                 filename = "{}_{}".format(a["md5"], a["filename"])
-                file_path = os.path.join(base_path, date_str)
-                sample = os.path.join(file_path, filename)
+                write_sample(
+                    binary=a["binary"],
+                    payload=a["payload"],
+                    path=path,
+                    filename=filename)
 
-                if not os.path.exists(file_path):
-                    os.makedirs(file_path)
-
-                if binary:
-                    with open(sample, "wb") as f:
-                        f.write(payload.decode("base64"))
-                else:
-                    with open(sample, "w") as f:
-                        f.write(payload)
+                # save file in archive
+                for i in a.get("files", []):
+                    filename = "{}_{}".format(i["md5"], i["filename"])
+                    write_sample(
+                        # All archived files have base64 payload
+                        binary=True,
+                        payload=i["payload"],
+                        path=path,
+                        filename=filename)

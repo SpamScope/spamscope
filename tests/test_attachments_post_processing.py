@@ -19,6 +19,7 @@ limitations under the License.
 
 import logging
 import os
+import six
 import sys
 import unittest
 import mailparser
@@ -238,7 +239,7 @@ class TestPostProcessing(unittest.TestCase):
     def test_store_samples(self):
         """Test add store file system processing."""
 
-        import datetime
+        from datetime import datetime
         import shutil
         from src.modules.attachments import store_samples
 
@@ -249,13 +250,19 @@ class TestPostProcessing(unittest.TestCase):
         attachments(intelligence=False, filtercontenttypes=False)
         store_samples(conf, attachments)
 
-        now = datetime.datetime.now().isoformat().split("T")[0]
+        now = six.text_type(datetime.utcnow().date())
         sample = os.path.join(
             "/tmp",
             now,
             "1e38e543279912d98cbfdc7b275a415e_20160523_916527.jpg_.zip")
 
+        sample_child = os.path.join(
+            "/tmp",
+            now,
+            "495315553b8af47daada4b279717f651_20160523_211439.jpg_.jpg.exe")
+
         self.assertTrue(os.path.exists(sample))
+        self.assertTrue(os.path.exists(sample_child))
         shutil.rmtree(os.path.join("/tmp", now))
 
 
