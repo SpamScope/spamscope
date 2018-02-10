@@ -1,7 +1,7 @@
 {
   "order": 0,
-  "version": 5,
-  "index_patterns": "spamscope_*-*",
+  "version": 6,
+  "index_patterns": "spamscope_mails-*",
   "settings": {
     "analysis": {
       "analyzer": {
@@ -29,18 +29,19 @@
       }
     },
     "index.codec": "best_compression",
-    "index.number_of_shards": 2,
+    "index.number_of_shards": 1,
     "index.number_of_replicas": 0,
     "index.refresh_interval": "5s",
     "index.mapping.ignore_malformed": true
   },
   "mappings": {
-    "analysis": {
+    "_doc": {
       "dynamic_templates": [
         {
           "cert_serial": {
             "mapping": {
-              "type": "text"
+              "type": "text",
+              "norms": false
             },
             "path_match": "network.shodan.data.ssl.cert.serial"
           }
@@ -58,7 +59,8 @@
         {
           "payload": {
             "mapping": {
-              "type": "binary"
+              "type": "binary",
+              "norms": false
             },
             "match_pattern": "regex",
             "match": "(^|.*\\.)(payload)$"
@@ -103,28 +105,13 @@
           }
         },
         {
-          "all_not_analyzed": {
+          "structured": {
             "mapping": {
               "type": "keyword",
               "eager_global_ordinals": true
             },
             "match_pattern": "regex",
-            "match": "(^|.*\\.)(charset|mail_server|mailbox|message_id|Content-Type|content_transfer_encoding|mail_content_type)$"
-          }
-        },
-        {
-          "all_string": {
-            "mapping": {
-              "type": "text",
-              "fields": {
-                "raw": {
-                  "ignore_above": 256,
-                  "type": "keyword",
-                  "eager_global_ordinals": true
-                }
-              }
-            },
-            "match_mapping_type": "string"
+            "match": "(^|.*\\.)(charset|mail_server|mailbox|message_id|Content-Type|content_transfer_encoding|mail_content_type|to_domains)$"
           }
         }
       ],
