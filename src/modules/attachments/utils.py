@@ -182,5 +182,5 @@ def write_sample(binary, payload, path, filename):
             with open(sample, "w") as f:
                 f.write(payload)
 
-    except IOError:
+    except (IOError, UnicodeEncodeError):
         pass

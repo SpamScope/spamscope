@@ -73,7 +73,7 @@
               "analyzer": "header"
             },
             "match_pattern": "regex",
-            "match": "^(from|to|headers)$"
+            "match": "^(from|to|headers|bcc|cc|delivered_to|reply_to)$"
           }
         },
         {
