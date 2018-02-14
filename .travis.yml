@@ -24,6 +24,7 @@ before_install:
         cmake
         libfuzzy-dev
         unrar
+        unzip
     - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
 
