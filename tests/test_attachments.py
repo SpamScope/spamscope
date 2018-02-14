@@ -32,6 +32,7 @@ mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_1 = os.path.join(base_path, 'samples', 'mail_test_1')
 mail_test_2 = os.path.join(base_path, 'samples', 'mail_test_2')
 mail_test_3 = os.path.join(base_path, 'samples', 'mail_test_3')
+mail_test_8 = os.path.join(base_path, 'samples', 'mail_test_8')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
 from src.modules.attachments.attachments import HashError, ContentTypeError
@@ -74,9 +75,26 @@ class TestAttachments(unittest.TestCase):
         p = mailparser.parse_from_file(mail_test_3)
         self.attachments_test_3 = p.attachments
 
+        p = mailparser.parse_from_file(mail_test_8)
+        self.attachments_test_8 = p.attachments
+
+    def test_not_extract_content_types(self):
+        t = MailAttachments.withhashes(self.attachments_test_8)
+        t(intelligence=False)
+        self.assertIn("files", t[0])
+
+        parameters = {
+            "commons": {
+                "not_extract_content_types": ["application/java-archive"]}}
+
+        t = MailAttachments.withhashes(self.attachments_test_8)
+        t.reload(**parameters)
+        t(intelligence=False)
+        self.assertNotIn("files", t[0])
+
     def test_error_base64(self):
         t = MailAttachments.withhashes(self.attachments_test_1)
-        t.run(filtercontenttypes=False, intelligence=False)
+        t.run(intelligence=False)
         files = []
 
         for i in t:
@@ -89,7 +107,7 @@ class TestAttachments(unittest.TestCase):
 
     def test_error_extract_rar(self):
         t = MailAttachments.withhashes(self.attachments_test_2)
-        t.run(filtercontenttypes=False, intelligence=False)
+        t.run(intelligence=False)
         self.assertEqual(len(t), 2)
         for i in t:
             self.assertEqual(i["Content-Type"], "application/x-rar")
@@ -142,7 +160,7 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(2, len(check_list))
 
         # It should not fail
-        t.run(filtercontenttypes=False, intelligence=False)
+        t.run(intelligence=False)
 
         t = MailAttachments.withhashes(self.attachments)
         check_list = deque(maxlen=10)
@@ -157,7 +175,7 @@ class TestAttachments(unittest.TestCase):
 
     def test_run(self):
         t = MailAttachments.withhashes(self.attachments)
-        t(filtercontenttypes=False, intelligence=False)
+        t(intelligence=False)
 
         for i in t:
             self.assertIn("analisys_date", i)
@@ -188,13 +206,13 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(t.key2, "value2")
         self.assertEqual(len(t), 1)
 
-        t(filtercontenttypes=False, intelligence=False)
+        t(intelligence=False)
         t.removeall()
         self.assertEqual(len(t), 0)
 
     def test_filenamestext(self):
         t = MailAttachments.withhashes(self.attachments)
-        t.run(filtercontenttypes=False, intelligence=False)
+        t.run(intelligence=False)
         text = t.filenamestext()
         self.assertIsNotNone(text)
         self.assertNotIsInstance(text, list)
@@ -204,7 +222,7 @@ class TestAttachments(unittest.TestCase):
 
     def test_payloadstext(self):
         t = MailAttachments.withhashes(self.attachments_thug)
-        t.run(filtercontenttypes=False, intelligence=False)
+        t.run(intelligence=False)
         text = t.payloadstext()
         self.assertIsNotNone(text)
         self.assertNotIsInstance(text, list)
@@ -224,14 +242,14 @@ class TestAttachments(unittest.TestCase):
 
     def test_popcontenttype(self):
         t = MailAttachments.withhashes(self.attachments)
-        t(filtercontenttypes=False, intelligence=False)
+        t(intelligence=False)
         self.assertEqual(len(t), 1)
         t.popcontenttype("application/zip")
         self.assertEqual(len(t), 0)
 
         # Test path when attach is filtered
         t = MailAttachments.withhashes(self.attachments)
-        t(filtercontenttypes=False, intelligence=False)
+        t(intelligence=False)
         check_list = deque(maxlen=10)
         md5 = "1e38e543279912d98cbfdc7b275a415e"
         check_list.append(md5)
@@ -240,13 +258,13 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(len(t), 0)
 
         t = MailAttachments.withhashes(self.attachments)
-        t(filtercontenttypes=False, intelligence=False)
+        t(intelligence=False)
         self.assertEqual(len(t[0]["files"]), 1)
         t.popcontenttype("application/x-dosexec")
         self.assertEqual(len(t[0]["files"]), 0)
 
         t = MailAttachments.withhashes(self.attachments)
-        t(filtercontenttypes=False, intelligence=False)
+        t(intelligence=False)
         t.popcontenttype("application/fake")
         self.assertEqual(len(t), 1)
         self.assertEqual(len(t[0]["files"]), 1)
@@ -258,18 +276,27 @@ class TestAttachments(unittest.TestCase):
     def test_filtercontenttypes(self):
         t = MailAttachments.withhashes(self.attachments)
 
-        parameters = {"filter_cont_types": ["application/x-dosexec",
-                                            "application/zip"]}
+        parameters = {
+            "commons": {
+                "blacklist_content_types": [
+                    "application/x-dosexec", "application/zip"]
+            }
+        }
         t.reload(**parameters)
-        self.assertIn("application/x-dosexec", t.filter_cont_types)
-        self.assertIn("application/zip", t.filter_cont_types)
+        self.assertIn(
+            "application/x-dosexec", t.commons["blacklist_content_types"])
+        self.assertIn("application/zip", t.commons["blacklist_content_types"])
 
         self.assertEqual(len(t), 1)
         t(intelligence=False)
         self.assertEqual(len(t), 0)
 
         t.extend(self.attachments)
-        parameters = {"filter_cont_types": ["application/x-dosexec"]}
+        parameters = {
+            "commons": {
+                "blacklist_content_types": ["application/x-dosexec"]
+            }
+        }
         t.reload(**parameters)
         t(intelligence=False)
         self.assertEqual(len(t), 1)
@@ -286,8 +313,8 @@ class TestAttachments(unittest.TestCase):
         parameters = {
             "tika": {"enabled": True,
                      "path_jar": OPTIONS["TIKA_APP_JAR"],
+                     "whitelist_content_types": ["application/zip"],
                      "memory_allocation": None},
-            "tika_whitelist_cont_types": ["application/zip"],
             "virustotal": {"enabled": True,
                            "api_key": OPTIONS["VIRUSTOTAL_APIKEY"]},
             "thug": {"enabled": True,
@@ -302,7 +329,7 @@ class TestAttachments(unittest.TestCase):
                        "useragent": "SpamScope"}}
 
         t.reload(**parameters)
-        t.run(filtercontenttypes=False)
+        t.run()
         for i in t:
             self.assertIn("tika", i)
             self.assertIn("virustotal", i)
