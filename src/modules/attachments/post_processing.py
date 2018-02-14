@@ -81,7 +81,7 @@ def tika(conf, attachments):
         for a in attachments:
             if not a.get("is_filtered", False):
 
-                if a["Content-Type"] in conf["whitelist_cont_types"]:
+                if a["Content-Type"] in conf["whitelist_content_types"]:
                     payload = a["payload"]
 
                     if a["content_transfer_encoding"] != "base64":
@@ -110,21 +110,23 @@ def virustotal(conf, attachments):
         from .utils import reformat_virustotal
 
         vt = VirusTotalPublicApi(conf["api_key"])
+        wtlist = conf["whitelist_content_types"]
 
         for a in attachments:
-            if not a.get("is_filtered", False):
+            if not a.get("is_filtered", False) and a["Content-Type"] in wtlist:
+                # main/archive
                 result = vt.get_file_report(a["sha1"])
                 reformat_virustotal(result)
-
                 if result:
                     a["virustotal"] = result
 
+                # files in archive
                 for i in a.get("files", []):
-                    i_result = vt.get_file_report(i["sha1"])
-                    reformat_virustotal(i_result)
-
-                    if i_result:
-                        i["virustotal"] = i_result
+                    if a["Content-Type"] in wtlist:
+                        i_result = vt.get_file_report(i["sha1"])
+                        reformat_virustotal(i_result)
+                        if i_result:
+                            i["virustotal"] = i_result
 
 
 @register(processors, active=True)

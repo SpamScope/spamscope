@@ -73,7 +73,7 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True,
                 "api_key": OPTIONS["VIRUSTOTAL_APIKEY"]}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         virustotal(conf, attachments)
 
         # VirusTotal analysis
@@ -106,7 +106,7 @@ class TestPostProcessing(unittest.TestCase):
                 "ApiKey": OPTIONS["ZEMANA_APIKEY"],
                 "useragent": "SpamScope"}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         zemana(conf, attachments)
 
         # Zemana analysis
@@ -131,9 +131,9 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True,
                 "path_jar": OPTIONS["TIKA_APP_JAR"],
                 "memory_allocation": None,
-                "whitelist_cont_types": ["application/zip"]}
+                "whitelist_content_types": ["application/zip"]}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         tika(conf, attachments)
 
         for i in attachments:
@@ -147,7 +147,7 @@ class TestPostProcessing(unittest.TestCase):
         # tika disabled
         conf["enabled"] = False
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         tika(conf, attachments)
 
         for i in attachments:
@@ -177,11 +177,11 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True,
                 "path_jar": OPTIONS["TIKA_APP_JAR"],
                 "memory_allocation": None,
-                "whitelist_cont_types": ["application/zip"]}
+                "whitelist_content_types": ["application/zip"]}
 
         p = mailparser.parse_from_file(mail_test_4)
         attachments = MailAttachments.withhashes(p.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         tika(conf, attachments)
 
         for i in attachments:
@@ -202,7 +202,7 @@ class TestPostProcessing(unittest.TestCase):
                 "referer": "http://www.google.com/",
                 "timeout": 300}
         attachments = MailAttachments.withhashes(self.attachments_thug)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
 
         first_attachment = attachments[0]
         self.assertNotIn('thug', first_attachment)
@@ -247,7 +247,7 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True,
                 "base_path": "/tmp"}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         store_samples(conf, attachments)
 
         now = six.text_type(datetime.utcnow().date())
