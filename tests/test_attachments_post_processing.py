@@ -263,7 +263,7 @@ class TestPostProcessing(unittest.TestCase):
             now,
             "495315553b8af47daada4b279717f651_20160523_211439.jpg_.jpg.exe")
 
-        self.assertTrue(os.path.exists(sample))
+        self.assertFalse(os.path.exists(sample))
         self.assertTrue(os.path.exists(sample_child))
         shutil.rmtree(os.path.join("/tmp", now))
 

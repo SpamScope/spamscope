@@ -148,6 +148,7 @@ class FilesMailSpout(AbstractSpout):
 
     def fail(self, tup_id):
         try:
+            os.chmod(tup_id, 0o775)
             shutil.move(tup_id, self._where_failed)
 
             # Remove from tail analyzed mail

@@ -232,11 +232,14 @@ def store_samples(conf, attachments):
 
                 # save attachment
                 filename = "{}_{}".format(a["md5"], a["filename"])
-                write_sample(
-                    binary=a["binary"],
-                    payload=a["payload"],
-                    path=path,
-                    filename=filename)
+
+                # do not write if has archived files
+                if not a.get("files", []):
+                    write_sample(
+                        binary=a["binary"],
+                        payload=a["payload"],
+                        path=path,
+                        filename=filename)
 
                 # save file in archive
                 for i in a.get("files", []):
