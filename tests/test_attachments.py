@@ -79,10 +79,6 @@ class TestAttachments(unittest.TestCase):
         self.attachments_test_8 = p.attachments
 
     def test_not_extract_content_types(self):
-        t = MailAttachments.withhashes(self.attachments_test_8)
-        t(intelligence=False)
-        self.assertIn("files", t[0])
-
         parameters = {
             "commons": {
                 "not_extract_content_types": ["application/java-archive"]}}
