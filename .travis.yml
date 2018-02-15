@@ -23,6 +23,7 @@ before_install:
         build-essential
         cmake
         libfuzzy-dev
+        p7zip-full
         unrar
         unzip
     - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
