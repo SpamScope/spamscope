@@ -29,6 +29,7 @@ root = os.path.join(base_path, '..')
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_4 = os.path.join(base_path, 'samples', 'mail_test_4')
+mail_test_9 = os.path.join(base_path, 'samples', 'mail_test_9')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
 
@@ -237,6 +238,28 @@ class TestPostProcessing(unittest.TestCase):
         self.assertEqual(
             first_thug_analysis['thug']['options']['referer'],
             'http://www.google.com/')
+
+    def test_store_samples_unicode_error(self):
+        from datetime import datetime
+        import shutil
+        from src.modules.attachments import store_samples
+
+        # Complete parameters
+        conf = {"enabled": True,
+                "base_path": "/tmp"}
+
+        p = mailparser.parse_from_file(mail_test_9)
+        attachments = MailAttachments.withhashes(p.attachments)
+        attachments(intelligence=False)
+        store_samples(conf, attachments)
+
+        now = six.text_type(datetime.utcnow().date())
+        sample = os.path.join(
+            "/tmp",
+            now,
+            "43573896890da36e092039cf0b3a92f8")
+        self.assertTrue(os.path.exists(sample))
+        shutil.rmtree(os.path.join("/tmp", now))
 
     def test_store_samples(self):
         """Test add store file system processing."""

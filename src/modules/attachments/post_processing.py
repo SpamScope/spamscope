@@ -230,27 +230,23 @@ def store_samples(conf, attachments):
                 date_str = a["analisys_date"].split("T")[0]
                 path = os.path.join(base_path, date_str)
 
-                # save attachment
-                filename = "{}_{}".format(a["md5"], a["filename"])
-
                 # do not write if has archived files
                 if not a.get("files", []):
                     write_sample(
                         binary=a["binary"],
                         payload=a["payload"],
                         path=path,
-                        filename=filename,
+                        filename=a["filename"],
                         hash_=a["md5"],
                     )
 
                 # save file in archive
                 for i in a.get("files", []):
-                    filename = "{}_{}".format(i["md5"], i["filename"])
                     write_sample(
                         # All archived files have base64 payload
                         binary=True,
                         payload=i["payload"],
                         path=path,
-                        filename=filename,
-                        hash_=a["md5"],
+                        filename=i["filename"],
+                        hash_=i["md5"],
                     )

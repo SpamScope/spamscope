@@ -173,7 +173,7 @@ def write_sample(binary, payload, path, filename, hash_):
         os.makedirs(path)
 
     try:
-        sample = os.path.join(path, filename)
+        sample = os.path.join(path, "{}_{}".format(hash_, filename))
 
         if binary:
             with open(sample, "wb") as f:
