@@ -85,7 +85,12 @@ def tika(conf, attachments):
                     payload = a["payload"]
 
                     if a["content_transfer_encoding"] != "base64":
-                        payload = payload.encode("base64")
+                        try:
+                            payload = payload.encode("base64")
+                        except UnicodeError:
+                            # content_transfer_encoding': u'x-uuencode'
+                            # it's not binary with strange encoding
+                            continue
 
                     # tika-app only gets payload in base64
                     a["tika"] = tika.extract_all_content(

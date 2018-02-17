@@ -30,6 +30,7 @@ mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_4 = os.path.join(base_path, 'samples', 'mail_test_4')
 mail_test_9 = os.path.join(base_path, 'samples', 'mail_test_9')
+mail_test_10 = os.path.join(base_path, 'samples', 'mail_test_10')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
 
@@ -189,6 +190,25 @@ class TestPostProcessing(unittest.TestCase):
 
         for i in attachments:
             self.assertIn("tika", i)
+
+    def test_tika_bug_unicode_error(self):
+        """Test add Tika processing."""
+
+        from src.modules.attachments import tika
+
+        # Complete parameters
+        conf = {"enabled": True,
+                "path_jar": OPTIONS["TIKA_APP_JAR"],
+                "memory_allocation": None,
+                "whitelist_content_types": [
+                    "application/zip", "application/octet-stream"]}
+
+        p = mailparser.parse_from_file(mail_test_10)
+        attachments = MailAttachments.withhashes(p.attachments)
+        attachments(intelligence=False)
+        tika(conf, attachments)
+
+        self.assertNotIn("tika", attachments[0])
 
     @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False",
                      "Thug test skipped: "
