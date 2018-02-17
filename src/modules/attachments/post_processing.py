@@ -239,7 +239,9 @@ def store_samples(conf, attachments):
                         binary=a["binary"],
                         payload=a["payload"],
                         path=path,
-                        filename=filename)
+                        filename=filename,
+                        hash_=a["md5"],
+                    )
 
                 # save file in archive
                 for i in a.get("files", []):
@@ -249,4 +251,6 @@ def store_samples(conf, attachments):
                         binary=True,
                         payload=i["payload"],
                         path=path,
-                        filename=filename)
+                        filename=filename,
+                        hash_=a["md5"],
+                    )

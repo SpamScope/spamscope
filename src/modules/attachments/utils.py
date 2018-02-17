@@ -158,7 +158,7 @@ def reformat_virustotal(report):
             report["results"]["scans"] = scans
 
 
-def write_sample(binary, payload, path, filename):
+def write_sample(binary, payload, path, filename, hash_):
     """
     This function writes a sample on file system.
 
@@ -167,14 +167,14 @@ def write_sample(binary, payload, path, filename):
         payload: payload of sample, in base64 if it's a binary
         path (string): path of file
         filename (string): name of file
+        hash_ (string): file hash
     """
-
-    sample = os.path.join(path, filename)
-
     if not os.path.exists(path):
         os.makedirs(path)
 
     try:
+        sample = os.path.join(path, filename)
+
         if binary:
             with open(sample, "wb") as f:
                 f.write(payload.decode("base64"))
@@ -182,5 +182,15 @@ def write_sample(binary, payload, path, filename):
             with open(sample, "w") as f:
                 f.write(payload)
 
-    except (IOError, UnicodeEncodeError):
+    except UnicodeError:
+        sample = os.path.join(path, hash_)
+
+        if binary:
+            with open(sample, "wb") as f:
+                f.write(payload.decode("base64"))
+        else:
+            with open(sample, "w") as f:
+                f.write(payload)
+
+    except IOError:
         pass
