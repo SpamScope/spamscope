@@ -183,14 +183,23 @@ def write_sample(binary, payload, path, filename, hash_):
                 f.write(payload)
 
     except UnicodeError:
-        sample = os.path.join(path, hash_)
+        try:
+            sample = os.path.join(path, hash_)
 
-        if binary:
-            with open(sample, "wb") as f:
-                f.write(payload.decode("base64"))
-        else:
-            with open(sample, "w") as f:
-                f.write(payload)
+            if binary:
+                with open(sample, "wb") as f:
+                    f.write(payload.decode("base64"))
+            else:
+                with open(sample, "w") as f:
+                    f.write(payload)
+        except UnicodeError:
+            log.warning("UnicodeError for sample {!r}".format(hash_))
+            # content_transfer_encoding': u'x-uuencode'
+            # it's not binary with strange encoding
+            with open(sample + "_failed_write", "w") as f:
+                f.write("UnicodeError - Search sample on output report")
 
     except IOError:
-        pass
+        log.warning("IOError for sample {!r}".format(hash_))
+        with open(sample + "_failed_write", "w") as f:
+            f.write("IOError - Search sample on output report")
