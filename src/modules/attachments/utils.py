@@ -183,6 +183,11 @@ def write_sample(binary, payload, path, filename, hash_):
                 f.write(payload)
 
     except UnicodeError:
+        log.warning("UnicodeError for sample {!r}".format(hash_))
+
+        # Remove old file failed
+        remove_file(sample)
+
         try:
             sample = os.path.join(path, hash_)
 
@@ -194,12 +199,27 @@ def write_sample(binary, payload, path, filename, hash_):
                     f.write(payload)
         except UnicodeError:
             log.warning("UnicodeError for sample {!r}".format(hash_))
+
+            # Remove old file failed
+            remove_file(sample)
+
             # content_transfer_encoding': u'x-uuencode'
             # it's not binary with strange encoding
-            with open(sample + "_failed_write", "w") as f:
+            with open(sample + "_failed_write.txt", "w") as f:
                 f.write("UnicodeError - Search sample on output report")
 
     except IOError:
         log.warning("IOError for sample {!r}".format(hash_))
-        with open(sample + "_failed_write", "w") as f:
+
+        # Remove old file failed
+        remove_file(sample)
+
+        with open(sample + "_failed_write.txt", "w") as f:
             f.write("IOError - Search sample on output report")
+
+
+def remove_file(file_path):
+    try:
+        os.remove(file_path)
+    except OSError:
+        pass
