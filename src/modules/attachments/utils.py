@@ -186,7 +186,11 @@ def write_sample(binary, payload, path, filename, hash_):
         log.warning("UnicodeError for sample {!r}".format(hash_))
 
         # Remove old file failed
-        remove_file(sample)
+        try:
+            remove_file(sample)
+        except UnboundLocalError:
+            # when it can't write the filename sample doesn't exist
+            pass
 
         try:
             sample = os.path.join(path, hash_)

@@ -281,6 +281,17 @@ class TestPostProcessing(unittest.TestCase):
         self.assertTrue(os.path.exists(sample))
         shutil.rmtree(os.path.join("/tmp", now))
 
+        p = mailparser.parse_from_file(mail_test_10)
+        attachments = MailAttachments.withhashes(p.attachments)
+        attachments(intelligence=False)
+        store_samples(conf, attachments)
+        sample = os.path.join(
+            "/tmp",
+            now,
+            "2ea90c996ca28f751d4841e6c67892b8_failed_write.txt")
+        self.assertTrue(os.path.exists(sample))
+        shutil.rmtree(os.path.join("/tmp", now))
+
     def test_store_samples(self):
         """Test add store file system processing."""
 
