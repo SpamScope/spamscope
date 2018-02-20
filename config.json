@@ -11,9 +11,9 @@
                 "localhost"
             ],
             "log": {
-                "path": "/logs/spamscope",
+                "path": "/logs",
                 "max_bytes": 5000000,
-                "backup_count": 3,
+                "backup_count": 1,
                 "level": "info"
             },
             "use_virtualenv": false,
