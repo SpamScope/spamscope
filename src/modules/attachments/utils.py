@@ -182,14 +182,13 @@ def write_sample(binary, payload, path, filename, hash_):
             with open(sample, "w") as f:
                 f.write(payload)
 
-    except UnicodeError:
-        log.warning("UnicodeError for sample {!r}".format(hash_))
+    except (UnicodeError, IOError):
+        log.warning("UnicodeError/IOError for sample {!r}".format(hash_))
 
         # Remove old file failed
         try:
             remove_file(sample)
         except UnboundLocalError:
-            # when it can't write the filename sample doesn't exist
             pass
 
         try:
@@ -211,15 +210,6 @@ def write_sample(binary, payload, path, filename, hash_):
             # it's not binary with strange encoding
             with open(sample + "_failed_write.txt", "w") as f:
                 f.write("UnicodeError - Search sample on output report")
-
-    except IOError:
-        log.warning("IOError for sample {!r}".format(hash_))
-
-        # Remove old file failed
-        remove_file(sample)
-
-        with open(sample + "_failed_write.txt", "w") as f:
-            f.write("IOError - Search sample on output report")
 
 
 def remove_file(file_path):

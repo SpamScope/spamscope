@@ -21,6 +21,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 import os
 
+from simplejson import JSONDecodeError
+
 try:
     from modules import register
 except ImportError:
@@ -80,7 +82,6 @@ def tika(conf, attachments):
 
         for a in attachments:
             if not a.get("is_filtered", False):
-
                 if a["Content-Type"] in conf["whitelist_content_types"]:
                     payload = a["payload"]
 
@@ -93,8 +94,14 @@ def tika(conf, attachments):
                             continue
 
                     # tika-app only gets payload in base64
-                    a["tika"] = tika.extract_all_content(
-                        payload=payload, convert_to_obj=True)
+                    try:
+                        a["tika"] = tika.extract_all_content(
+                            payload=payload,
+                            convert_to_obj=True)
+                    except JSONDecodeError:
+                        log.warning(
+                            "JSONDecodeError for {!r} in Tika analysis".format(
+                                a["md5"]))
 
 
 @register(processors, active=True)
