@@ -134,7 +134,8 @@ def virustotal(conf, attachments):
 
             # files in archive
             for i in a.get("files", []):
-                if not i.get("is_filtered", False) and i["Content-Type"] in wtlist:
+                if not i.get("is_filtered", False) \
+                        and i["Content-Type"] in wtlist:
                     i_result = vt.get_file_report(i["sha1"])
                     reformat_virustotal(i_result)
                     if i_result:

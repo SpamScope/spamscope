@@ -75,7 +75,10 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True,
                 "api_key": OPTIONS["VIRUSTOTAL_APIKEY"],
                 "whitelist_content_types": [
-                    "application/zip", "application/octet-stream"]}
+                    "application/octet-stream",
+                    "application/x-dosexec",
+                    "application/zip",
+                ]}
         attachments = MailAttachments.withhashes(self.attachments)
         attachments(intelligence=False)
         virustotal(conf, attachments)
