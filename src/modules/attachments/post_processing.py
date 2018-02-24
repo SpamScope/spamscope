@@ -132,13 +132,13 @@ def virustotal(conf, attachments):
                 if result:
                     a["virustotal"] = result
 
-                # files in archive
-                for i in a.get("files", []):
-                    if a["Content-Type"] in wtlist:
-                        i_result = vt.get_file_report(i["sha1"])
-                        reformat_virustotal(i_result)
-                        if i_result:
-                            i["virustotal"] = i_result
+            # files in archive
+            for i in a.get("files", []):
+                if a["Content-Type"] in wtlist:
+                    i_result = vt.get_file_report(i["sha1"])
+                    reformat_virustotal(i_result)
+                    if i_result:
+                        i["virustotal"] = i_result
 
 
 @register(processors, active=True)

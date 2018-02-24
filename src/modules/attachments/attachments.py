@@ -262,7 +262,9 @@ class Attachments(UserList):
                             f, outdir=temp_dir, verbosity=-1)
 
                     except PatoolError as e:
-                        log.warning(repr(e))
+                        log.warning(
+                            "PatoolError archive md5 {!r}. Details: {}".format(
+                                i["md5"], repr(e)))
 
                     else:
                         for path, subdirs, files in os.walk(temp_dir):
