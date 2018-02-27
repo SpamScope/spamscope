@@ -291,7 +291,7 @@ class TestPostProcessing(unittest.TestCase):
         sample = os.path.join(
             "/tmp",
             now,
-            "2ea90c996ca28f751d4841e6c67892b8_failed_write.txt")
+            "2ea90c996ca28f751d4841e6c67892b8_REQUEST FOR QUOTE.zip")
         self.assertTrue(os.path.exists(sample))
         shutil.rmtree(os.path.join("/tmp", now))
 
