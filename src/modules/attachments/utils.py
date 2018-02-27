@@ -180,7 +180,7 @@ def write_sample(binary, payload, path, filename, hash_):
                 f.write(payload.decode("base64"))
         else:
             with open(sample, "w") as f:
-                f.write(payload)
+                f.write(payload.encode("utf-8"))
 
     except (UnicodeError, IOError):
         log.warning("UnicodeError/IOError for sample {!r}".format(hash_))
@@ -199,7 +199,7 @@ def write_sample(binary, payload, path, filename, hash_):
                     f.write(payload.decode("base64"))
             else:
                 with open(sample, "w") as f:
-                    f.write(payload)
+                    f.write(payload.encode("utf-8"))
         except UnicodeError:
             log.warning("UnicodeError for sample {!r}".format(hash_))
 
