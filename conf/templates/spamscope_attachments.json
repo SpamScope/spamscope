@@ -1,0 +1,81 @@
+{
+  "order": 0,
+  "version": 1,
+  "index_patterns": "spamscope_attachments-*",
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "header": {
+          "tokenizer": "uax_url_email",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "html_body": {
+          "char_filter": [
+            "html_strip"
+          ],
+          "tokenizer": "uax_url_email",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "path_pattern": {
+          "tokenizer": "path_hierarchy",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    },
+    "index.codec": "best_compression",
+    "index.number_of_shards": 1,
+    "index.number_of_replicas": 0,
+    "index.refresh_interval": "5s",
+    "index.mapping.ignore_malformed": true
+  },
+  "mappings": {
+    "_doc": {
+      "dynamic_templates": [
+        {
+          "hashes": {
+            "mapping": {
+              "type": "keyword",
+              "eager_global_ordinals": true
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(md5|sha1|sha256|sha512|ssdeep|extension)$"
+          }
+        },
+        {
+          "payload": {
+            "mapping": {
+              "type": "binary",
+              "norms": false
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(payload)$"
+          }
+        },
+        {
+          "structured": {
+            "mapping": {
+              "type": "keyword",
+              "eager_global_ordinals": true
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(charset|mail_server|mailbox|message_id|Content-Type|content_transfer_encoding|mail_content_type)$"
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "@version": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

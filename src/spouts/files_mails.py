@@ -18,11 +18,14 @@ limitations under the License.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals
+from datetime import date
 
 import Queue
 import glob
 import os
 import shutil
+
+import six
 
 from modules import AbstractSpout, MailItem, MAIL_PATH, MAIL_PATH_OUTLOOK
 
@@ -53,9 +56,6 @@ class FilesMailSpout(AbstractSpout):
             raise RuntimeError(
                 "where.failed in {!r} is not configurated".format(
                     self.component_name))
-
-        if not os.path.exists(self._where):
-            os.makedirs(self._where)
 
         if not os.path.exists(self._where_failed):
             os.makedirs(self._where_failed)
@@ -127,7 +127,14 @@ class FilesMailSpout(AbstractSpout):
                 os.remove(tup_id)
             else:
                 try:
-                    shutil.move(tup_id, self._where)
+                    now = six.text_type(date.today())
+                    mail_path = os.path.join(self._where, now)
+                    if not os.path.exists(mail_path):
+                        os.makedirs(mail_path)
+                    # this chmod is useful to work under
+                    # nginx directory listing
+                    os.chmod(tup_id, 0o775)
+                    shutil.move(tup_id, mail_path)
                 except shutil.Error:
                     os.remove(tup_id)
 
@@ -141,6 +148,7 @@ class FilesMailSpout(AbstractSpout):
 
     def fail(self, tup_id):
         try:
+            os.chmod(tup_id, 0o775)
             shutil.move(tup_id, self._where_failed)
 
             # Remove from tail analyzed mail

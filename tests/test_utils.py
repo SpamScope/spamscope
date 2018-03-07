@@ -37,6 +37,7 @@ from pyfaup.faup import Faup
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_7 = os.path.join(base_path, 'samples', 'mail_test_7')
+mail_test_11 = os.path.join(base_path, 'samples', 'mail_test_11')
 
 logging.getLogger().addHandler(logging.NullHandler())
 
@@ -46,7 +47,7 @@ def sleeping():
     time.sleep(30)
 
 
-class TestSearchText(unittest.TestCase):
+class TestUtils(unittest.TestCase):
     faup = Faup()
 
     def setUp(self):
@@ -134,6 +135,18 @@ class TestSearchText(unittest.TestCase):
 
         os.remove(file_path)
         self.assertFalse(os.path.exists(file_path))
+
+        p = mailparser.parse_from_file(mail_test_11)
+        attachments = MailAttachments.withhashes(p.attachments)
+        attachments.run()
+
+        for i in attachments:
+            temp = utils.write_payload(
+                i["payload"],
+                i["extension"],
+                i["content_transfer_encoding"],
+            )
+            os.remove(temp)
 
     def test_search_words_in_text(self):
         with open(text_files) as f:

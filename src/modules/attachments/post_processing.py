@@ -19,6 +19,9 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 import logging
+import os
+
+from simplejson import JSONDecodeError
 
 try:
     from modules import register
@@ -79,16 +82,26 @@ def tika(conf, attachments):
 
         for a in attachments:
             if not a.get("is_filtered", False):
-
-                if a["Content-Type"] in conf["whitelist_cont_types"]:
+                if a["Content-Type"] in conf["whitelist_content_types"]:
                     payload = a["payload"]
 
                     if a["content_transfer_encoding"] != "base64":
-                        payload = payload.encode("base64")
+                        try:
+                            payload = payload.encode("base64")
+                        except UnicodeError:
+                            # content_transfer_encoding': u'x-uuencode'
+                            # it's not binary with strange encoding
+                            continue
 
                     # tika-app only gets payload in base64
-                    a["tika"] = tika.extract_all_content(
-                        payload=payload, convert_to_obj=True)
+                    try:
+                        a["tika"] = tika.extract_all_content(
+                            payload=payload,
+                            convert_to_obj=True)
+                    except JSONDecodeError:
+                        log.warning(
+                            "JSONDecodeError for {!r} in Tika analysis".format(
+                                a["md5"]))
 
 
 @register(processors, active=True)
@@ -109,19 +122,22 @@ def virustotal(conf, attachments):
         from .utils import reformat_virustotal
 
         vt = VirusTotalPublicApi(conf["api_key"])
+        wtlist = conf["whitelist_content_types"]
 
         for a in attachments:
-            if not a.get("is_filtered", False):
+            if not a.get("is_filtered", False) and a["Content-Type"] in wtlist:
+                # main/archive
                 result = vt.get_file_report(a["sha1"])
                 reformat_virustotal(result)
-
                 if result:
                     a["virustotal"] = result
 
-                for i in a.get("files", []):
+            # files in archive
+            for i in a.get("files", []):
+                if not i.get("is_filtered", False) \
+                        and i["Content-Type"] in wtlist:
                     i_result = vt.get_file_report(i["sha1"])
                     reformat_virustotal(i_result)
-
                     if i_result:
                         i["virustotal"] = i_result
 
@@ -201,3 +217,49 @@ def zemana(conf, attachments):
                     if i_result:
                         i["zemana"] = i_result.json
                         i["zemana"]["type"] = i_result.type
+
+
+@register(processors, active=True)
+def store_samples(conf, attachments):
+    """This method stores the attachments on file system.
+
+    Args:
+        attachments (list): all attachments of email
+        conf (dict): conf of this post processor
+
+    Returns:
+        This method updates the attachments list given
+    """
+
+    if conf["enabled"]:
+        from .utils import write_sample
+
+        base_path = conf["base_path"]
+
+        for a in attachments:
+            if not a.get("is_filtered", False):
+
+                # commons
+                date_str = a["analisys_date"].split("T")[0]
+                path = os.path.join(base_path, date_str)
+
+                # do not write if has archived files
+                if not a.get("files", []):
+                    write_sample(
+                        binary=a["binary"],
+                        payload=a["payload"],
+                        path=path,
+                        filename=a["filename"],
+                        hash_=a["md5"],
+                    )
+
+                # save file in archive
+                for i in a.get("files", []):
+                    write_sample(
+                        # All archived files have base64 payload
+                        binary=True,
+                        payload=i["payload"],
+                        path=path,
+                        filename=i["filename"],
+                        hash_=i["md5"],
+                    )

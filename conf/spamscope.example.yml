@@ -107,11 +107,22 @@ raw_mail:
 
 # Attachments bolt configuration
 attachments:
-    content_types_blacklist:
-        # All content types to remove from results
-        # Example in content_types/blacklist/generic.example.yml
-        generic: /path/to/generic_content_types
-        custom: /path/to/custom_content_types
+    # The lists of all components must be under lists keyword to load them
+    # automatically
+    commons:
+        lists:
+            blacklist_content_types:
+                # All content types to remove from results
+                # Example in content_types/blacklist/generic.example.yml
+                generic: /path/to/generic_content_types
+                custom: /path/to/custom_content_types
+
+            not_extract_content_types:
+                # All content types that you don't want extract from archive
+                # Example: application/java-archive (jar), you can save the jar
+                # but do not extract the class inside.
+                generic: /path/to/generic_content_types
+                custom: /path/to/custom_content_types
 
     # Apache Tika analysis: https://tika.apache.org/
     tika:
@@ -125,9 +136,10 @@ attachments:
 
         # All content types to extract details
         # Example in content_types/tika/generic.example.yml
-        valid_content_types:
-            generic: /path/to/generic_content_types
-            custom: /path/to/custom_content_types
+        lists:
+            whitelist_content_types:
+                generic: /path/to/generic_content_types
+                custom: /path/to/custom_content_types
 
     # VirusTotal analysis: https://www.virustotal.com/
     virustotal:
@@ -138,9 +150,10 @@ attachments:
         # All content types to analyze with virustotal
         # Example in content_types/virustotal/generic.example.yml
         # Now is not active
-        content_types_details:
-            generic: /path/to/generic_content_types
-            custom: /path/to/custom_content_types
+        lists:
+            whitelist_content_types:
+                generic: /path/to/generic_content_types
+                custom: /path/to/custom_content_types
 
     # Thug analysis: https://github.com/buffer/thug
     thug:
@@ -187,6 +200,12 @@ attachments:
         UserId: xxxxx
         ApiKey: xxxxx
         useragent: SpamScope
+
+    # This plugin store the samples on file system
+    # in date format subfolders (YYYY-MM-DD)
+    store_samples:
+        enabled: false
+        base_path: /tmp
 
 
 # Urls

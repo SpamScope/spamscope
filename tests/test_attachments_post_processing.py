@@ -19,6 +19,7 @@ limitations under the License.
 
 import logging
 import os
+import six
 import sys
 import unittest
 import mailparser
@@ -28,6 +29,8 @@ root = os.path.join(base_path, '..')
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_4 = os.path.join(base_path, 'samples', 'mail_test_4')
+mail_test_9 = os.path.join(base_path, 'samples', 'mail_test_9')
+mail_test_10 = os.path.join(base_path, 'samples', 'mail_test_10')
 sys.path.append(root)
 from src.modules.attachments import MailAttachments
 
@@ -70,9 +73,14 @@ class TestPostProcessing(unittest.TestCase):
         from src.modules.attachments import virustotal
 
         conf = {"enabled": True,
-                "api_key": OPTIONS["VIRUSTOTAL_APIKEY"]}
+                "api_key": OPTIONS["VIRUSTOTAL_APIKEY"],
+                "whitelist_content_types": [
+                    "application/octet-stream",
+                    "application/x-dosexec",
+                    "application/zip",
+                ]}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         virustotal(conf, attachments)
 
         # VirusTotal analysis
@@ -105,7 +113,7 @@ class TestPostProcessing(unittest.TestCase):
                 "ApiKey": OPTIONS["ZEMANA_APIKEY"],
                 "useragent": "SpamScope"}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         zemana(conf, attachments)
 
         # Zemana analysis
@@ -130,9 +138,9 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True,
                 "path_jar": OPTIONS["TIKA_APP_JAR"],
                 "memory_allocation": None,
-                "whitelist_cont_types": ["application/zip"]}
+                "whitelist_content_types": ["application/zip"]}
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         tika(conf, attachments)
 
         for i in attachments:
@@ -146,7 +154,7 @@ class TestPostProcessing(unittest.TestCase):
         # tika disabled
         conf["enabled"] = False
         attachments = MailAttachments.withhashes(self.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         tika(conf, attachments)
 
         for i in attachments:
@@ -176,15 +184,34 @@ class TestPostProcessing(unittest.TestCase):
         conf = {"enabled": True,
                 "path_jar": OPTIONS["TIKA_APP_JAR"],
                 "memory_allocation": None,
-                "whitelist_cont_types": ["application/zip"]}
+                "whitelist_content_types": ["application/zip"]}
 
         p = mailparser.parse_from_file(mail_test_4)
         attachments = MailAttachments.withhashes(p.attachments)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
         tika(conf, attachments)
 
         for i in attachments:
             self.assertIn("tika", i)
+
+    def test_tika_bug_unicode_error(self):
+        """Test add Tika processing."""
+
+        from src.modules.attachments import tika
+
+        # Complete parameters
+        conf = {"enabled": True,
+                "path_jar": OPTIONS["TIKA_APP_JAR"],
+                "memory_allocation": None,
+                "whitelist_content_types": [
+                    "application/zip", "application/octet-stream"]}
+
+        p = mailparser.parse_from_file(mail_test_10)
+        attachments = MailAttachments.withhashes(p.attachments)
+        attachments(intelligence=False)
+        tika(conf, attachments)
+
+        self.assertNotIn("tika", attachments[0])
 
     @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False",
                      "Thug test skipped: "
@@ -201,7 +228,7 @@ class TestPostProcessing(unittest.TestCase):
                 "referer": "http://www.google.com/",
                 "timeout": 300}
         attachments = MailAttachments.withhashes(self.attachments_thug)
-        attachments(intelligence=False, filtercontenttypes=False)
+        attachments(intelligence=False)
 
         first_attachment = attachments[0]
         self.assertNotIn('thug', first_attachment)
@@ -234,6 +261,68 @@ class TestPostProcessing(unittest.TestCase):
         self.assertEqual(
             first_thug_analysis['thug']['options']['referer'],
             'http://www.google.com/')
+
+    def test_store_samples_unicode_error(self):
+        from datetime import datetime
+        import shutil
+        from src.modules.attachments import store_samples
+
+        # Complete parameters
+        conf = {"enabled": True,
+                "base_path": "/tmp"}
+
+        p = mailparser.parse_from_file(mail_test_9)
+        attachments = MailAttachments.withhashes(p.attachments)
+        attachments(intelligence=False)
+        store_samples(conf, attachments)
+
+        now = six.text_type(datetime.utcnow().date())
+        sample = os.path.join(
+            "/tmp",
+            now,
+            "43573896890da36e092039cf0b3a92f8")
+        self.assertTrue(os.path.exists(sample))
+        shutil.rmtree(os.path.join("/tmp", now))
+
+        p = mailparser.parse_from_file(mail_test_10)
+        attachments = MailAttachments.withhashes(p.attachments)
+        attachments(intelligence=False)
+        store_samples(conf, attachments)
+        sample = os.path.join(
+            "/tmp",
+            now,
+            "2ea90c996ca28f751d4841e6c67892b8_REQUEST FOR QUOTE.zip")
+        self.assertTrue(os.path.exists(sample))
+        shutil.rmtree(os.path.join("/tmp", now))
+
+    def test_store_samples(self):
+        """Test add store file system processing."""
+
+        from datetime import datetime
+        import shutil
+        from src.modules.attachments import store_samples
+
+        # Complete parameters
+        conf = {"enabled": True,
+                "base_path": "/tmp"}
+        attachments = MailAttachments.withhashes(self.attachments)
+        attachments(intelligence=False)
+        store_samples(conf, attachments)
+
+        now = six.text_type(datetime.utcnow().date())
+        sample = os.path.join(
+            "/tmp",
+            now,
+            "1e38e543279912d98cbfdc7b275a415e_20160523_916527.jpg_.zip")
+
+        sample_child = os.path.join(
+            "/tmp",
+            now,
+            "495315553b8af47daada4b279717f651_20160523_211439.jpg_.jpg.exe")
+
+        self.assertFalse(os.path.exists(sample))
+        self.assertTrue(os.path.exists(sample_child))
+        shutil.rmtree(os.path.join("/tmp", now))
 
 
 if __name__ == '__main__':

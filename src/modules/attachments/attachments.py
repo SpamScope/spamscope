@@ -51,11 +51,13 @@ class Attachments(UserList):
         try:
             return self._kwargs[name]
         except KeyError:
+            if name in ("commons"):
+                return {}
             msg = "'{0}' object has no attribute '{1}'"
             raise AttributeError(msg.format(type(self).__name__, name))
 
-    def __call__(self, filtercontenttypes=True, intelligence=True):
-        self.run(filtercontenttypes, intelligence)
+    def __call__(self, intelligence=True):
+        self.run(intelligence)
 
     def _intelligence(self):
         """
@@ -73,13 +75,12 @@ class Attachments(UserList):
         """Remove all items from object. """
         del self[:]
 
-    def run(self, filtercontenttypes=True, intelligence=True):
+    def run(self, intelligence=True):
         """Run processing on items in memory. """
 
         self._addmetadata()
 
-        if filtercontenttypes:
-            self._filtercontenttypes()
+        self._filtercontenttypes()
 
         if intelligence:
             self._intelligence()
@@ -87,13 +88,6 @@ class Attachments(UserList):
     def reload(self, **kwargs):
         """Reload all configuration parameters"""
         self._kwargs = kwargs
-
-        # tika needs to load external list
-        try:
-            self._kwargs["tika"].update({
-                "whitelist_cont_types": self.tika_whitelist_cont_types})
-        except KeyError:
-            log.warning("KeyError: 'tika' doesn't exist")
 
     def filenamestext(self):
         """Return a string with the filenames of all attachments. """
@@ -197,11 +191,8 @@ class Attachments(UserList):
         """Filtering of all content types in
         'filter_cont_types' parameter.
         """
-        try:
-            for i in self.filter_cont_types:
-                self.popcontenttype(i)
-        except AttributeError:
-            log.warning("AttributeError: 'filter_cont_types' doesn't exist")
+        for i in self.commons.get("blacklist_content_types", set()):
+            self.popcontenttype(i)
 
     def filter(self, check_list, hash_type="sha1"):
         """Remove from memory the payloads with hash in check_list. """
@@ -230,7 +221,9 @@ class Attachments(UserList):
             except TypeError, e:
                 # https://gist.github.com/perrygeo/ee7c65bb1541ff6ac770
                 raw_dict["payload"] += "==="
-                log.warning("Added '===' to payload base64 in TypeError")
+                log.warning(
+                    "Added '===' to payload base64 for sample {!r}".format(
+                        raw_dict["md5"]))
                 payload = base64.b64decode(raw_dict["payload"])
                 raw_dict.setdefault("errors", []).append(repr(e))
         else:
@@ -244,6 +237,8 @@ class Attachments(UserList):
         """For each item in memory add extra informations as: file extension,
         file size, content type, if is a archive and archived files.
         """
+        bl_list = self.commons.get("not_extract_content_types", set())
+
         for i in self:
             i["analisys_date"] = datetime.datetime.utcnow().isoformat()
 
@@ -258,7 +253,7 @@ class Attachments(UserList):
                     "Content-Type": content_type,
                     "is_archive": flag})
 
-                if flag:
+                if flag and content_type not in bl_list:
                     i["files"] = []
                     temp_dir = tempfile.mkdtemp()
 
@@ -267,7 +262,9 @@ class Attachments(UserList):
                             f, outdir=temp_dir, verbosity=-1)
 
                     except PatoolError as e:
-                        log.warning(repr(e))
+                        log.warning(
+                            "PatoolError archive md5 {!r}. Details: {}".format(
+                                i["md5"], repr(e)))
 
                     else:
                         for path, subdirs, files in os.walk(temp_dir):
@@ -287,7 +284,7 @@ class Attachments(UserList):
                                     t["size"] = len(payload)
                                     t["Content-Type"] = content_type
                                     t["payload"] = payload.encode("base64")
-                                    t["is_filtered"] = False,
+                                    t["is_filtered"] = False
                                     t["md5"], t["sha1"], t["sha256"], \
                                         t["sha512"], t["ssdeep"] = \
                                         fingerprints(payload)

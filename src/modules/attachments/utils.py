@@ -156,3 +156,64 @@ def reformat_virustotal(report):
 
         else:
             report["results"]["scans"] = scans
+
+
+def write_sample(binary, payload, path, filename, hash_):
+    """
+    This function writes a sample on file system.
+
+    Args:
+        binary (bool): True if it's a binary file
+        payload: payload of sample, in base64 if it's a binary
+        path (string): path of file
+        filename (string): name of file
+        hash_ (string): file hash
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    try:
+        sample = os.path.join(path, "{}_{}".format(hash_, filename))
+
+        if binary:
+            with open(sample, "wb") as f:
+                f.write(payload.decode("base64"))
+        else:
+            with open(sample, "w") as f:
+                f.write(payload.encode("utf-8"))
+
+    except (UnicodeError, IOError):
+        log.warning("UnicodeError/IOError for sample {!r}".format(hash_))
+
+        # Remove old file failed
+        try:
+            remove_file(sample)
+        except UnboundLocalError:
+            pass
+
+        try:
+            sample = os.path.join(path, hash_)
+
+            if binary:
+                with open(sample, "wb") as f:
+                    f.write(payload.decode("base64"))
+            else:
+                with open(sample, "w") as f:
+                    f.write(payload.encode("utf-8"))
+        except UnicodeError:
+            log.warning("UnicodeError for sample {!r}".format(hash_))
+
+            # Remove old file failed
+            remove_file(sample)
+
+            # content_transfer_encoding': u'x-uuencode'
+            # it's not binary with strange encoding
+            with open(sample + "_failed_write.txt", "w") as f:
+                f.write("UnicodeError - Search sample on output report")
+
+
+def remove_file(file_path):
+    try:
+        os.remove(file_path)
+    except OSError:
+        pass

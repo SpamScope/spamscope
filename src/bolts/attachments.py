@@ -34,28 +34,20 @@ class Attachments(AbstractBolt):
 
     def _load_settings(self):
         # Loading configuration
-        self._load_lists()
-
-        settings = copy.deepcopy(self.conf)
-        settings.update(
-            {"filter_cont_types": self._filter_cont_types,
-             "tika_whitelist_cont_types": self._tika_whitelist_cont_types})
-
+        settings = self._load_lists()
         self.attach.reload(**settings)
 
     def _load_lists(self):
+        settings = copy.deepcopy(self.conf)
 
-        # Load content types to filter
-        self._filter_cont_types = load_keywords_list(
-            self.conf.get("content_types_blacklist", {}), lower=False)
-        self.log("Content types to filter reloaded", "debug")
-
-        # Load Tika content types to analyze
-        self._tika_whitelist_cont_types = set()
-        if self.conf["tika"]["enabled"]:
-            self._tika_whitelist_cont_types = load_keywords_list(
-                self.conf["tika"].get("valid_content_types", {}), lower=False)
-            self.log("Whitelist Tika content types reloaded", "debug")
+        for k in self.conf:
+            for i, j in self.conf[k].get("lists", {}).items():
+                settings[k][i] = load_keywords_list(j)
+                self.log("Loaded lists {!r} for {!r}".format(i, k), "debug")
+                self.log("Keys[{!r}][{!r}]: {}".format(
+                    k, i, ", ".join(settings[k][i])), "debug")
+        else:
+            return settings
 
     def process_tick(self, freq):
         """Every freq seconds you reload the keywords. """
