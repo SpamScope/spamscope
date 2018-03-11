@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ def load_config(config_file):
     try:
         with open(config_file, 'r') as c:
             return yaml.load(c)
-    except:
+    except Exception:
         message = "Config file {} not loaded".format(config_file)
         log.exception(message)
         raise RuntimeError(message)
@@ -300,7 +300,7 @@ def reformat_output(mail=None, bolt=None, **kwargs):
             try:
                 timestamp = datetime.datetime.strptime(
                     mail["analisys_date"], "%Y-%m-%dT%H:%M:%S.%f")
-            except:
+            except Exception:
                 # Without microseconds
                 timestamp = datetime.datetime.strptime(
                     mail["analisys_date"], "%Y-%m-%dT%H:%M:%S")
