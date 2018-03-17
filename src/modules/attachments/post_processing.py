@@ -29,6 +29,13 @@ except ImportError:
     from ...modules import register
 
 
+# The processors is a set of tuples (function, priority)
+# You can use it to sort the post processing analysis
+# Example:
+#
+# from operator import itemgetter
+# p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
+
 processors = set()
 
 
@@ -219,7 +226,7 @@ def zemana(conf, attachments):
                         i["zemana"]["type"] = i_result.type
 
 
-@register(processors, active=True)
+@register(processors, priority=999, active=True)
 def store_samples(conf, attachments):
     """This method stores the attachments on file system.
 

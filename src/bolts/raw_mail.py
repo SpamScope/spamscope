@@ -22,6 +22,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from modules import AbstractBolt
 from modules.mails import processors
+from operator import itemgetter
+
+p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
 
 
 class RawMail(AbstractBolt):
@@ -40,7 +43,7 @@ class RawMail(AbstractBolt):
         results = {}
 
         if not is_filtered:
-            for p in processors:
+            for p in p_ordered:
                 try:
                     p(self.conf[p.__name__], raw_mail, mail_type, results)
                 except KeyError:

@@ -28,6 +28,13 @@ except ImportError:
     from ...modules import register
 
 
+# The processors is a set of tuples (function, priority)
+# You can use it to sort the post processing analysis
+# Example:
+#
+# from operator import itemgetter
+# p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
+
 processors = set()
 
 

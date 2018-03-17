@@ -370,7 +370,7 @@ def reformat_output(mail=None, bolt=None, **kwargs):
         return mail, attachments
 
 
-def register(processors, active=True):
+def register(processors, priority=0, active=True):
     """Add processor to set of processors.
     From the best Python book Fluent Python (https://github.com/fluentpython).
     Thanks a lot Luciano Ramalho.
@@ -378,6 +378,7 @@ def register(processors, active=True):
     Args:
         processors (set): where store the active functions
         active (bool): if True adds the function, viceversa removes it
+        priority (int): priority to give at analysis
 
     Returns:
         decorator
@@ -385,9 +386,9 @@ def register(processors, active=True):
 
     def decorate(func):
         if active:
-            processors.add(func)
+            processors.add((func, priority))
         else:
-            processors.discard(func)
+            processors.discard((func, priority))
 
         return func
 

@@ -24,6 +24,7 @@ import os
 import sys
 import time
 import unittest
+from operator import itemgetter
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 root = os.path.join(base_path, '..')
@@ -445,6 +446,33 @@ class TestUtils(unittest.TestCase):
     def test_timeout(self):
         with self.assertRaises(utils.TimeoutError):
             sleeping()
+
+    def test_register_order(self):
+        register = utils.register
+        processors = set()
+
+        @register(processors, priority=2)
+        def number_two():
+            pass
+
+        @register(processors, priority=1)
+        def number_one():
+            pass
+
+        @register(processors, priority=4)
+        def number_four():
+            pass
+
+        @register(processors, priority=3)
+        def number_three():
+            pass
+
+        processors = [i[0] for i in sorted(processors, key=itemgetter(1))]
+
+        self.assertIs(processors[0], number_one)
+        self.assertIs(processors[1], number_two)
+        self.assertIs(processors[2], number_three)
+        self.assertIs(processors[3], number_four)
 
 
 if __name__ == '__main__':

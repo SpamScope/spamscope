@@ -29,8 +29,7 @@ before_install:
     - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
 
-    # Build latest images spamscope-root, spamscope-elasticsearch
-    # make images
+    # Build spamscope-elasticsearch
     - if [ "$TRAVIS_BRANCH" == "master" ]; then
         git clone -b $TRAVIS_BRANCH --single-branch https://github.com/SpamScope/spamscope-dockerfile-elasticsearch.git $DOCKER_ELASTICSEARCH_PATH;
         cd $DOCKER_ELASTICSEARCH_PATH && docker build --build-arg SPAMSCOPE_VER=master -t $DOCKER_USERNAME/spamscope-elasticsearch . && cd -;

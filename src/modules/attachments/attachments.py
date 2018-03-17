@@ -31,6 +31,7 @@ import logging
 import os
 import shutil
 import tempfile
+from operator import itemgetter
 
 import patoolib
 from patoolib.util import PatoolError
@@ -42,6 +43,8 @@ from .utils import fingerprints, check_archive, contenttype, extension
 
 
 log = logging.getLogger(__name__)
+
+p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
 
 
 class Attachments(UserList):
@@ -63,8 +66,7 @@ class Attachments(UserList):
         """
         Post processing attachments with third party tools
         """
-
-        for p in processors:
+        for p in p_ordered:
             try:
                 p(getattr(self, p.__name__), self)
             except AttributeError:
