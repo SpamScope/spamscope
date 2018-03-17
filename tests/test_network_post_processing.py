@@ -103,6 +103,9 @@ class TestPostProcessing(unittest.TestCase):
         """Test all post processing."""
 
         from src.modules.networks import processors
+        from operator import itemgetter
+
+        p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
 
         conf = {
             "virustotal": {"enabled": True,
@@ -113,7 +116,7 @@ class TestPostProcessing(unittest.TestCase):
         results = {}
         self.assertFalse(results)
 
-        for p in processors:
+        for p in p_ordered:
             p(conf[p.__name__], self.ipaddress, results)
 
         self.assertTrue(results)

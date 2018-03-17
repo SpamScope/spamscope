@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/SpamScope/spamscope.svg?branch=master)](https://travis-ci.org/SpamScope/spamscope)
 [![Coverage Status](https://coveralls.io/repos/github/SpamScope/spamscope/badge.svg?branch=develop)](https://coveralls.io/github/SpamScope/spamscope?branch=develop)
 [![BCH compliance](https://bettercodehub.com/edge/badge/SpamScope/spamscope?branch=develop)](https://bettercodehub.com/)
-[![](https://images.microbadger.com/badges/image/fmantuano/spamscope-elasticsearch.svg)](https://microbadger.com/images/fmantuano/spamscope-elasticsearch "Get your own image badge on microbadger.com")
+
 
 ![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 

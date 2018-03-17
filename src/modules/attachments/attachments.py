@@ -41,6 +41,11 @@ from .exceptions import HashError, ContentTypeError
 from .post_processing import processors
 from .utils import fingerprints, check_archive, contenttype, extension
 
+try:
+    from modules import TimeoutError
+except ImportError:
+    from ...modules import TimeoutError
+
 
 log = logging.getLogger(__name__)
 
@@ -72,6 +77,8 @@ class Attachments(UserList):
             except AttributeError:
                 log.warning(
                     "AttributeError: {!r} doesn't exist".format(p.__name__))
+            except TimeoutError as e:
+                log.warning(repr(e))
 
     def removeall(self):
         """Remove all items from object. """

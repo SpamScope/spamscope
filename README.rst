@@ -1,5 +1,4 @@
 |PyPI version| |Build Status| |Coverage Status| |BCH compliance|
-|image4|
 
 .. figure:: https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png
    :alt: SpamScope
@@ -351,7 +350,5 @@ Screenshots
    :target: https://coveralls.io/github/SpamScope/spamscope?branch=develop
 .. |BCH compliance| image:: https://bettercodehub.com/edge/badge/SpamScope/spamscope?branch=develop
    :target: https://bettercodehub.com/
-.. |image4| image:: https://images.microbadger.com/badges/image/fmantuano/spamscope-elasticsearch.svg
-   :target: https://microbadger.com/images/fmantuano/spamscope-elasticsearch
 .. |Donate| image:: https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif
    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2

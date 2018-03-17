@@ -75,6 +75,9 @@ class TestPostProcessing(unittest.TestCase):
         """Test all post processing."""
 
         from src.modules.mails import processors
+        from operator import itemgetter
+
+        p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
 
         conf = {
             "spamassassin": {"enabled": True}}
@@ -82,7 +85,7 @@ class TestPostProcessing(unittest.TestCase):
         results = {}
         self.assertFalse(results)
 
-        for p in processors:
+        for p in p_ordered:
             p(conf[p.__name__], mail_thug, MAIL_PATH, results)
 
         self.assertTrue(results)
