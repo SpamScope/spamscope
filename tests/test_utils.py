@@ -26,19 +26,20 @@ import time
 import unittest
 from operator import itemgetter
 
-base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
-
-import mailparser
-import src.modules.utils as utils
-from src.modules.attachments import MailAttachments, fingerprints
 from pyfaup.faup import Faup
+import mailparser
 
+from context import attachments, utils
+
+MailAttachments = attachments.MailAttachments
+fingerprints = attachments.fingerprints
+
+base_path = os.path.realpath(os.path.dirname(__file__))
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_7 = os.path.join(base_path, 'samples', 'mail_test_7')
 mail_test_11 = os.path.join(base_path, 'samples', 'mail_test_11')
+
 
 logging.getLogger().addHandler(logging.NullHandler())
 

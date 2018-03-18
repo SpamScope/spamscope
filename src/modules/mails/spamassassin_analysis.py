@@ -133,18 +133,18 @@ def convert_ascii2json(table):
     """
 
     t = ascii.read(table, fill_values=(''))
-    l = []
+    elements = []
 
     for row in t:
         if row[0] or row[0] == 0:
-            l.append({
+            elements.append({
                 "pts": float(row[0]),
                 "rule name": row[1].strip(),
                 "description": row[2].strip()})
         else:
             if row[1]:
-                l[-1]["rule name"] += " " + row[1].strip()
+                elements[-1]["rule name"] += " " + row[1].strip()
             if row[2]:
-                l[-1]["description"] += " " + row[2].strip()
+                elements[-1]["description"] += " " + row[2].strip()
     else:
-        return l
+        return elements

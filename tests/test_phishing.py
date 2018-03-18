@@ -24,15 +24,15 @@ import sys
 import unittest
 
 import mailparser
-
-base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
-
-import src.modules.mails.phishing as phishing
-import src.modules.utils as utils
 from pyfaup.faup import Faup
 
+from context import mails
+from context import utils
+
+
+phishing = mails.phishing
+
+base_path = os.path.realpath(os.path.dirname(__file__))
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_form = os.path.join(base_path, 'samples', 'mail_form')
 mail_test_5 = os.path.join(base_path, 'samples', 'mail_test_5')

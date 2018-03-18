@@ -24,10 +24,6 @@ import sys
 import unittest
 import simplejson as json
 
-base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
-
 try:
     from collections import ChainMap
 except ImportError:
@@ -55,7 +51,9 @@ class TestPostProcessing(unittest.TestCase):
     def test_virustotal(self):
         """Test add VirusTotal processing."""
 
-        from src.modules.networks import virustotal
+        from context import networks
+
+        virustotal = networks.virustotal
 
         conf = {"enabled": True,
                 "api_key": OPTIONS["VIRUSTOTAL_APIKEY"]}
@@ -75,7 +73,9 @@ class TestPostProcessing(unittest.TestCase):
     def test_shodan(self):
         """Test add Shodan processing."""
 
-        from src.modules.networks import shodan
+        from context import networks
+
+        shodan = networks.shodan
 
         # Complete parameters
         conf = {"enabled": True,
@@ -102,10 +102,11 @@ class TestPostProcessing(unittest.TestCase):
     def test_processors(self):
         """Test all post processing."""
 
-        from src.modules.networks import processors
+        from context import networks
         from operator import itemgetter
 
-        p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
+        p_ordered = [i[0] for i in sorted(
+            networks.processors, key=itemgetter(1))]
 
         conf = {
             "virustotal": {"enabled": True,

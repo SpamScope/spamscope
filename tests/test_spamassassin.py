@@ -27,16 +27,19 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
+from context import mails
+
+
 base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
-
-import src.modules.mails.spamassassin_analysis as spamassassin
-
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_thug_spamassassin = os.path.join(
     base_path, 'samples', 'mail_thug_spamassassin')
 mail_spamassassin = os.path.join(base_path, 'samples', 'mail_spamassassin')
+
+obj_report = mails.obj_report
+analysis_from_file = mails.analysis_from_file
+report_from_file = mails.report_from_file
+
 
 DEFAULTS = {"SPAMASSASSIN_ENABLED": "False"}
 OPTIONS = ChainMap(os.environ, DEFAULTS)
@@ -53,7 +56,7 @@ class TestSpamAssassin(unittest.TestCase):
         with open(mail_thug_spamassassin) as f:
             s = f.read()
 
-        report = spamassassin.obj_report(s)
+        report = obj_report(s)
         self.assertIsInstance(report, dict)
         self.assertIn("X-Spam-Checker-Version", report)
         self.assertIn("X-Spam-Flag", report)
@@ -70,7 +73,7 @@ class TestSpamAssassin(unittest.TestCase):
                      "SpamAssassin test skipped: "
                      "set env variable 'SPAMASSASSIN_ENABLED' to True")
     def test_analysis_from_file(self):
-        s = spamassassin.analysis_from_file(mail_thug)
+        s = analysis_from_file(mail_thug)
         self.assertIn("X-Spam-Status", s)
         self.assertIn("pts rule name", s)
 
@@ -78,7 +81,7 @@ class TestSpamAssassin(unittest.TestCase):
                      "SpamAssassin test skipped: "
                      "set env variable 'SPAMASSASSIN_ENABLED' to True")
     def test_report_from_file(self):
-        s = spamassassin.report_from_file(mail_thug)
+        s = report_from_file(mail_thug)
         self.assertIsInstance(s, dict)
         self.assertIn("X-Spam-Status", s)
         self.assertIn("score", s)
@@ -90,7 +93,7 @@ class TestSpamAssassin(unittest.TestCase):
                      "SpamAssassin test skipped: "
                      "set env variable 'SPAMASSASSIN_ENABLED' to True")
     def test_mail_spamassassin(self):
-        s = spamassassin.report_from_file(mail_spamassassin)
+        s = report_from_file(mail_spamassassin)
         self.assertIsInstance(s, dict)
         self.assertIn("X-Spam-Status", s)
         self.assertIn("score", s)

@@ -27,11 +27,7 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
-base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
-
-from src.modules import MAIL_PATH
+from context import MAIL_PATH
 
 # Set environment variables to change defaults:
 # Example export SPAMASSASSIN_ENABLED=True
@@ -39,7 +35,10 @@ from src.modules import MAIL_PATH
 DEFAULTS = {"SPAMASSASSIN_ENABLED": "False"}
 OPTIONS = ChainMap(os.environ, DEFAULTS)
 
+
+base_path = os.path.realpath(os.path.dirname(__file__))
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
+
 
 logging.getLogger().addHandler(logging.NullHandler())
 
@@ -52,7 +51,9 @@ class TestPostProcessing(unittest.TestCase):
     def test_spamassassin(self):
         """Test add SpamAssassin processing."""
 
-        from src.modules.mails import spamassassin
+        from context import mails
+
+        spamassassin = mails.spamassassin
 
         conf = {"enabled": True}
         results = {}
@@ -74,10 +75,10 @@ class TestPostProcessing(unittest.TestCase):
     def test_processors(self):
         """Test all post processing."""
 
-        from src.modules.mails import processors
+        from context import mails
         from operator import itemgetter
 
-        p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
+        p_ordered = [i[0] for i in sorted(mails.processors, key=itemgetter(1))]
 
         conf = {
             "spamassassin": {"enabled": True}}

@@ -16,3 +16,9 @@ limitations under the License.
 
 from .post_processing import processors, spamassassin
 from .phishing import check_form, check_urls, check_phishing
+from .spamassassin_analysis import (
+    obj_report, 
+    report_from_file, 
+    analysis_from_file, 
+    report_from_string, 
+    convert_ascii2json)
