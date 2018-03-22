@@ -1,0 +1,57 @@
+---
+- name: Install Apache Storm and SpamScope Develop Environment
+  hosts: develop
+  gather_facts: yes
+
+  tasks:
+      - name: Install OpenJDK
+        become: true
+        apt:
+          name: openjdk-8-jre
+          update_cache: yes
+
+      - name: Make the local bin folder
+        file:
+          path: "{{ bin_path }}"
+          state: directory
+
+      - name: Install lein
+        get_url:
+          url: "{{ lein_url }}"
+          dest: "{{ bin_path }}"
+          mode: 0775
+
+      - name: Download and untar Apache Storm
+        unarchive:
+          src: "{{ storm_url }}"
+          dest: "{{ base_path }}"
+          remote_src: yes
+
+      - name: Get stats of Apache Storm install path
+        stat: "path={{ storm_path }}"
+        register: apache_storm
+
+      - name: Move old Apache Storm installation
+        command: "mv -f {{ storm_path}} {{ storm_path}}.old"
+        when: apache_storm.stat.exists
+
+      - name: Rename Apache Storm folder
+        command: "mv {{ base_path }}/{{ DISTRO_NAME }} {{ storm_path }}"
+
+      - name: Make a Apache Storm link in bin folder
+        file:
+          src: "{{ storm_path }}/bin/storm"
+          dest: "{{ bin_path }}/storm"
+          state: link
+
+      - name: Lein version
+        command: lein version
+        register: lein
+
+      - name: Apache Storm version
+        command: storm version
+        register: apache_storm
+
+      - name: Print Apache Storm and Lein versions
+        debug:
+          msg: "Lein version: {{ lein.stdout }}. Apache Storm version: {{ apache_storm.stdout }}"

@@ -1,0 +1,10 @@
+[develop]
+develop_server ansible_host=localhost ansible_connection=ssh ansible_port=2222 ansible_user=root ansible_ssh_pass=screencast
+
+[all:vars]
+DISTRO_NAME="apache-storm-1.2.1"
+bin_path="~/bin"
+base_path="~"
+storm_path="{{ base_path }}/.storm"
+lein_url="https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein"
+storm_url="http://www.apache.org/dist/storm/{{ DISTRO_NAME }}/{{ DISTRO_NAME }}.tar.gz"
