@@ -1,0 +1,7 @@
+---
+storm.zookeeper.servers: ["localhost"]
+nimbus.seeds: ["localhost"]
+storm.log.dir: "{{ storm_log_dir }}"
+storm.local.dir: "{{ storm_local_dir }}"
+worker.heap.memory.mb: {{ worker_heap_memory_mb | int}}
+topology.worker.max.heap.size.mb: {{ topology_worker_max_heap_size_mb | int }}

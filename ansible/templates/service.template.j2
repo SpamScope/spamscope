@@ -1,0 +1,11 @@
+[Unit]
+Description = Start Apache Storm {{ item.service_name }}
+After = network.target
+
+[Service]
+WorkingDirectory = {{ storm_path }}
+Restart = always
+ExecStart = {{ storm_path }}/bin/storm {{ item.service_name }}
+
+[Install]
+WantedBy = multi-user.target

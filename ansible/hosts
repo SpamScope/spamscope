@@ -1,10 +1,25 @@
 [develop]
-develop_server ansible_host=localhost ansible_connection=ssh ansible_port=2222 ansible_user=root ansible_ssh_pass=screencast
+develop_server ansible_host=192.168.0.150 ansible_connection=ssh ansible_port=22 ansible_user=debian ansible_ssh_pass=screencast ansible_become_pass=screencast
 
 [all:vars]
-DISTRO_NAME="apache-storm-1.2.1"
-bin_path="~/bin"
-base_path="~"
-storm_path="{{ base_path }}/.storm"
+
+# Apache Storm parameters
+distro_name="apache-storm-1.2.1"
+apache_storm_mirror="http://it.apache.contactlab.it/storm"
+file_distro_name="{{ distro_name }}.tar.gz"
+storm_url="{{ apache_storm_mirror }}/{{ distro_name }}/{{ file_distro_name }}"
+delay=30
+
+install_path="/opt"
+storm_path="{{ install_path }}/storm"
+
+# Apache Storm parameters - storm.yaml file
+storm_log_dir=/var/log/storm
+storm_local_dir=/var/lib/storm
+worker_heap_memory_mb=2048
+topology_worker_max_heap_size_mb=1024
+
+# SpamScope parameters
+bin_path="/usr/local/bin"
 lein_url="https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein"
-storm_url="http://www.apache.org/dist/storm/{{ DISTRO_NAME }}/{{ DISTRO_NAME }}.tar.gz"
+apache_tika_ver="1.16"

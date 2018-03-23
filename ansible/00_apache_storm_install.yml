@@ -1,0 +1,91 @@
+---
+- name: Install Apache Storm
+  hosts: develop
+  gather_facts: yes
+  become: true
+  become_method: su
+
+  tasks:
+    - name: Install all system dependencies for Apache Storm
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+        - openjdk-8-jre
+        - python
+        - unzip
+        - zookeeperd
+
+    - name: Make sure that all folders exist
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - "{{ install_path }}"
+        - "{{ storm_log_dir }}"
+        - "{{ storm_local_dir }}"
+
+    - name: Download Apache Storm in local
+      become: false
+      get_url:
+        url: "{{ storm_url }}"
+        dest: "/tmp/{{ file_distro_name }}"
+      delegate_to: localhost
+
+    - name: Copy Apache Storm on server
+      copy:
+        src: /tmp/{{ file_distro_name }}
+        dest: /tmp/{{ file_distro_name }}
+
+    - name: Unarchive Apache Storm
+      unarchive:
+        src: "/tmp/{{ file_distro_name }}"
+        dest: "{{ install_path }}"
+
+    - name: Remove archive Apache Storm
+      file:
+        path: "/tmp/{{ file_distro_name }}"
+        state: absent
+
+    - name: Rename downloaded Apache Storm folder
+      command: "mv {{ install_path }}/{{ distro_name }} {{ storm_path }}"
+
+    - name: Copy configuration file storm.yaml
+      template:
+        src: templates/storm.yaml.j2
+        dest: "{{ storm_path }}/conf/storm.yaml"
+
+    - name: Add Apache Storm bin in $PATH and environment variable
+      template:
+        src: templates/apache-storm-path.sh.j2
+        dest: /etc/profile.d/apache-storm-path.sh
+
+    - name: Make Apache Storm units files
+      template:
+        src: templates/service.template.j2
+        dest: "/lib/systemd/system/storm_{{ item.service_name }}.service"
+      with_items:
+        - { service_name: supervisor }
+        - { service_name: ui }
+        - { service_name: nimbus }
+        - { service_name: logviewer }
+
+    - name: Enable Apache Storm units files
+      systemd:
+        name: "storm_{{ item.service_name }}"
+        state: started
+        enabled: yes
+      with_items:
+        - { service_name: supervisor }
+        - { service_name: ui }
+        - { service_name: nimbus }
+        - { service_name: logviewer }
+
+    - name: Wait for Apache Storm is up
+      uri:
+        url: "http://{{ ansible_default_ipv4.address }}:8080/api/v1/nimbus/summary"
+        return_content: yes
+      register: result
+      until: result.content.find("Leader") != -1
+      retries: 5
+      delay: "{{ delay }}"

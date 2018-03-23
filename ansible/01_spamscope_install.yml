@@ -1,0 +1,46 @@
+---
+- name: Install SpamScope
+  hosts: develop
+  gather_facts: yes
+  become: true
+  become_method: su
+
+  tasks:
+    - name: Install lein
+      get_url:
+        url: "{{ lein_url }}"
+        dest: "{{ bin_path }}"
+        mode: 0775
+
+    - name: Install all SpamScope system dependencies
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+        - autoconf
+        - automake
+        - build-essential
+        - cmake
+        - git
+        - graphviz
+        - graphviz-dev
+        - libboost-all-dev
+        - libboost-python-dev
+        - libemail-outlook-message-perl
+        - libffi-dev
+        - libfuzzy-dev
+        - libjpeg-dev
+        - libtool
+        - libxml2-dev
+        - libxslt-dev
+        - libxslt1-dev
+        - libyaml-dev
+        - p7zip-full
+        - pkg-config
+        - python-dev
+        - python-pip
+        - python-setuptools
+        - spamassassin
+        - unzip
+        - yara
+        - zlib1g-dev
