@@ -26,6 +26,7 @@ RUN git clone -b ${SPAMSCOPE_VER} --single-branch https://github.com/SpamScope/s
  ```
 
 It's very important set `SPAMSCOPE_CONF_FILE` environment varible, that SpamScope uses to find the main configuration file.
+An commented example is [here](../conf/spamscope.example.yml).
 
 After that you can build your image:
 
