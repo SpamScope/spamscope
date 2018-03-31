@@ -77,6 +77,6 @@ docker-compose exec -d -T spamscope-debug
 
 and it says: _exec my command in container spamscope-debug_.
 
-The command that I want to exec is `spamscope-topology submit`, for more details read the guide inside [spamscope/src/cli/](src/cli/README.md) folder.
+The command that I want to exec is `spamscope-topology submit`, for more details read the guide inside [spamscope/src/cli/](../src/cli/README.md) folder.
 
 Now SpamScope is up and running. You can navigate url `http://localhost:8080` and you will see `spamscope_debug` under `Topology Summary` section.
