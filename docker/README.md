@@ -43,8 +43,8 @@ The `docker-compose.yml` example uses `spamscope-debug` image, if doesn't exist,
 
 ```
 volumes:
-      - ${HOST_SPAMSCOPE_CONF}:/etc/spamscope
-      - ${HOST_MAILS_FOLDER}:${DOCKER_MAILS_FOLDER}
+  - ${HOST_SPAMSCOPE_CONF}:/etc/spamscope
+  - ${HOST_MAILS_FOLDER}:${DOCKER_MAILS_FOLDER}
 ```
 
 With `volumes` you mount host folders in docker container folders. In this case `HOST_SPAMSCOPE_CONF` is the folder with SpamScope configuration, `HOST_MAILS_FOLDER` is the folder with emails to analyze and `DOCKER_MAILS_FOLDER` the email folder in docker container.

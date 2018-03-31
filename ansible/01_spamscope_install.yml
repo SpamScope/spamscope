@@ -44,3 +44,38 @@
         - unzip
         - yara
         - zlib1g-dev
+
+    - name: Download Apache Tika in local
+      become: false
+      get_url:
+        url: "{{ apache_tika_url }}"
+        dest: "/tmp"
+      delegate_to: localhost
+
+    - name: Copy Apache Tika on server
+      copy:
+        src: "/tmp/tika-app-{{ apache_tika_version }}.jar"
+        dest: "{{ install_path }}"
+
+    - name: Clone Faup
+      git:
+        dest: "{{ faup_path }}"
+        repo: "{{ faup_repo }}"
+        update: yes
+        clone: yes
+        accept_hostkey: yes
+        version: master
+      tags:
+        - git
+
+    - name: Build Faup
+      shell: "{{ item }}"
+      args:
+        chdir: "{{ faup_path }}"
+      with_items:
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make
+        - make install
+        - echo '/usr/local/lib' | tee -a /etc/ld.so.conf.d/faup.conf && ldconfig

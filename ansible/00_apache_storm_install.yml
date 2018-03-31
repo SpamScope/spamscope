@@ -34,8 +34,8 @@
 
     - name: Copy Apache Storm on server
       copy:
-        src: /tmp/{{ file_distro_name }}
-        dest: /tmp/{{ file_distro_name }}
+        src: "/tmp/{{ file_distro_name }}"
+        dest: "/tmp/{{ file_distro_name }}"
 
     - name: Unarchive Apache Storm
       unarchive:
