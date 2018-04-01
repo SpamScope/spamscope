@@ -73,7 +73,7 @@
       args:
         chdir: "{{ faup_path }}"
       with_items:
-        - mkdir build
+        - mkdir -p build
         - cd build
         - cmake ..
         - make

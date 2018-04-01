@@ -1,0 +1,3 @@
+---
+- import_playbook: 00_apache_storm_install.yml
+- import_playbook: 01_spamscope_install.yml

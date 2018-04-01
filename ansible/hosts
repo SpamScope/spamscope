@@ -29,4 +29,3 @@ faup_repo="https://github.com/stricaud/faup.git"
 
 # SpamScope parameters
 lein_url="https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein"
-apache_tika_ver="1.16"
