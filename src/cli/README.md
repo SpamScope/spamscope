@@ -1,13 +1,11 @@
 ![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 
-
-## Overview
+# Overview
 SpamScope comes with some tools that help you to manage it:
   - spamscope-topology
   - spamscope-elasticsearch
 
-
-## spamscope-topology
+# spamscope-topology
 
 General options:
 
@@ -52,8 +50,7 @@ optional arguments:
                         considers that worker dead.
 ```
 
-
-## spamscope-elasticsearch
+# spamscope-elasticsearch
 
 General options:
 

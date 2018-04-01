@@ -1,9 +1,9 @@
-## Overview
+# Overview
 SpamScope has two Docker images on Docker Hub. These images are complete and they have both Apache Storm and SpamScope with all requirements:
  - [spamscope-deps](https://hub.docker.com/r/fmantuano/spamscope-deps/): you should use this image as base of all SpamScope images. This image doesn't have SpamScope, but has all its requirements.
  - [spamscope-elasticsearch](https://hub.docker.com/r/fmantuano/spamscope-elasticsearch/): this image is an example of image that use Elasticsearch as database store.
 
- ## How make a custom image
+ # How make a custom image
  The `Dockerfile` example in this repository start with:
 
  ```
@@ -34,7 +34,7 @@ After that you can build your image:
 $ docker build -t spamscope-debug .
 ```
 
-##  Example
+#  Example
 In this repository there is an example of `Dockerfile` that can be used for debug.
 
 I don't like use `docker` command, so I made a `docker-compose.yml` that is more clean and easy to use.

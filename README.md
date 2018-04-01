@@ -33,13 +33,13 @@ SpamScope uses Apache Storm that allows you to start small and scale horizontall
 You can choose your mails input sources (with **spouts**) and your functionalities (with **bolts**).
 
 SpamScope comes with the following bolts:
- - tokenizer splits mail in token like headers, body, attachments and it can filter emails, attachments and ip addresses already seen
- - phishing looks for your keywords in email and connects email to targets (bank, your customers, etc.)
- - raw_mail is for all third party tools that analyze raw mails like SpamAssassin
- - attachments analyzes all mail attachments and uses third party tools like VirusTotal
- - network analyzes all sender ip addresses with third party tools like Shodan
- - urls extracts all urls in email and attachments
- - json_maker and outputs make the json report and save it
+ - **tokenizer** splits mail in token like headers, body, attachments and it can filter emails, attachments and ip addresses already seen
+ - **phishing** looks for your keywords in email and connects email to targets (bank, your customers, etc.)
+ - **raw_mail** is for all third party tools that analyze raw mails like SpamAssassin
+ - **attachments** analyzes all mail attachments and uses third party tools like VirusTotal
+ - **network** analyzes all sender ip addresses with third party tools like Shodan
+ - **urls** extracts all urls in email and attachments
+ - **json_maker** and **outputs** make the json report and save it
 
 ## Store where you want
 You can build your custom output bolts and store your data in Elasticsearch, MongoDB, filesystem, etc.
@@ -77,6 +77,8 @@ For Python requirements you can read:
  * [mandatory requirements](./requirements.txt)
  * [optional requirements](./requirements_optional.txt)
 
+_Thug_ is another optional requirement. See Thug section for more details.
+
 ## Apache Storm
 [Apache Storm](http://storm.apache.org/) is a free and open source distributed realtime computation system.
 
@@ -92,19 +94,17 @@ For Python requirements you can read:
 ## SpamAssassin (optional)
 SpamScope can use [SpamAssassin](http://spamassassin.apache.org/) an open source anti-spam to analyze every mails.
 
-## Tika (optional)
-SpamScope can use [Tika App](https://tika.apache.org/) to parse every attachments.
-The **Apache Tika** toolkit detects and extracts metadata and text from over a thousand different file types (such as PPT, XLS, and PDF).
-To use Apache Tika in SpamScope you must install [tika-app-python](https://github.com/fedelemantuano/tika-app-python).
+## Apache Tika (optional)
+SpamScope can use [Apache Tika](https://tika.apache.org/) to parse every attachments.
+The Apache Tika toolkit detects and extracts metadata and text from over a thousand different file types (such as PPT, XLS, and PDF).
+To use Apache Tika in SpamScope you must install [tika-app-python](https://github.com/fedelemantuano/tika-app-python) with `pip` and [Apache Tika](https://tika.apache.org/download.html).
 
 ## Thug (optional)
 From release v1.3 SpamScope can analyze Javascript and HTML attachments with [Thug](https://github.com/buffer/thug).
 If you want to analyze the attachments with Thug, follow [these instructions](http://buffer.github.io/thug/doc/build.html) to install it. Enable it in `attachments` section.
 
 What is Thug? From README project:
-```
-Thug is a Python low-interaction honeyclient aimed at mimicing the behavior of a web browser in order to detect and emulate malicious contents.
-```
+> Thug is a Python low-interaction honeyclient aimed at mimicing the behavior of a web browser in order to detect and emulate malicious contents.
 
 You can see a complete SpamScope report with Thug analysis [here](https://goo.gl/Y4kWCv).
 
@@ -140,7 +140,7 @@ $ export SPAMSCOPE_CONF_FILE=/etc/spamscope/spamscope.yml
 # Installation
 You can use:
   * [Docker images](./docker/README.md) to run SpamScope with docker engine
-  * [Ansible](): to install and run SpamScope on server
+  * [Ansible](./ansible/README.md): to install and run SpamScope on server
 
 # Topologies
 SpamScope comes with three topologies:
@@ -148,13 +148,13 @@ SpamScope comes with three topologies:
    - [spamscope_elasticsearch](./topologies/spamscope_elasticsearch.py): the output are stored in Elasticsearch indexes.
    - [spamscope_redis](./topologies/spamscope_redis.py): the output are stored in Redis.
 
-If you want submit SpamScope topology use `spamscope-topology submit` tool. For more details `spamscope-topology submit -h`:
+If you want submit SpamScope topology use `spamscope-topology submit` tool. For more details [see SpamScope cli tools](src/cli/README.md):
 
 ```
 $ spamscope-topology submit --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis}
 ```
 
-It's possible change the default settings for all Apache Storm options. I suggest to change these options:
+It's possible to change the default settings for all Apache Storm options. I suggest to change these options:
 
  - **topology.tick.tuple.freq.secs**: reload configuration of all bolts
  - **topology.max.spout.pending**: Apache Storm framework will then throttle your spout as needed to meet the `topology.max.spout.pending` requirement
@@ -167,7 +167,7 @@ If you are using Elasticsearch output, I suggest you to use [Elasticsearch templ
 
 # Unittest
 SpamScope comes with unittests for each modules. In bolts and spouts there are no special features, all intelligence is in external modules.
-All unittests are in `tests` folder.
+All unittests are in [tests folder](tests/).
 
 To have complete tests you should set the followings enviroment variables:
 
@@ -184,7 +184,13 @@ $ export SHODAN_APIKEY="your key"
 $ export SPAMASSASSIN_ENABLED=True
 ```
 
-## Screenshots
+# Output example
+This is a [raw email](https://goo.gl/wMBfbF) that I analyzed with SpamScope:
+  - [SpamScope output](https://goo.gl/fr4i7C).
+
+This is another example with [Thug analysis](https://goo.gl/Y4kWCv).
+
+# Screenshots
 ![Apache Storm](docs/images/Docker00.png?raw=true "Apache Storm")
 
 ![SpamScope](docs/images/Docker01.png?raw=true "SpamScope")
