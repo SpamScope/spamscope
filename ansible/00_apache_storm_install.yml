@@ -16,7 +16,7 @@
         - unzip
         - zookeeperd
 
-    - name: Make sure that all folders exist
+    - name: Make sure that all Apache Storm folders exist
       file:
         path: "{{ item }}"
         state: directory
@@ -32,17 +32,17 @@
         dest: "/tmp/{{ file_distro_name }}"
       delegate_to: localhost
 
-    - name: Copy Apache Storm on server
+    - name: Copy Apache Storm on server target
       copy:
         src: "/tmp/{{ file_distro_name }}"
         dest: "/tmp/{{ file_distro_name }}"
 
-    - name: Unarchive Apache Storm
+    - name: Unarchive Apache Storm file archive
       unarchive:
         src: "/tmp/{{ file_distro_name }}"
         dest: "{{ install_path }}"
 
-    - name: Remove archive Apache Storm
+    - name: Remove Apache Storm file archive
       file:
         path: "/tmp/{{ file_distro_name }}"
         state: absent
@@ -70,7 +70,7 @@
         - { service_name: nimbus }
         - { service_name: logviewer }
 
-    - name: Enable Apache Storm units files
+    - name: Enable and start Apache Storm units files
       systemd:
         name: "storm_{{ item.service_name }}"
         state: started

@@ -45,6 +45,11 @@
         - yara
         - zlib1g-dev
 
+    - name: Install virtualenv
+      pip:
+        name: virtualenv
+        state: latest
+
     - name: Download Apache Tika in local
       become: false
       get_url:
@@ -71,11 +76,66 @@
     - name: Build Faup
       shell: "{{ item }}"
       args:
-        chdir: "{{ faup_path }}"
+        chdir: "{{ faup_path }}/build"
       with_items:
-        - mkdir -p build
-        - cd build
         - cmake ..
         - make
         - make install
         - echo '/usr/local/lib' | tee -a /etc/ld.so.conf.d/faup.conf && ldconfig
+
+    - name: Download rarlinux
+      become: false
+      get_url:
+        url: "{{ rarlinux_url }}"
+        dest: "/tmp"
+      delegate_to: localhost
+
+    - name: Copy rarlinux on server
+      copy:
+        src: "/tmp/{{ rarlinux_filename }}"
+        dest: "{{ install_path }}"
+
+    - name: Unarchive rarlinux file archive
+      unarchive:
+        src: "/tmp/{{ rarlinux_filename }}"
+        dest: "{{ install_path }}"
+
+    - name: Remove rarlinux file archive
+      file:
+        path: "{{ install_path }}/{{ rarlinux_filename }}"
+        state: absent
+
+    - name: Make rarlinux symbolic links in bin path
+      file:
+        src: "{{ install_path }}/rar/{{ item }}"
+        dest: "{{ bin_path }}/{{ item }}"
+        state: link
+      with_items:
+        - rar
+        - unrar
+
+    - name: Clone SpamScope repository
+      git:
+        dest: "{{ spamscope_path }}"
+        repo: "{{ spamscope_repo }}"
+        update: yes
+        clone: yes
+        accept_hostkey: yes
+        version: "{{ spamscope_version }}"
+      tags:
+        - git
+
+    - name: Install SpamScope
+      pip:
+        name: "git+{{ spamscope_repo }}@{{ spamscope_version }}"
+        virtualenv: "{{ spamscope_path }}/venv"
+
+    - name: Install SpamScope requirements optional
+      pip:
+        requirements: "{{ spamscope_path }}/requirements_optional.txt"
+        virtualenv: "{{ spamscope_path }}/venv"
+
+    - name: Enable SpamScope environment variable
+      template:
+        src: templates/spamscope.sh.j2
+        dest: /etc/profile.d/spamscope.sh

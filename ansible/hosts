@@ -5,7 +5,7 @@ develop_server ansible_host=192.168.0.150 ansible_connection=ssh ansible_port=22
 bin_path="/usr/local/bin"
 install_path="/opt"
 
-# Apache Storm parameters
+# Apache Storm
 distro_name="apache-storm-1.2.1"
 apache_storm_mirror="http://it.apache.contactlab.it/storm"
 file_distro_name="{{ distro_name }}.tar.gz"
@@ -13,7 +13,7 @@ storm_url="{{ apache_storm_mirror }}/{{ distro_name }}/{{ file_distro_name }}"
 delay=30
 storm_path="{{ install_path }}/storm"
 
-# Apache Storm parameters - storm.yaml file
+# Apache Storm - storm.yaml file
 storm_log_dir=/var/log/storm
 storm_local_dir=/var/lib/storm
 worker_heap_memory_mb=2048
@@ -27,5 +27,14 @@ apache_tika_url="https://archive.apache.org/dist/tika/tika-app-{{ apache_tika_ve
 faup_path="/opt/faup"
 faup_repo="https://github.com/stricaud/faup.git"
 
-# SpamScope parameters
+# Lein
 lein_url="https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein"
+
+# rarlinux
+rarlinux_filename="rarlinux-x64-5.5.0.tar.gz"
+rarlinux_url="https://www.rarlab.com/rar/{{ rarlinux_filename }}"
+
+# SpamScope
+spamscope_version="develop"
+spamscope_repo="https://github.com/SpamScope/spamscope.git"
+spamscope_path="/opt/spamscope"

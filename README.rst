@@ -152,6 +152,11 @@ Faup
 Parser and is a library and command line tool to parse URLs and
 normalize fields.
 
+rarlinux (optional)
+-------------------
+
+`rarlinux <https://www.rarlab.com/>`__ unarchives rar file.
+
 SpamAssassin (optional)
 -----------------------
 

@@ -91,6 +91,9 @@ _Thug_ is another optional requirement. See Thug section for more details.
 ## Faup
 [Faup](https://github.com/stricaud/faup) stands for Finally An Url Parser and is a library and command line tool to parse URLs and normalize fields.
 
+## rarlinux (optional)
+[rarlinux](https://www.rarlab.com/) unarchives rar file.
+
 ## SpamAssassin (optional)
 SpamScope can use [SpamAssassin](http://spamassassin.apache.org/) an open source anti-spam to analyze every mails.
 
