@@ -50,6 +50,29 @@
         name: virtualenv
         state: latest
 
+    - name: Make SpamScope worker folders
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - "{{ spamscope_conf_path }}"
+        - "/var/log/spamscope"
+        - "/var/lib/spamscope/moved"
+        - "/var/lib/spamscope/failed"
+        - "/var/lib/spamscope/output"
+
+    - name: Copy SpamScope main configuration file
+      template:
+        src: templates/spamscope.yml.j2
+        dest: "{{ spamscope_conf_path }}/spamscope.yml"
+
+    - name: Copy others SpamScope configuration files
+      copy:
+        src: "files/{{ item }}"
+        dest: "{{ spamscope_conf_path }}/{{ item }}"
+      with_items:
+        - tika_whitelist.yml
+
     - name: Download Apache Tika in local
       become: false
       get_url:

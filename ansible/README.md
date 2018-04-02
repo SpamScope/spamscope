@@ -59,12 +59,14 @@ rarlinux_url="https://www.rarlab.com/rar/{{ rarlinux_filename }}"
 spamscope_version="develop"
 spamscope_repo="https://github.com/SpamScope/spamscope.git"
 spamscope_path="/opt/spamscope"
+spamscope_conf_path="/etc/spamscope"
 ```
 
-I don't explain all of them, but only those parameters that are important.
-If you want upgrade Apache Storm change version to `distro_name`.
-To give more memory to run Apache Storm use `worker_heap_memory_mb`, while `topology_worker_max_heap_size_mb` limit the heap space of SpamScope topology.
-`apache_tika_version` is the version of Apache Tika and it's useful if you want upgrade this tool.
+I don't explain all of them, but only those parameters that are important:
+ * `distro_name` if you want upgrade Apache Storm change version to;
+ * `worker_heap_memory_mb` to give more memory to run Apache Storm;
+ * `topology_worker_max_heap_size_mb` limit the heap space of SpamScope topology;
+ * `apache_tika_version` is the version of Apache Tika and it's useful if you want upgrade this tool.
 
 # Playbooks
 There are two playbooks to install SpamScope:
@@ -102,6 +104,9 @@ The list of tasks is:
       Install lein      TAGS: []
       Install all SpamScope system dependencies TAGS: []
       Install virtualenv        TAGS: []
+      Make SpamScope worker folders     TAGS: []
+      Copy SpamScope main configuration file    TAGS: []
+      Copy others SpamScope configuration files TAGS: []
       Download Apache Tika in local     TAGS: []
       Copy Apache Tika on server        TAGS: []
       Clone Faup        TAGS: [git]
@@ -115,7 +120,16 @@ The list of tasks is:
       Install SpamScope TAGS: []
       Install SpamScope requirements optional   TAGS: []
       Enable SpamScope environment variable     TAGS: []
+
 ```
+
+With this playbook you will install a main SpamScope configuration path to test your installation:
+ * in `/var/lib/spamscope/moved` SpamScope moves the email analyzed
+ * in `/var/lib/spamscope/failed` SpamScope moves the email that it couldn't analyze
+ * in `/var/lib/spamscope/output` SpamScope save the output, if you use spamscope_debug topology, that saves the output on filesystem
+ * in `/var/log/spamscope` SpamScope puts the Python logs
+
+The main configuration file in this installation enable only _Apache Tika_ and _SpamAssassin_.
 
 # Installation
 You can use `ansible` folder to install SpamScope.

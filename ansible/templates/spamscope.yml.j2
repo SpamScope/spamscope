@@ -1,0 +1,208 @@
+---
+# Spouts configurations
+# Spout file on file system
+files-mails:
+
+    # Reload new mails after reload.mails analyzed
+    reload.mails: 1000
+
+    # Post processing
+    post_processing:
+
+        # move or remove mails?
+        what: move
+
+        # if move where
+        where: /var/lib/spamscope/moved
+
+        # if failed move in where.failed
+        where.failed: /var/lib/spamscope/failed
+
+    # Mailboxes
+    mailboxes:
+        unittest:
+            mail_server: hostname
+            # Trust string is used to get sender IP address from mail server.
+            # More details:
+            # https://github.com/SpamScope/mail-parser/blob/v0.4.6/mailparser/__init__.py#L221
+            trust_string: "test_trust_string"
+            files_pattern: "mail_*"
+            priority: 1
+            path_mails: {{ spamscope_path }}/tests/samples
+
+            # This flag enables Outlook msg parsing for every mails in mailbox
+            # Default value is false
+            outlook: false
+
+
+# Bolts configurations
+# Phishing bolt configuration
+phishing:
+    lists:
+        subjects:
+            # Suspect subjects
+            # Example in conf/keywords/subjects.example.yml
+            # generic: /path/to/generic_subjects
+
+        targets:
+            # Keyword for every targets
+            # Example in conf/keywords/targets.example.yml
+            # generic: /path/to/generic_targets
+
+
+tokenizer:
+    # If true mails with same hash are filtered and not analyzed.
+    # Only the body will not saved
+    filter_mails: true
+
+    # Max number of hashes saved for filter function
+    maxlen_mails: 1000000
+
+    # If true attachments with same hash are filtered and not analyzed.
+    # Only hashes will be saved
+    filter_attachments: true
+
+    # Max number of hashes saved for filter function
+    maxlen_attachments: 1000000
+
+    # If true the same ip address is filtered and not analyzed.
+    filter_network: true
+
+    # Max number of hashes saved for filter function
+    maxlen_network: 1000000
+
+
+# Network bolt configuration
+network:
+    # Shodan analysis https://www.shodan.io/
+    shodan:
+        enabled: false
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
+
+    # VirusTotal analysis https://www.virustotal.com/
+    virustotal:
+        enabled: false
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+# RawMail bolt configuration
+raw_mail:
+    # SpamAssassin analysis: https://spamassassin.apache.org/
+    spamassassin:
+        enabled: true
+
+
+# Attachments bolt configuration
+attachments:
+    # The lists of all components must be under lists keyword to load them
+    # automatically
+    commons:
+        lists:
+            blacklist_content_types:
+                # All content types to remove from results
+                # Example in content_types/blacklist/generic.example.yml
+                # generic: /path/to/generic_content_types
+
+            not_extract_content_types:
+                # All content types that you don't want extract from archive
+                # Example: application/java-archive (jar), you can save the jar
+                # but do not extract the class inside.
+                # generic: /path/to/generic_content_types
+
+    # Apache Tika analysis: https://tika.apache.org/
+    tika:
+        # Enable Tika but it's very slow:
+        enabled: true
+
+        path_jar: {{ install_path }}/tika-app-{{ apache_tika_version }}.jar
+
+        # Like parameter -Xmx of java application
+        memory_allocation:
+
+        # All content types to extract details
+        # Example in content_types/tika/generic.example.yml
+        lists:
+            whitelist_content_types:
+                generic: {{ spamscope_conf_path }}/tika_whitelist.yml
+
+    # VirusTotal analysis: https://www.virustotal.com/
+    virustotal:
+        enabled: false
+
+        api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
+
+        # All content types to analyze with virustotal
+        # Example in content_types/virustotal/generic.example.yml
+        # Now is not active
+        lists:
+            whitelist_content_types:
+                generic: /path/to/generic_content_types
+                custom: /path/to/custom_content_types
+
+    # Thug analysis: https://github.com/buffer/thug
+    thug:
+        enabled: false
+
+        # File extensions to submit to thug
+        extensions:
+            - .html
+            - .js
+            - .jse
+
+        # More details:
+        # http://buffer.github.io/thug/doc/usage.html#basic-usage
+        #
+        # list of user agents to use for analysis
+        # SpamScope gets start an analysis for user agent
+        user_agents:
+            - win7ie90
+
+        referer: http://www.google.com/
+
+        # Set the singe analysis timeout in seconds
+        # This value MUST be lower than supervisor.worker.timeout.secs
+        # of SpamScope:
+        # nr. user agents * timeout < supervisor.worker.timeout.secs
+        timeout: 10
+
+        # Set the connect timeout in seconds
+        connect_timeout: 1
+
+        disable_cert_logging: true
+        disable_code_logging: true
+
+        # Maximum pages to fetch
+        # For SpamScope a good value is 1 to have short analysis
+        threshold: 1
+
+    # Zemana Antimalware analysis: https://www.zemana.com/
+    # only premium users
+    zemana:
+        enabled: false
+
+        PartnerId: xxxxx
+        UserId: xxxxx
+        ApiKey: xxxxx
+        useragent: SpamScope
+
+    # This plugin store the samples on file system
+    # in date format subfolders (YYYY-MM-DD)
+    store_samples:
+        enabled: false
+        base_path: /tmp
+
+
+# Urls
+urls:
+    whitelists:
+        # Only second level domains to whitelisting
+        # Example in conf/whitelists/generic.example.yml
+        # alexa:
+        #     path: /path/to/alexa
+        #     expiry: 2016-06-28T12:33:00.000Z  # date ISO 8601 only UTC
+
+
+# Output debug bolt configuration
+output-debug:
+    json.indent: 4
+    output.path: /var/lib/spamscope/output

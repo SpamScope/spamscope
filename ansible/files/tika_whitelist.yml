@@ -1,0 +1,10 @@
+---
+- application/msword
+- application/octet-stream
+- application/pdf
+- application/vnd.openxmlformats-officedocument.wordprocessingml.document
+- application/x-7z-compressed
+- application/xml
+- application/zip
+- text/html
+- text/plain
