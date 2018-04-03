@@ -1,7 +1,7 @@
 # Overview
-The Ansible playbook in this repository can help you to install Apache Storm and SpamScope on Debian servers. The ansible folder is complete with [ansible.cfg](./ansible.cfg) file.
+The Ansible playbooks in this repository can help you to install Apache Storm and SpamScope on Debian servers. The ansible folder also contains [ansible.cfg](./ansible.cfg) file.
 You can use these playbooks with your Ansible infrastructure or from this folder.
-Explain how Ansible works is out of scope.
+_Explain how Ansible works is out of scope._
 
 # File hosts
 This is the inventory file, that has the targets where you want to install SpamScope.
@@ -18,7 +18,7 @@ ansible_become_pass=screencast
 ```
 
 Then there are others parameters for Apache Storm and all SpamScope requirements. I put all of them in **all:vars** section of inventory, but you can use `host_vars` or `group_vars`. [See here](http://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) for more details.
-For first time you could use this inventory.
+For first test you could use this inventory.
 
 These are all parameters:
 
@@ -60,20 +60,23 @@ spamscope_version="develop"
 spamscope_repo="https://github.com/SpamScope/spamscope.git"
 spamscope_path="/opt/spamscope"
 spamscope_conf_path="/etc/spamscope"
+spamscope_debug_submit="true"
 ```
 
 I don't explain all of them, but only those parameters that are important:
- * `distro_name` if you want upgrade Apache Storm change version to;
+ * `distro_name` if you want upgrade Apache Storm change this parameter;
  * `worker_heap_memory_mb` to give more memory to run Apache Storm;
  * `topology_worker_max_heap_size_mb` limit the heap space of SpamScope topology;
- * `apache_tika_version` is the version of Apache Tika and it's useful if you want upgrade this tool.
+ * `apache_tika_version` is the version of Apache Tika and it's useful if you want upgrade this tool;
+ * `spamscope_debug_submit` is true if you want submit [spamscope_debug](../topologies/spamscope_debug.yml) topology.
 
 # Playbooks
-There are two playbooks to install SpamScope:
+There are three playbooks to install SpamScope:
  - [00_apache_storm_install.yml](./00_apache_storm_install.yml): this playbook installs Apache Storm
  - [01_spamscope_install.yml](./01_spamscope_install.yml): this playbook installs SpamScope
+ - [02_submit_spamscope_debug.yml](./02_submit_spamscope_debug.yml): this playbook submits [spamscope_debug](../topologies/spamscope_debug.yml) topology
 
-You can install both with [install.yml](./install.yml).
+You can install all playbooks with [install.yml](./install.yml).
 
 ## 00_apache_storm_install.yml
 The list of tasks is:
@@ -99,6 +102,8 @@ The list of tasks is:
 The list of tasks is:
 
 ```
+  playbook: 01_spamscope_install.yml
+
   play #1 (develop): Install SpamScope  TAGS: []
     tasks:
       Install lein      TAGS: []
@@ -117,19 +122,31 @@ The list of tasks is:
       Remove rarlinux file archive      TAGS: []
       Make rarlinux symbolic links in bin path  TAGS: []
       Clone SpamScope repository        TAGS: [git]
+      Copy streamparse config.json file TAGS: []
       Install SpamScope TAGS: []
       Install SpamScope requirements optional   TAGS: []
       Enable SpamScope environment variable     TAGS: []
-
 ```
 
-With this playbook you will install a main SpamScope configuration path to test your installation:
+With this playbook you will install SpamScope with a base configuration to test your installation:
  * in `/var/lib/spamscope/moved` SpamScope moves the email analyzed
  * in `/var/lib/spamscope/failed` SpamScope moves the email that it couldn't analyze
  * in `/var/lib/spamscope/output` SpamScope save the output, if you use spamscope_debug topology, that saves the output on filesystem
  * in `/var/log/spamscope` SpamScope puts the Python logs
 
-The main configuration file in this installation enable only _Apache Tika_ and _SpamAssassin_.
+The main configuration file in this installation enable only _Apache Tika_.
+
+## 02_submit_spamscope_debug.yml
+The list of tasks is:
+
+```
+  play #1 (develop): Install SpamScope  TAGS: []
+    tasks:
+      Submit spamscope_debug topology   TAGS: []
+```
+
+With `spamscope_debug_submit` you can enable/disable submit.
+
 
 # Installation
 You can use `ansible` folder to install SpamScope.
@@ -149,21 +166,24 @@ Now you have Ansible. Then change the file `hosts` with your data and run the pl
 $ ansible-playbook install.yml
 ```
 
-After that you have Apache Storm and SpamScope installed. Check the url `http://server_ip:8080`, that gives you the overview of Apache Storm.
+Yes only two words and you can install SpamScope on many servers.
 
-But SpamScope isn't up because you must submit a topology. From Apache Storm concepts:
+After that you have Apache Storm and SpamScope installed on all targets in file inventory. Check the url `http://server_ip:8080`, it gives you the overview of Apache Storm.
+
+This playbook makes the submit of [spamscope_debug](../topologies/spamscope_debug.py). From Apache Storm concepts:
 
 _The logic for a realtime application is packaged into a Storm topology. A Storm topology is analogous to a MapReduce job. One key difference is that a MapReduce job eventually finishes, whereas a topology runs forever (or until you kill it, of course). A topology is a graph of spouts and bolts that are connected with stream groupings._
 
-Now we can submit the `spamscope_debug` topology using a custom command line tool that comes with SpamScope `spamscope-topology`.
+To do a manual submit of `spamscope_debug` topology, you should use the custom command line tool that comes with SpamScope `spamscope-topology`.
+Connect to server and type:
 
 ```
 $ cd /opt/spamscope # or your SpamScope path
-$ spamscope-topology submit -g spamscope_debug -p 100 -t 30
+$ spamscope-topology submit -g spamscope_debug -p 100 -t 30 -e prod_vm
 ```
 
-The command that I want to exec is `spamscope-topology submit`, for more details read the guide inside [spamscope/src/cli/](../src/cli/README.md) folder.
+For more details about `spamscope-topology` read [this guide](../src/cli/README.md).
 
 Now SpamScope is up and running. You can navigate url `http://server_ip:8080` and you will see `spamscope_debug` under `Topology Summary` section.
 
-_In this playbook there isn't the Thug installation, that you can install following Thug guide._
+_With this playbook I don't install Thug (but I install all its system requirements), that you can install following Thug guide._

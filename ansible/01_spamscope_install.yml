@@ -143,10 +143,16 @@
         repo: "{{ spamscope_repo }}"
         update: yes
         clone: yes
+        force: yes
         accept_hostkey: yes
         version: "{{ spamscope_version }}"
       tags:
         - git
+
+    - name: Copy streamparse config.json file
+      template:
+        src: templates/config.json.j2
+        dest: "{{ spamscope_path }}/config.json"
 
     - name: Install SpamScope
       pip:

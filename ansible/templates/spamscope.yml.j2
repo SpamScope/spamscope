@@ -89,7 +89,7 @@ network:
 raw_mail:
     # SpamAssassin analysis: https://spamassassin.apache.org/
     spamassassin:
-        enabled: true
+        enabled: false
 
 
 # Attachments bolt configuration
@@ -136,8 +136,7 @@ attachments:
         # Now is not active
         lists:
             whitelist_content_types:
-                generic: /path/to/generic_content_types
-                custom: /path/to/custom_content_types
+                # generic: /path/to/generic_content_types
 
     # Thug analysis: https://github.com/buffer/thug
     thug:

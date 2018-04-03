@@ -1,0 +1,13 @@
+---
+- name: Install SpamScope
+  hosts: develop
+  gather_facts: yes
+  become: true
+  become_method: su
+
+  tasks:
+    - name: Submit spamscope_debug topology
+      shell: "{{ spamscope_path }}/venv/bin/spamscope-topology submit -g spamscope_debug -p 100 -t 30 -e prod_vm"
+      args:
+        chdir: "{{ spamscope_path }}"
+      when: spamscope_debug_submit == "true"
