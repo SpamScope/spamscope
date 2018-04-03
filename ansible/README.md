@@ -74,7 +74,7 @@ I don't explain all of them, but only those parameters that are important:
 There are three playbooks to install SpamScope:
  - [00_apache_storm_install.yml](./00_apache_storm_install.yml): this playbook installs Apache Storm
  - [01_spamscope_install.yml](./01_spamscope_install.yml): this playbook installs SpamScope
- - [02_submit_spamscope_debug.yml](./02_submit_spamscope_debug.yml): this playbook submits [spamscope_debug](../topologies/spamscope_debug.yml) topology
+ - [02_submit_spamscope_debug.yml](./02_submit_spamscope_debug.yml): this playbook submits [spamscope_debug](../topologies/spamscope_debug.py) topology
 
 You can install all playbooks with [install.yml](./install.yml).
 
@@ -145,7 +145,7 @@ The list of tasks is:
       Submit spamscope_debug topology   TAGS: []
 ```
 
-With `spamscope_debug_submit` you can enable/disable submit.
+With `spamscope_debug_submit` parameter you can enable/disable submit.
 
 
 # Installation
@@ -179,6 +179,7 @@ Connect to server and type:
 
 ```
 $ cd /opt/spamscope # or your SpamScope path
+$ source venv/bin/activate
 $ spamscope-topology submit -g spamscope_debug -p 100 -t 30 -e prod_vm
 ```
 
