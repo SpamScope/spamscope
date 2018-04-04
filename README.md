@@ -140,6 +140,8 @@ The default value where SpamScope will search the configuration file is `/etc/sp
 $ export SPAMSCOPE_CONF_FILE=/etc/spamscope/spamscope.yml
 ```
 
+When you change the configuration file, SpamScope automatically reloads the new changes.
+
 # Installation
 You can use:
   * [Docker images](./docker/README.md) to run SpamScope with docker engine

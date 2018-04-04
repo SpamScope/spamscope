@@ -235,6 +235,9 @@ environment variable ``SPAMSCOPE_CONF_FILE``:
 
     $ export SPAMSCOPE_CONF_FILE=/etc/spamscope/spamscope.yml
 
+When you change the configuration file, SpamScope automatically reloads
+the new changes.
+
 Installation
 ============
 
