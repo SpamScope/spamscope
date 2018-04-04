@@ -188,3 +188,12 @@ For more details about `spamscope-topology` read [this guide](../src/cli/README.
 Now SpamScope is up and running. You can navigate url `http://server_ip:8080` and you will see `spamscope_debug` under `Topology Summary` section.
 
 _With this playbook I don't install Thug (but I install all its system requirements), that you can install following Thug guide._
+
+## Check installation
+The [configuration file](./templates/spamscope.yml.j2) of SpamScope has one `mailbox` and its name is `unittest`. It's configurated to analyze all email in [tests folder](../tests) of SpamScope repository:
+
+```
+files_pattern: "mail_*"
+``` 
+
+You should have the results in `/var/lib/spamscope/output` and the analyzed emails in `/var/lib/spamscope/moved`. `/var/lib/spamscope/failed` should be empty.
