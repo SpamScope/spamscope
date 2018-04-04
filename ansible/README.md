@@ -140,9 +140,9 @@ The main configuration file in this installation enable only _Apache Tika_.
 The list of tasks is:
 
 ```
-  play #1 (develop): Install SpamScope  TAGS: []
+  play #1 (develop): Submit spamscope_debug topology    TAGS: []
     tasks:
-      Submit spamscope_debug topology   TAGS: []
+      Submit spamscope_debug topology   TAGS: [submit]
 ```
 
 With `spamscope_debug_submit` parameter you can enable/disable submit.
