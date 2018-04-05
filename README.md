@@ -11,7 +11,7 @@ To understand how SpamScope works, I suggest to read these overviews:
  - [Apache Storm Concepts](http://storm.apache.org/releases/1.2.1/Concepts.html)
  - [Streamparse Quickstart](http://streamparse.readthedocs.io/en/stable/quickstart.html)
 
-In general the first step is start Apache Storm, then you can run the topologies.
+In general the first step is run Apache Storm, then you can run the topologies on it.
 SpamScope has some topologies in [topologies folder](./topologies/), but you can make others topologies.
 
 ![Schema topology](docs/images/schema_topology.png?raw=true "Schema topology")
@@ -71,13 +71,13 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
  Fedele Mantuano (**LinkedIn**: [Fedele Mantuano](https://www.linkedin.com/in/fmantuano/))
 
 # Requirements
-For operating system requirements you can read `Ansible` playbook, that goes into details.
+For operating system requirements you can read [Ansible playbooks](./ansible), that go into details.
 
 For Python requirements you can read:
  * [mandatory requirements](./requirements.txt)
  * [optional requirements](./requirements_optional.txt)
 
-_Thug_ is another optional requirement. See Thug section for more details.
+_Thug_ is another optional requirement, that it's not in requirements. See [Thug section](#thug-optional) for more details.
 
 ## Apache Storm
 [Apache Storm](http://storm.apache.org/) is a free and open source distributed realtime computation system.
@@ -104,14 +104,14 @@ To use Apache Tika in SpamScope you must install [tika-app-python](https://githu
 
 ## Thug (optional)
 From release v1.3 SpamScope can analyze Javascript and HTML attachments with [Thug](https://github.com/buffer/thug).
-If you want to analyze the attachments with Thug, follow [these instructions](http://buffer.github.io/thug/doc/build.html) to install it. Enable it in `attachments` section.
+If you want to analyze the attachments with Thug, follow [these instructions](http://buffer.github.io/thug/doc/build.html) to install it. Enable it in `attachments` section of [main configuration file](./conf/spamscope.example.yml).
 
 What is Thug? From README project:
 > Thug is a Python low-interaction honeyclient aimed at mimicing the behavior of a web browser in order to detect and emulate malicious contents.
 
 You can see a complete SpamScope report with Thug analysis [here](https://goo.gl/Y4kWCv).
 
-Thug analysis can be very slow and you can have `heartbeat timeout` in Apache Storm.
+Thug analysis can be very slow and you can have `heartbeat timeout` errors in Apache Storm.
 To avoid any issue set `supervisor.worker.timeout.secs`:
 
 ```
@@ -133,7 +133,7 @@ It's possible to store the results in Elasticsearch. In this case you should ins
 It's possible to store the results in Redis. In this case you should install `redis` package.
 
 # Configuration
-Read the [example configuration file](./conf/spamscope.example.yml).
+Read the [example of main configuration file](./conf/spamscope.example.yml).
 The default value where SpamScope will search the configuration file is `/etc/spamscope/spamscope.yml`, but it's possible to set the environment variable `SPAMSCOPE_CONF_FILE`:
 
 ```
