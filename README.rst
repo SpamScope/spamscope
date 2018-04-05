@@ -17,8 +17,8 @@ Concepts <http://storm.apache.org/releases/1.2.1/Concepts.html>`__ -
 `Streamparse
 Quickstart <http://streamparse.readthedocs.io/en/stable/quickstart.html>`__
 
-In general the first step is start Apache Storm, then you can run the
-topologies. SpamScope has some topologies in `topologies
+In general the first step is run Apache Storm, then you can run the
+topologies on it. SpamScope has some topologies in `topologies
 folder <./topologies/>`__, but you can make others topologies.
 
 .. figure:: docs/images/schema_topology.png?raw=true
@@ -117,15 +117,15 @@ Mantuano <https://www.linkedin.com/in/fmantuano/>`__)
 Requirements
 ============
 
-For operating system requirements you can read ``Ansible`` playbook,
-that goes into details.
+For operating system requirements you can read `Ansible
+playbooks <./ansible>`__, that go into details.
 
 For Python requirements you can read: \* `mandatory
 requirements <./requirements.txt>`__ \* `optional
 requirements <./requirements_optional.txt>`__
 
-*Thug* is another optional requirement. See Thug section for more
-details.
+*Thug* is another optional requirement, that it's not in requirements.
+See `Thug section <#thug-optional>`__ for more details.
 
 Apache Storm
 ------------
@@ -181,7 +181,8 @@ From release v1.3 SpamScope can analyze Javascript and HTML attachments
 with `Thug <https://github.com/buffer/thug>`__. If you want to analyze
 the attachments with Thug, follow `these
 instructions <http://buffer.github.io/thug/doc/build.html>`__ to install
-it. Enable it in ``attachments`` section.
+it. Enable it in ``attachments`` section of `main configuration
+file <./conf/spamscope.example.yml>`__.
 
 What is Thug? From README project: > Thug is a Python low-interaction
 honeyclient aimed at mimicing the behavior of a web browser in order to
@@ -190,8 +191,9 @@ detect and emulate malicious contents.
 You can see a complete SpamScope report with Thug analysis
 `here <https://goo.gl/Y4kWCv>`__.
 
-Thug analysis can be very slow and you can have ``heartbeat timeout`` in
-Apache Storm. To avoid any issue set ``supervisor.worker.timeout.secs``:
+Thug analysis can be very slow and you can have ``heartbeat timeout``
+errors in Apache Storm. To avoid any issue set
+``supervisor.worker.timeout.secs``:
 
 ::
 
@@ -226,8 +228,9 @@ install ``redis`` package.
 Configuration
 =============
 
-Read the `example configuration file <./conf/spamscope.example.yml>`__.
-The default value where SpamScope will search the configuration file is
+Read the `example of main configuration
+file <./conf/spamscope.example.yml>`__. The default value where
+SpamScope will search the configuration file is
 ``/etc/spamscope/spamscope.yml``, but it's possible to set the
 environment variable ``SPAMSCOPE_CONF_FILE``:
 
