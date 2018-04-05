@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2017 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ limitations under the License.
 
 from os.path import join
 
-__version__ = "2.3.0"
+__version__ = "2.4.0"
 __configuration_path__ = "/etc/spamscope"
 
 __defaults__ = {

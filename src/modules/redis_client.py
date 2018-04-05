@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ class Redis:
 
         try:
             host, port = server
-        except:
+        except Exception:
             host = server[0]
 
         return host, port
@@ -178,7 +178,7 @@ class Redis:
             # Reset current_retry
             self._current_retry = self.max_retry
 
-        except:
+        except Exception:
             log.warning(
                 "Failed to push messages in Redis server".format(self.hosts))
 

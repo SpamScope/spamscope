@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,17 +23,19 @@ import sys
 import unittest
 
 import simplejson as json
+from context import attachments
+
 
 base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
-from src.modules.attachments import (
-    fingerprints, check_archive, contenttype, extension, reformat_virustotal)
-
-
 sample_zip = os.path.join(base_path, 'samples', 'test.zip')
 sample_txt = os.path.join(base_path, 'samples', 'test.txt')
 vt_report = os.path.join(base_path, 'samples', 'vt_report.json')
+
+fingerprints = attachments.fingerprints
+check_archive = attachments.check_archive
+contenttype = attachments.contenttype
+extension = attachments.extension
+reformat_virustotal = attachments.reformat_virustotal
 
 logging.getLogger().addHandler(logging.NullHandler())
 

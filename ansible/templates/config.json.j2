@@ -1,0 +1,60 @@
+{
+    "serializer": "json",
+    "topology_specs": "topologies/",
+    "virtualenv_specs": "virtualenvs/",
+    "use_virtualenv": "false",
+    "envs": {
+        "prod": {
+            "user": "root",
+            "nimbus": "localhost",
+            "workers": [
+                "localhost"
+            ],
+            "log": {
+                "path": "/logs",
+                "max_bytes": 5000000,
+                "backup_count": 1,
+                "level": "info"
+            },
+            "use_virtualenv": false,
+            "use_ssh_for_nimbus": false,
+            "virtualenv_root": ""
+        },
+        "prod_vm": {
+            "user": "root",
+            "nimbus": "localhost",
+            "workers": [
+                "localhost"
+            ],
+            "log": {
+                "path": "/var/log/spamscope",
+                "max_bytes": 5000000,
+                "backup_count": 7,
+                "level": "info"
+            },
+            "use_virtualenv": true,
+            "install_virtualenv": false,
+            "use_ssh_for_nimbus": false,
+            "virtualenv_root": "{{ spamscope_path }}/venv",
+            "virtualenv_name": ""
+        },
+        "debug": {
+            "user": "fedelemantuano",
+            "nimbus": "localhost",
+            "workers": [
+                "localhost"
+            ],
+            "log": {
+                "path": "/tmp/logs/",
+                "max_bytes": 5000000,
+                "backup_count": 1,
+                "level": "debug"
+            },
+            "use_virtualenv": true,
+            "install_virtualenv": false,
+            "use_ssh_for_nimbus": false,
+            "virtualenv_root": "",
+             "virtualenv_name": ""
+        }
+    }
+}

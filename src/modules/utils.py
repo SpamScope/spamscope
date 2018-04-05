@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ def load_config(config_file):
     try:
         with open(config_file, 'r') as c:
             return yaml.load(c)
-    except:
+    except Exception:
         message = "Config file {} not loaded".format(config_file)
         log.exception(message)
         raise RuntimeError(message)
@@ -300,7 +300,7 @@ def reformat_output(mail=None, bolt=None, **kwargs):
             try:
                 timestamp = datetime.datetime.strptime(
                     mail["analisys_date"], "%Y-%m-%dT%H:%M:%S.%f")
-            except:
+            except Exception:
                 # Without microseconds
                 timestamp = datetime.datetime.strptime(
                     mail["analisys_date"], "%Y-%m-%dT%H:%M:%S")
@@ -370,7 +370,7 @@ def reformat_output(mail=None, bolt=None, **kwargs):
         return mail, attachments
 
 
-def register(processors, active=True):
+def register(processors, priority=0, active=True):
     """Add processor to set of processors.
     From the best Python book Fluent Python (https://github.com/fluentpython).
     Thanks a lot Luciano Ramalho.
@@ -378,6 +378,7 @@ def register(processors, active=True):
     Args:
         processors (set): where store the active functions
         active (bool): if True adds the function, viceversa removes it
+        priority (int): priority to give at analysis
 
     Returns:
         decorator
@@ -385,9 +386,9 @@ def register(processors, active=True):
 
     def decorate(func):
         if active:
-            processors.add(func)
+            processors.add((func, priority))
         else:
-            processors.discard(func)
+            processors.discard((func, priority))
 
         return func
 

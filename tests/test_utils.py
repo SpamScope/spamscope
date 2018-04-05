@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,20 +24,22 @@ import os
 import sys
 import time
 import unittest
+from operator import itemgetter
+
+from pyfaup.faup import Faup
+import mailparser
+
+from context import attachments, utils
+
+MailAttachments = attachments.MailAttachments
+fingerprints = attachments.fingerprints
 
 base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
-
-import mailparser
-import src.modules.utils as utils
-from src.modules.attachments import MailAttachments, fingerprints
-from pyfaup.faup import Faup
-
 text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_7 = os.path.join(base_path, 'samples', 'mail_test_7')
 mail_test_11 = os.path.join(base_path, 'samples', 'mail_test_11')
+
 
 logging.getLogger().addHandler(logging.NullHandler())
 
@@ -445,6 +447,33 @@ class TestUtils(unittest.TestCase):
     def test_timeout(self):
         with self.assertRaises(utils.TimeoutError):
             sleeping()
+
+    def test_register_order(self):
+        register = utils.register
+        processors = set()
+
+        @register(processors, priority=2)
+        def number_two():
+            pass
+
+        @register(processors, priority=1)
+        def number_one():
+            pass
+
+        @register(processors, priority=4)
+        def number_four():
+            pass
+
+        @register(processors, priority=3)
+        def number_three():
+            pass
+
+        processors = [i[0] for i in sorted(processors, key=itemgetter(1))]
+
+        self.assertIs(processors[0], number_one)
+        self.assertIs(processors[1], number_two)
+        self.assertIs(processors[2], number_three)
+        self.assertIs(processors[3], number_four)
 
 
 if __name__ == '__main__':

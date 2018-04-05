@@ -1,0 +1,18 @@
+---
+- name: Submit spamscope_debug topology
+  hosts: develop
+  gather_facts: yes
+  become: true
+  become_method: su
+
+  tasks:
+    - name: Submit spamscope_debug topology
+      shell: "spamscope-topology submit -g spamscope_debug -p 100 -t 30 -e prod_vm"
+      args:
+        chdir: "{{ spamscope_path }}"
+      tags:
+        - submit
+      when: spamscope_debug_submit == "true"
+      environment:
+          PATH: "{{ spamscope_path }}/venv/bin:{{ install_path }}/storm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          LEIN_ROOT: "yes"

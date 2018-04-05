@@ -1,7 +1,5 @@
 FROM fmantuano/spamscope-deps
 
-MAINTAINER Fedele Mantuano "mantuano.fedele@gmail.com"
-
 # environment variables
 ARG SPAMSCOPE_VER="develop"
 
@@ -9,10 +7,6 @@ ENV SPAMASSASSIN_ENABLED="True" \
     SPAMSCOPE_CONF_FILE="/etc/spamscope/spamscope.yml" \
     SPAMSCOPE_PATH="/opt/spamscope" \
     THUG_ENABLED="True"
-
-# labels
-LABEL description="Spamscope: Advanced Spam Analysis" \
-    spamscope_version=${SPAMSCOPE_VER}
 
 # install SpamScope
 RUN set -ex; \

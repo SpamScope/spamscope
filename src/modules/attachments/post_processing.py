@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,10 +24,17 @@ import os
 from simplejson import JSONDecodeError
 
 try:
-    from modules import register
+    from modules import register, timeout
 except ImportError:
-    from ...modules import register
+    from ...modules import register, timeout
 
+
+# The processors is a set of tuples (function, priority)
+# You can use it to sort the post processing analysis
+# Example:
+#
+# from operator import itemgetter
+# p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
 
 processors = set()
 
@@ -142,6 +149,7 @@ def virustotal(conf, attachments):
                         i["virustotal"] = i_result
 
 
+@timeout(seconds=30, error_message="Thug analysis in timeout")
 @register(processors, active=True)
 def thug(conf, attachments):
     """This method updates the attachments results
@@ -219,7 +227,7 @@ def zemana(conf, attachments):
                         i["zemana"]["type"] = i_result.type
 
 
-@register(processors, active=True)
+@register(processors, priority=999, active=True)
 def store_samples(conf, attachments):
     """This method stores the attachments on file system.
 

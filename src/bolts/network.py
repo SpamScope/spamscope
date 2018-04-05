@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from modules import AbstractBolt
 from modules.networks import processors
+from operator import itemgetter
+
+p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
 
 
 class Network(AbstractBolt):
@@ -39,7 +42,7 @@ class Network(AbstractBolt):
         results = {}
 
         if not is_filtered and ipaddress:
-            for p in processors:
+            for p in p_ordered:
                 try:
                     p(self.conf[p.__name__], ipaddress, results)
                 except KeyError:

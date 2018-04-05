@@ -1,5 +1,5 @@
 """
-Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2017 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,3 +16,9 @@ limitations under the License.
 
 from .post_processing import processors, spamassassin
 from .phishing import check_form, check_urls, check_phishing
+from .spamassassin_analysis import (
+    obj_report, 
+    report_from_file, 
+    analysis_from_file, 
+    report_from_string, 
+    convert_ascii2json)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import logging
 import os
 import shutil
 import tempfile
+from operator import itemgetter
 
 import patoolib
 from patoolib.util import PatoolError
@@ -40,8 +41,15 @@ from .exceptions import HashError, ContentTypeError
 from .post_processing import processors
 from .utils import fingerprints, check_archive, contenttype, extension
 
+try:
+    from modules import TimeoutError
+except ImportError:
+    from ...modules import TimeoutError
+
 
 log = logging.getLogger(__name__)
+
+p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
 
 
 class Attachments(UserList):
@@ -63,13 +71,14 @@ class Attachments(UserList):
         """
         Post processing attachments with third party tools
         """
-
-        for p in processors:
+        for p in p_ordered:
             try:
                 p(getattr(self, p.__name__), self)
             except AttributeError:
                 log.warning(
                     "AttributeError: {!r} doesn't exist".format(p.__name__))
+            except TimeoutError as e:
+                log.warning(repr(e))
 
     def removeall(self):
         """Remove all items from object. """

@@ -1,13 +1,11 @@
 ![SpamScope](https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png)
 
-
-## Overview
+# Overview
 SpamScope comes with some tools that help you to manage it:
   - spamscope-topology
   - spamscope-elasticsearch
 
-
-## spamscope-topology
+# spamscope-topology
 
 General options:
 
@@ -31,13 +29,16 @@ Submit options:
 ```
 usage: spamscope-topology submit [-h]
                                  [-g {spamscope_debug,spamscope_elasticsearch,spamscope_redis}]
-                                 [-w WORKERS] [-k TICK] [-p MAX_PENDING]
-                                 [-s SPOUT_SLEEP] [-t TIMEOUT]
+                                 [-e ENVIRONMENT] [-w WORKERS] [-k TICK]
+                                 [-p MAX_PENDING] [-s SPOUT_SLEEP]
+                                 [-t TIMEOUT]
 
 optional arguments:
   -h, --help            show this help message and exit
   -g {spamscope_debug,spamscope_elasticsearch,spamscope_redis}, --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis}
                         SpamScope topology.
+  -e ENVIRONMENT, --environment ENVIRONMENT
+                        The environment to use for the command.
   -w WORKERS, --workers WORKERS
                         Apache Storm workers for your topology.
   -k TICK, --tick TICK  Every tick seconds SpamScope configuration is
@@ -50,10 +51,10 @@ optional arguments:
   -t TIMEOUT, --timeout TIMEOUT
                         How long (in s) between heartbeats until supervisor
                         considers that worker dead.
+
 ```
 
-
-## spamscope-elasticsearch
+# spamscope-elasticsearch
 
 General options:
 

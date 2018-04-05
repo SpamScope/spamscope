@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,20 +24,21 @@ import sys
 import unittest
 import mailparser
 
+try:
+    from collections import ChainMap
+except ImportError:
+    from chainmap import ChainMap
+
+from context import attachments
+
+MailAttachments = attachments.MailAttachments
+
 base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_4 = os.path.join(base_path, 'samples', 'mail_test_4')
 mail_test_9 = os.path.join(base_path, 'samples', 'mail_test_9')
 mail_test_10 = os.path.join(base_path, 'samples', 'mail_test_10')
-sys.path.append(root)
-from src.modules.attachments import MailAttachments
-
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
 
 # Set environment variables to change defaults:
 # Example export VIRUSTOTAL_APIKEY=your_api_key

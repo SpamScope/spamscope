@@ -20,6 +20,24 @@
             "use_ssh_for_nimbus": false,
             "virtualenv_root": ""
         },
+        "prod_vm": {
+            "user": "root",
+            "nimbus": "localhost",
+            "workers": [
+                "localhost"
+            ],
+            "log": {
+                "path": "/var/log/spamscope",
+                "max_bytes": 5000000,
+                "backup_count": 7,
+                "level": "info"
+            },
+            "use_virtualenv": true,
+            "install_virtualenv": false,
+            "use_ssh_for_nimbus": false,
+            "virtualenv_root": "/opt/spamscope/venv",
+            "virtualenv_name": ""
+        },
         "debug": {
             "user": "fedelemantuano",
             "nimbus": "localhost",
@@ -35,7 +53,8 @@
             "use_virtualenv": true,
             "install_virtualenv": false,
             "use_ssh_for_nimbus": false,
-            "virtualenv_root": "venv/"
+            "virtualenv_root": "~/Repositories/Sources/spamscope",
+            "virtualenv_name": ""
         }
     }
 }

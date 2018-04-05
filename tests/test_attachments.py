@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,23 +25,28 @@ from collections import deque
 
 import mailparser
 
+try:
+    from collections import ChainMap
+except ImportError:
+    from chainmap import ChainMap
+
+from context import attachments, utils
+
+
+MailAttachments = attachments.MailAttachments
+write_payload = utils.write_payload
+HashError = attachments.attachments.HashError
+ContentTypeError = attachments.attachments.ContentTypeError
+
+
 base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_1 = os.path.join(base_path, 'samples', 'mail_test_1')
 mail_test_2 = os.path.join(base_path, 'samples', 'mail_test_2')
 mail_test_3 = os.path.join(base_path, 'samples', 'mail_test_3')
 mail_test_8 = os.path.join(base_path, 'samples', 'mail_test_8')
-sys.path.append(root)
-from src.modules.attachments import MailAttachments
-from src.modules.attachments.attachments import HashError, ContentTypeError
-from src.modules.utils import write_payload
 
-try:
-    from collections import ChainMap
-except ImportError:
-    from chainmap import ChainMap
 
 # Set environment variables to change defaults:
 # Example export VIRUSTOTAL_APIKEY=your_api_key

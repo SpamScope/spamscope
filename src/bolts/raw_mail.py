@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2017 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2017 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from modules import AbstractBolt
 from modules.mails import processors
+from operator import itemgetter
+
+p_ordered = [i[0] for i in sorted(processors, key=itemgetter(1))]
 
 
 class RawMail(AbstractBolt):
@@ -40,7 +43,7 @@ class RawMail(AbstractBolt):
         results = {}
 
         if not is_filtered:
-            for p in processors:
+            for p in p_ordered:
                 try:
                     p(self.conf[p.__name__], raw_mail, mail_type, results)
                 except KeyError:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright 2016 Fedele Mantuano (https://twitter.com/fedelemantuano)
+Copyright 2016 Fedele Mantuano (https://www.linkedin.com/in/fmantuano/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,13 +22,10 @@ import os
 import sys
 import unittest
 
-base_path = os.path.realpath(os.path.dirname(__file__))
-root = os.path.join(base_path, '..')
-sys.path.append(root)
+from context import bitmap
 
-import src.modules.bitmap as bitmap
-from src.modules.bitmap import PhishingBitMap
 
+PhishingBitMap = bitmap.PhishingBitMap
 logging.getLogger().addHandler(logging.NullHandler())
 
 
