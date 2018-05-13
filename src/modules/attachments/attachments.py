@@ -42,9 +42,9 @@ from .post_processing import processors
 from .utils import fingerprints, check_archive, contenttype, extension
 
 try:
-    from modules import TimeoutError
+    from modules import timeout
 except ImportError:
-    from ...modules import TimeoutError
+    from ...modules import timeout
 
 
 log = logging.getLogger(__name__)
@@ -77,13 +77,12 @@ class Attachments(UserList):
             except AttributeError:
                 log.warning(
                     "AttributeError: {!r} doesn't exist".format(p.__name__))
-            except TimeoutError as e:
-                log.warning(repr(e))
 
     def removeall(self):
         """Remove all items from object. """
         del self[:]
 
+    @timeout(seconds=10, error_message="Attachment analysis in timeout")
     def run(self, intelligence=True):
         """Run processing on items in memory. """
 
