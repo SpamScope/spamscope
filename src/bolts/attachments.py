@@ -73,7 +73,6 @@ class Attachments(AbstractBolt):
             self.raise_exception(e, tup)
 
         except TimeoutError, e:
-            self.fail(tup)
             self.raise_exception(e, tup)
 
         else:
