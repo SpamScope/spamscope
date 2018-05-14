@@ -82,7 +82,7 @@ class Attachments(UserList):
         """Remove all items from object. """
         del self[:]
 
-    @timeout(seconds=20, error_message="Attachment analysis in timeout")
+    # @timeout(seconds=20, error_message="Attachment analysis in timeout")
     def run(self, intelligence=True):
         """Run processing on items in memory. """
 
