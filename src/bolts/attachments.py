@@ -19,7 +19,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function, unicode_literals
 import copy
-from modules import AbstractBolt, load_keywords_list, TimeoutError
+from modules import AbstractBolt, load_keywords_list
 from modules.attachments import MailAttachments
 from binascii import Error as BinAsciiError
 
@@ -70,9 +70,6 @@ class Attachments(AbstractBolt):
             self.attach.run()
 
         except BinAsciiError, e:
-            self.raise_exception(e, tup)
-
-        except TimeoutError, e:
             self.raise_exception(e, tup)
 
         else:

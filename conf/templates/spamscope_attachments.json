@@ -1,6 +1,6 @@
 {
   "order": 0,
-  "version": 1,
+  "version": 2,
   "index_patterns": "spamscope_attachments-*",
   "settings": {
     "analysis": {
@@ -55,6 +55,15 @@
             },
             "match_pattern": "regex",
             "match": "(^|.*\\.)(payload)$"
+          }
+        },
+        {
+          "number": {
+            "mapping": {
+              "type": "long"
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(size)$"
           }
         },
         {

@@ -1,6 +1,6 @@
 {
   "order": 0,
-  "version": 6,
+  "version": 7,
   "index_patterns": "spamscope_mails-*",
   "settings": {
     "analysis": {
@@ -102,6 +102,15 @@
             },
             "match_pattern": "regex",
             "match": "(^|.*\\.)(sender_ip|srcip|http_iv_remote_address|clientip|syslog_host|ip_str)$"
+          }
+        },
+        {
+          "number": {
+            "mapping": {
+              "type": "long"
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(size)$"
           }
         },
         {

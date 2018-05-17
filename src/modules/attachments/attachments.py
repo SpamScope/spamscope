@@ -41,11 +41,6 @@ from .exceptions import HashError, ContentTypeError
 from .post_processing import processors
 from .utils import fingerprints, check_archive, contenttype, extension
 
-try:
-    from modules import timeout
-except ImportError:
-    from ...modules import timeout
-
 
 log = logging.getLogger(__name__)
 
@@ -82,7 +77,6 @@ class Attachments(UserList):
         """Remove all items from object. """
         del self[:]
 
-    # @timeout(seconds=20, error_message="Attachment analysis in timeout")
     def run(self, intelligence=True):
         """Run processing on items in memory. """
 

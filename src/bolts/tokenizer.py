@@ -79,6 +79,12 @@ class Tokenizer(AbstractBolt):
         self.parser = self.mailparser[mail_type](raw_mail)
         mail = self.parser.mail
 
+        if mail_type in (MAIL_PATH, MAIL_PATH_OUTLOOK):
+            with open(raw_mail) as f:
+                mail["size"] = len(f.read())
+        elif mail_type in (MAIL_STRING):
+            mail["size"] = len(raw_mail)
+
         # Data mail sources
         mail["mail_server"] = tup.values[1]
         mail["mailbox"] = tup.values[2]
