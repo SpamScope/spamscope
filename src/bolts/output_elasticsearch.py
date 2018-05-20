@@ -64,6 +64,9 @@ class OutputElasticsearch(AbstractBolt):
         self._count = 1
 
     def process(self, tup):
+        sha256_random = tup.values[0]
+        sha256 = sha256_random.split("_")[0]
+        self.log("Processing started: {}".format(sha256))
         raw_mail = tup.values[1]
 
         # Convert back to object strings convert manually

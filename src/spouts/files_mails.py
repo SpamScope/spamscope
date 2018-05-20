@@ -108,6 +108,8 @@ class FilesMailSpout(AbstractSpout):
         # If queue is not empty
         if not self._queue.empty():
             mail = self._queue.get(block=True)
+            mail_string = mail.filename.split("/")[-1]
+            self.log("EMITTED - {!r}".format(mail_string))
 
             self.emit([
                 mail.filename,  # 0
@@ -121,6 +123,8 @@ class FilesMailSpout(AbstractSpout):
 
     def ack(self, tup_id):
         """Acknowledge tup_id, that is the path_mail. """
+        mail_string = tup_id.split("/")[-1]
+        self.log("ACKED - {!r}".format(mail_string))
 
         if os.path.exists(tup_id):
             if self._what == "remove":
@@ -147,6 +151,8 @@ class FilesMailSpout(AbstractSpout):
             self.raise_exception(e, tup_id)
 
     def fail(self, tup_id):
+        mail_string = tup_id.split("/")[-1]
+
         try:
             os.chmod(tup_id, 0o775)
             shutil.move(tup_id, self._where_failed)
@@ -159,4 +165,4 @@ class FilesMailSpout(AbstractSpout):
             self.raise_exception(e, tup_id)
 
         finally:
-            self.log("Mail {!r} failed. Check it".format(tup_id))
+            self.log("FAILED - {!r}".format(mail_string))

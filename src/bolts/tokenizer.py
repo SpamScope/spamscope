@@ -79,12 +79,6 @@ class Tokenizer(AbstractBolt):
         self.parser = self.mailparser[mail_type](raw_mail)
         mail = self.parser.mail
 
-        if mail_type in (MAIL_PATH, MAIL_PATH_OUTLOOK):
-            with open(raw_mail) as f:
-                mail["size"] = len(f.read())
-        elif mail_type in (MAIL_STRING):
-            mail["size"] = len(raw_mail)
-
         # Data mail sources
         mail["mail_server"] = tup.values[1]
         mail["mailbox"] = tup.values[2]
@@ -96,6 +90,14 @@ class Tokenizer(AbstractBolt):
         (mail["md5"], mail["sha1"], mail["sha256"], mail["sha512"],
             mail["ssdeep"]) = fingerprints(self.parser.body.encode('utf-8'))
         sha256_rand = mail["sha256"] + rand
+
+        if mail_type in (MAIL_PATH, MAIL_PATH_OUTLOOK):
+            mail_string = raw_mail.split("/")[-1]
+            self.log("{}: {}".format(mail_string, mail["sha256"]))
+            with open(raw_mail) as f:
+                mail["size"] = len(f.read())
+        elif mail_type in (MAIL_STRING):
+            mail["size"] = len(raw_mail)
 
         # Add path to result
         if mail_type == MAIL_PATH:
@@ -126,6 +128,8 @@ class Tokenizer(AbstractBolt):
     def process(self, tup):
         try:
             sha256_rand, mail = self._make_mail(tup)
+            sha256 = sha256_rand.split("_")[0]
+            self.log("Processing started: {}".format(sha256))
             with_attachments = False
             attachments = []
             body = self.parser.body
