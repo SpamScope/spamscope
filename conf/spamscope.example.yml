@@ -9,14 +9,14 @@ files-mails:
     # Post processing
     post_processing:
 
-        # move or remove mails?
+        # move or remove mails analyzed, default remove
         what: remove
 
-        # if move where
-        where: /mnt/testing/spamscope/mails/moved
+        # Where you want move the analyzed mails, default /tmp/moved
+        where: /tmp/moved
 
-        # if failed move in where.failed
-        where.failed: /mnt/testing/spamscope/mails/failed
+        # Where you want move the failed mails, default /tmp/failed
+        where.failed: /tmp/failed
 
     # Mailboxes
     mailboxes:

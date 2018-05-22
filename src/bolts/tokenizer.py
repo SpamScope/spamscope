@@ -101,7 +101,8 @@ class Tokenizer(AbstractBolt):
 
         # Add path to result
         if mail_type == MAIL_PATH:
-            mail["path_mail"] = raw_mail
+            mail["mail_file"] = raw_mail.split("/")[-1].replace(
+                ".processing", "")
 
         # Dates
         if mail.get('date'):

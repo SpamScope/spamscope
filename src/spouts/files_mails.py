@@ -36,50 +36,36 @@ class FilesMailSpout(AbstractSpout):
 
     def initialize(self, stormconf, context):
         super(FilesMailSpout, self).initialize(stormconf, context)
-
         self._check_conf()
         self._queue = Queue.PriorityQueue()
-        self._queue_tail = set()
         self._count = 1
-        self._what = self.conf["post_processing"]["what"].lower()
         self._load_mails()
 
     def _check_conf(self):
-        self._where = self.conf["post_processing"]["where"]
-        if not self._where:
-            raise RuntimeError(
-                "where in {!r} is not configurated".format(
-                    self.component_name))
-
-        self._where_failed = self.conf["post_processing"]["where.failed"]
-        if not self._where_failed:
-            raise RuntimeError(
-                "where.failed in {!r} is not configurated".format(
-                    self.component_name))
-
+        self._what = self.conf["post_processing"].get("what", "remove").lower()
+        self._where = self.conf["post_processing"].get("where", "/tmp/moved")
+        if not os.path.exists(self._where):
+            os.makedirs(self._where)
+        self._where_failed = self.conf["post_processing"].get(
+            "where.failed", "/tmp/failed")
         if not os.path.exists(self._where_failed):
             os.makedirs(self._where_failed)
 
     def _load_mails(self):
         """This function load mails in a priority queue. """
-
         self.log("Loading new mails for {!r}".format(self.component_name))
 
-        mailboxes = self.conf["mailboxes"]
-        for k, v in mailboxes.iteritems():
-            if not os.path.exists(v["path_mails"]):
-                raise RuntimeError(
-                    "Mail path {!r} does not exist".format(v["path_mails"]))
-
-            all_mails = set(
-                glob.glob(os.path.join(v["path_mails"], v["files_pattern"])))
+        for k, v in self.conf["mailboxes"].iteritems():
+            all_mails = set(glob.glob(os.path.join(
+                v["path_mails"], v["files_pattern"])))
+            processing_mails = set(glob.glob(os.path.join(
+                v["path_mails"], "*.processing")))
 
             # put new mails in queue
-            for mail in (all_mails - self._queue_tail):
+            for mail in (all_mails - processing_mails):
                 mail_type = MAIL_PATH_OUTLOOK \
                     if v.get("outlook", False) else MAIL_PATH
 
-                self._queue_tail.add(mail)
                 self._queue.put(
                     MailItem(
                         filename=mail,
@@ -91,7 +77,6 @@ class FilesMailSpout(AbstractSpout):
                         headers=v.get("headers", [])))
 
     def next_tuple(self):
-
         # After reload.mails next_tuple reload spout config
         if (self._count % self.conf["reload.mails"]):
             self._count += 1
@@ -108,11 +93,15 @@ class FilesMailSpout(AbstractSpout):
         # If queue is not empty
         if not self._queue.empty():
             mail = self._queue.get(block=True)
+
             mail_string = mail.filename.split("/")[-1]
             self.log("EMITTED - {!r}".format(mail_string))
 
+            processing = mail.filename + ".processing"
+            shutil.move(mail.filename, processing)
+
             self.emit([
-                mail.filename,  # 0
+                processing,  # 0
                 mail.mail_server,  # 1
                 mail.mailbox,  # 2
                 mail.priority,  # 3
@@ -123,46 +112,40 @@ class FilesMailSpout(AbstractSpout):
 
     def ack(self, tup_id):
         """Acknowledge tup_id, that is the path_mail. """
+        self._queue.task_done()
+
         mail_string = tup_id.split("/")[-1]
         self.log("ACKED - {!r}".format(mail_string))
 
-        if os.path.exists(tup_id):
-            if self._what == "remove":
-                os.remove(tup_id)
-            else:
-                try:
-                    now = six.text_type(date.today())
-                    mail_path = os.path.join(self._where, now)
-                    if not os.path.exists(mail_path):
-                        os.makedirs(mail_path)
-                    # this chmod is useful to work under
-                    # nginx directory listing
-                    os.chmod(tup_id, 0o775)
-                    shutil.move(tup_id, mail_path)
-                except shutil.Error:
-                    os.remove(tup_id)
+        processing = tup_id + ".processing"
 
-        try:
-            # Remove from tail analyzed mail
-            self._queue.task_done()
-            self._queue_tail.remove(tup_id)
-            self.log("Mails to process: {}".format(len(self._queue_tail)))
-        except KeyError, e:
-            self.raise_exception(e, tup_id)
+        if self._what == "remove":
+            try:
+                os.remove(processing)
+            except Exception:
+                self.log("Failed to remove {!r} mail".format(processing))
+        else:
+            try:
+                now = six.text_type(date.today())
+                mail_path = os.path.join(self._where, now)
+                if not os.path.exists(mail_path):
+                    os.makedirs(mail_path)
+                # this chmod is useful to work under
+                # nginx directory listing
+                os.chmod(processing, 0o775)
+                mail = os.path.join(mail_path, mail_string)
+                shutil.move(processing, mail)
+            except shutil.Error:
+                os.remove(processing)
 
     def fail(self, tup_id):
+        self._queue.task_done()
         mail_string = tup_id.split("/")[-1]
+        mail = os.path.join(self._where_failed, mail_string)
+        processing = tup_id + ".processing"
 
         try:
-            os.chmod(tup_id, 0o775)
-            shutil.move(tup_id, self._where_failed)
-
-            # Remove from tail analyzed mail
-            self._queue.task_done()
-            self._queue_tail.remove(tup_id)
-
-        except IOError, e:
-            self.raise_exception(e, tup_id)
-
+            os.chmod(processing, 0o775)
+            shutil.move(processing, mail)
         finally:
             self.log("FAILED - {!r}".format(mail_string))
