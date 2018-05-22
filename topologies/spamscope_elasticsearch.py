@@ -38,7 +38,7 @@ class OutputElasticsearchTopology(Topology):
     attachments = Attachments.spec(
         name="attachments",
         inputs={tokenizer['attachments']: Grouping.fields('sha256_random')},
-        par=2)
+        par=1)
 
     urls = Urls.spec(
         name="urls",
