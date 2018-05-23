@@ -92,7 +92,7 @@ class Tokenizer(AbstractBolt):
         sha256_rand = mail["sha256"] + rand
 
         if mail_type in (MAIL_PATH, MAIL_PATH_OUTLOOK):
-            mail_string = raw_mail.split("/")[-1]
+            mail_string = raw_mail.split("/")[-1].replace(".processing", "")
             self.log("{}: {}".format(mail_string, mail["sha256"]))
             with open(raw_mail) as f:
                 mail["size"] = len(f.read())
