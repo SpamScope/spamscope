@@ -6,6 +6,9 @@ files-mails:
     # Reload new mails after reload.mails analyzed
     reload.mails: 1000
 
+    # The mails in processing older that fail.after.seconds will be failed
+    fail.after.seconds: 60
+
     # Post processing
     post_processing:
 

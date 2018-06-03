@@ -21,7 +21,6 @@ import logging
 import copy
 import datetime
 import os
-import sys
 import time
 import unittest
 from operator import itemgetter
@@ -35,7 +34,7 @@ MailAttachments = attachments.MailAttachments
 fingerprints = attachments.fingerprints
 
 base_path = os.path.realpath(os.path.dirname(__file__))
-text_files = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
+text_file = os.path.join(base_path, 'samples', 'lorem_ipsum.txt')
 mail = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_7 = os.path.join(base_path, 'samples', 'mail_test_7')
 mail_test_11 = os.path.join(base_path, 'samples', 'mail_test_11')
@@ -70,7 +69,7 @@ class TestUtils(unittest.TestCase):
 
     def test_mail_item(self):
         mail = utils.MailItem(
-            filename=text_files,
+            filename=text_file,
             mail_server="test_mail_server",
             mailbox="test_mailbox",
             priority=1,
@@ -78,7 +77,7 @@ class TestUtils(unittest.TestCase):
             mail_type=1,
             headers=["header1", "header2"])
 
-        self.assertEqual(mail.filename, text_files)
+        self.assertEqual(mail.filename, text_file)
         self.assertEqual(mail.mail_server, "test_mail_server")
         self.assertEqual(mail.mailbox, "test_mailbox")
         self.assertEqual(mail.priority, 1)
@@ -89,21 +88,21 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(mail.headers, ["header1", "header2"])
 
         mail_1 = utils.MailItem(
-            filename=text_files,
+            filename=text_file,
             mail_server="test_mail_server",
             mailbox="test_mailbox",
             priority=1,
             trust="test_trust")
 
         mail_2 = utils.MailItem(
-            filename=text_files,
+            filename=text_file,
             mail_server="test_mail_server",
             mailbox="test_mailbox",
             priority=2,
             trust="test_trust")
 
         mail_3 = utils.MailItem(
-            filename=text_files,
+            filename=text_file,
             mail_server="test_mail_server",
             mailbox="test_mailbox",
             priority=1,
@@ -121,7 +120,7 @@ class TestUtils(unittest.TestCase):
             utils.load_config("conf/fake.yml")
 
     def test_write_payload(self):
-        with open(text_files) as f:
+        with open(text_file) as f:
             payload = f.read()
         sha1_origin = fingerprints(payload).sha1
 
@@ -151,7 +150,7 @@ class TestUtils(unittest.TestCase):
             os.remove(temp)
 
     def test_search_words_in_text(self):
-        with open(text_files) as f:
+        with open(text_file) as f:
             text = f.read()
 
         keywords_1 = [
@@ -474,6 +473,12 @@ class TestUtils(unittest.TestCase):
         self.assertIs(processors[1], number_two)
         self.assertIs(processors[2], number_three)
         self.assertIs(processors[3], number_four)
+
+    def test_is_file_older_than(self):
+        r = utils.is_file_older_than(text_file, seconds=20)
+        self.assertTrue(r)
+        r = utils.is_file_older_than(text_file, seconds=3153600000)
+        self.assertFalse(r)
 
 
 if __name__ == '__main__':

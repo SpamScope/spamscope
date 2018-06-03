@@ -27,6 +27,7 @@ import os
 import re
 import signal
 import tempfile
+import time
 import functools
 
 import six
@@ -488,3 +489,9 @@ def reformat_urls(urls):
         new_urls.extend(v)
 
     return new_urls
+
+
+def is_file_older_than(file_path, seconds=60):
+    if (time.time() - os.path.getmtime(file_path)) >= seconds:
+        return True
+    return False

@@ -27,7 +27,13 @@ import shutil
 
 import six
 
-from modules import AbstractSpout, MailItem, MAIL_PATH, MAIL_PATH_OUTLOOK
+from modules import (
+    AbstractSpout,
+    MAIL_PATH,
+    MAIL_PATH_OUTLOOK,
+    MailItem,
+    is_file_older_than,
+)
 
 
 class FilesMailSpout(AbstractSpout):
@@ -42,6 +48,7 @@ class FilesMailSpout(AbstractSpout):
         self._load_mails()
 
     def _check_conf(self):
+        self._fail_seconds = int(self.conf.get("fail.after.seconds", 60))
         self._what = self.conf["post_processing"].get("what", "remove").lower()
         self._where = self.conf["post_processing"].get("where", "/tmp/moved")
         if not os.path.exists(self._where):
@@ -50,6 +57,17 @@ class FilesMailSpout(AbstractSpout):
             "where.failed", "/tmp/failed")
         if not os.path.exists(self._where_failed):
             os.makedirs(self._where_failed)
+
+    def _fail_old_mails(self, processing_mails):
+        failed = set()
+        for i in processing_mails:
+            mail = i.replace(".processing", "")
+            if is_file_older_than(i, self._fail_seconds):
+                failed.add(i)
+                self.log("Mail {!r} older than {} seconds".format(
+                    i, self._fail_seconds))
+                self.fail(mail)
+        processing_mails -= failed
 
     def _load_mails(self):
         """This function load mails in a priority queue. """
@@ -60,6 +78,9 @@ class FilesMailSpout(AbstractSpout):
                 v["path_mails"], v["files_pattern"])))
             processing_mails = set(glob.glob(os.path.join(
                 v["path_mails"], "*.processing")))
+
+            # Fail old mails
+            self._fail_old_mails(processing_mails)
 
             # put new mails in queue
             for mail in (all_mails - processing_mails):
