@@ -135,13 +135,13 @@
               "type": "ip"
             },
             "latitude": {
-              "type": "half_float"
+              "type": "float"
             },
             "location": {
               "type": "geo_point"
             },
             "longitude": {
-              "type": "half_float"
+              "type": "float"
             }
           }
         },

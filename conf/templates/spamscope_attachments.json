@@ -83,6 +83,9 @@
         },
         "@version": {
           "type": "keyword"
+        },
+        "tika": {
+          "enabled": false
         }
       }
     }
