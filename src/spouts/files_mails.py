@@ -160,7 +160,10 @@ class FilesMailSpout(AbstractSpout):
                 os.remove(processing)
 
     def fail(self, tup_id):
-        self._queue.task_done()
+        try:
+            self._queue.task_done()
+        except ValueError:  # ValueError: task_done() called too many times
+            pass
         mail_string = tup_id.split("/")[-1]
         mail = os.path.join(self._where_failed, mail_string)
         processing = tup_id + ".processing"
