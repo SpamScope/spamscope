@@ -47,6 +47,17 @@ class FilesMailSpout(AbstractSpout):
         self._count = 1
         self._load_mails()
 
+    def _move_fail(self, src):
+        mail_string = src.split("/")[-1]
+        mail = os.path.join(self._where_failed, mail_string)
+        processing = src + ".processing"
+
+        try:
+            os.chmod(processing, 0o775)
+            shutil.move(processing, mail)
+        finally:
+            self.log("FAILED - {!r}".format(mail_string))
+
     def _check_conf(self):
         self._fail_seconds = int(self.conf.get("fail.after.seconds", 60))
         self._what = self.conf["post_processing"].get("what", "remove").lower()
@@ -59,15 +70,13 @@ class FilesMailSpout(AbstractSpout):
             os.makedirs(self._where_failed)
 
     def _fail_old_mails(self, processing_mails):
-        failed = set()
         for i in processing_mails:
             mail = i.replace(".processing", "")
+            mail_string = mail.split("/")[-1]
             if is_file_older_than(i, self._fail_seconds):
-                failed.add(i)
                 self.log("Mail {!r} older than {} seconds".format(
-                    i, self._fail_seconds))
-                self.fail(mail)
-        processing_mails -= failed
+                    mail_string, self._fail_seconds))
+                self._move_fail(mail)
 
     def _load_mails(self):
         """This function load mails in a priority queue. """
@@ -78,9 +87,6 @@ class FilesMailSpout(AbstractSpout):
                 v["path_mails"], v["files_pattern"])))
             processing_mails = set(glob.glob(os.path.join(
                 v["path_mails"], "*.processing")))
-
-            # Fail old mails
-            self._fail_old_mails(processing_mails)
 
             # put new mails in queue
             for mail in (all_mails - processing_mails):
@@ -96,6 +102,9 @@ class FilesMailSpout(AbstractSpout):
                         trust=v["trust_string"],
                         mail_type=mail_type,
                         headers=v.get("headers", [])))
+
+            # Fail old mails
+            self._fail_old_mails(processing_mails)
 
     def next_tuple(self):
         # After reload.mails next_tuple reload spout config
@@ -164,12 +173,5 @@ class FilesMailSpout(AbstractSpout):
             self._queue.task_done()
         except ValueError:  # ValueError: task_done() called too many times
             pass
-        mail_string = tup_id.split("/")[-1]
-        mail = os.path.join(self._where_failed, mail_string)
-        processing = tup_id + ".processing"
-
-        try:
-            os.chmod(processing, 0o775)
-            shutil.move(processing, mail)
         finally:
-            self.log("FAILED - {!r}".format(mail_string))
+            self._move_fail(tup_id)
