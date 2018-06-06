@@ -84,6 +84,8 @@ class Attachments(UserList):
 
         self._filtercontenttypes()
 
+        self._filterforsize()
+
         if intelligence:
             self._intelligence()
 
@@ -188,6 +190,38 @@ class Attachments(UserList):
         else:
             for i in to_remove:
                 self.remove(i)
+
+    def _filterforsize(self, size=3145728):
+        """
+        Filter all attachments or archived files greater than fixed size
+
+        Args:
+            size (long): max size in bytes
+        """
+        for i in self:
+            if not i.get("is_filtered", False):
+                if i["size"] >= size:
+                    i.pop("payload", None)
+                    i["is_filtered"] = True
+                    i["filter_reason"] = "greater that {} bytes".format(size)
+                    continue
+
+                if i.get("files", []):
+                    files = []
+                    for j in i["files"]:
+                        if j["size"] < size:
+                            files.append(j)
+                        else:
+                            log.warning(
+                                "File {!r} greater than {} bytes".format(
+                                    j["sha1"], size))
+
+                    if len(files) != len(i["files"]):
+                        i["filter_files"] = True
+                        if files:
+                            i["files"] = files
+                        else:
+                            i.pop("files", None)
 
     def _filtercontenttypes(self):
         """Filtering of all content types in
