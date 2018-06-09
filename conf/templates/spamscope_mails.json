@@ -1,6 +1,6 @@
 {
   "order": 0,
-  "version": 7,
+  "version": 8,
   "index_patterns": "spamscope_mails-*",
   "settings": {
     "analysis": {
@@ -38,12 +38,21 @@
     "_doc": {
       "dynamic_templates": [
         {
-          "cert_serial": {
+          "shodan_cert_serial": {
             "mapping": {
               "type": "text",
               "norms": false
             },
             "path_match": "network.shodan.data.ssl.cert.serial"
+          }
+        },
+        {
+          "shodan_vulns": {
+            "mapping": {
+              "type": "text",
+              "norms": false
+            },
+            "path_match": "network.shodan.data.vulns.*.cvss"
           }
         },
         {
