@@ -191,37 +191,37 @@ class Attachments(UserList):
             for i in to_remove:
                 self.remove(i)
 
-    def _filterforsize(self, size=3145728):
+    def _filterforsize(self):
         """
         Filter all attachments or archived files greater than fixed size
-
-        Args:
-            size (long): max size in bytes
         """
+        max_size = int(self.commons.get("max.size", 3145728))
+
         for i in self:
             if not i.get("is_filtered", False):
-                if i["size"] >= size:
+                if i["size"] >= max_size:
                     i.pop("payload", None)
+                    i.pop("files", None)
                     i["is_filtered"] = True
-                    i["filter_reason"] = "greater that {} bytes".format(size)
-                    continue
+                    i["filter_reason"] = "greater that {} bytes".format(
+                        max_size)
+                else:
+                    if i.get("files", []):
+                        files = []
+                        for j in i["files"]:
+                            if j["size"] < max_size:
+                                files.append(j)
+                            else:
+                                log.warning(
+                                    "File {!r} greater than {} bytes".format(
+                                        j["sha1"], max_size))
 
-                if i.get("files", []):
-                    files = []
-                    for j in i["files"]:
-                        if j["size"] < size:
-                            files.append(j)
-                        else:
-                            log.warning(
-                                "File {!r} greater than {} bytes".format(
-                                    j["sha1"], size))
-
-                    if len(files) != len(i["files"]):
-                        i["filter_files"] = True
-                        if files:
-                            i["files"] = files
-                        else:
-                            i.pop("files", None)
+                        if len(files) != len(i["files"]):
+                            i["filter_files"] = True
+                            if files:
+                                i["files"] = files
+                            else:
+                                i.pop("files", None)
 
     def _filtercontenttypes(self):
         """Filtering of all content types in

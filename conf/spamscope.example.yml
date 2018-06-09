@@ -113,6 +113,9 @@ attachments:
     # The lists of all components must be under lists keyword to load them
     # automatically
     commons:
+        # max size to analyze in bytes
+        max.size: 3145728
+
         lists:
             blacklist_content_types:
                 # All content types to remove from results
