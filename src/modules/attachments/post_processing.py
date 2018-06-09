@@ -102,9 +102,11 @@ def tika(conf, attachments):
 
                     # tika-app only gets payload in base64
                     try:
-                        a["tika"] = tika.extract_all_content(
+                        results = tika.extract_all_content(
                             payload=payload,
                             convert_to_obj=True)
+                        if results:
+                            a["tika"] = results
                     except JSONDecodeError:
                         log.warning(
                             "JSONDecodeError for {!r} in Tika analysis".format(
