@@ -372,23 +372,37 @@ class TestAttachments(unittest.TestCase):
             self.assertIn("content_transfer_encoding", i)
 
     def test_filterforsize(self):
-        parameters = {"commons": {"max.size": 3145728}}
+        parameters = {"commons": {
+            "size.filter.enabled": True,
+            "max.size": 3145728}}
         t = MailAttachments.withhashes(self.attachments_huge_archive)
         t.reload(**parameters)
         t(intelligence=False)
         self.assertNotIn("files", t[0])
 
-        parameters = {"commons": {"max.size": 1024}}
+        parameters = {"commons": {
+            "size.filter.enabled": True,
+            "max.size": 1024}}
         t = MailAttachments.withhashes(self.attachments_huge_archive)
         t.reload(**parameters)
         t(intelligence=False)
         self.assertNotIn("payload", t[0])
 
-        parameters = {"commons": {"max.size": "1024"}}
+        parameters = {"commons": {
+            "size.filter.enabled": True,
+            "max.size": "1024"}}
         t = MailAttachments.withhashes(self.attachments_huge_archive)
         t.reload(**parameters)
         t(intelligence=False)
         self.assertNotIn("payload", t[0])
+
+        parameters = {"commons": {
+            "size.filter.enabled": False,
+            "max.size": "1024"}}
+        t = MailAttachments.withhashes(self.attachments_huge_archive)
+        t.reload(**parameters)
+        t(intelligence=False)
+        self.assertIn("payload", t[0])
 
 
 if __name__ == '__main__':

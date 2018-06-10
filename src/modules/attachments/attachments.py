@@ -195,6 +195,9 @@ class Attachments(UserList):
         """
         Filter all attachments or archived files greater than fixed size
         """
+        if not self.commons.get("size.filter.enabled", False):
+            return
+
         max_size = int(self.commons.get("max.size", 3145728))
 
         for i in self:

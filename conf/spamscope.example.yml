@@ -113,6 +113,8 @@ attachments:
     # The lists of all components must be under lists keyword to load them
     # automatically
     commons:
+        # enable or disable filter on size
+        size.filter.enabled: false
         # max size to analyze in bytes
         max.size: 3145728
 
