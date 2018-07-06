@@ -84,7 +84,6 @@ class Tokenizer(AbstractBolt):
         mail["mailbox"] = tup.values[2]
         mail["priority"] = tup.values[3]
         mail["sender_ip"] = self.parser.get_server_ipaddress(tup.values[4])
-        mail["to_domains"] = self.parser.to_domains
 
         # Fingerprints of body mail
         (mail["md5"], mail["sha1"], mail["sha256"], mail["sha512"],
