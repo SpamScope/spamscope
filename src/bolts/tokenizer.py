@@ -20,6 +20,7 @@ limitations under the License.
 from __future__ import absolute_import, print_function, unicode_literals
 
 import datetime
+import os
 import random
 import six
 from collections import deque
@@ -27,7 +28,13 @@ from collections import deque
 from streamparse import Stream
 import mailparser
 from mailparser import get_header
-from modules import AbstractBolt, MAIL_PATH, MAIL_STRING, MAIL_PATH_OUTLOOK
+from modules import (
+    AbstractBolt,
+    MAIL_PATH,
+    MAIL_PATH_OUTLOOK,
+    MAIL_STRING,
+    dump_obj,
+    load_obj)
 from modules.attachments import fingerprints, MailAttachments
 
 
@@ -52,25 +59,41 @@ class Tokenizer(AbstractBolt):
             fields=['sha256_random', 'with_attachments', 'attachments'],
             name='attachments')]
 
+    def __getattr__(self, name):
+        return self.conf[name]
+
+    def get_persistent_path(self, filter_name):
+        return os.path.join(
+            self.persistent_path, "{}.dump".format(filter_name))
+
     def initialize(self, stormconf, context):
         super(Tokenizer, self).initialize(stormconf, context)
+
+        self.filter_types = ("mails", "attachments", "network")
+        self.load_filters()
 
         self.mailparser = {
             MAIL_PATH: mailparser.parse_from_file,
             MAIL_PATH_OUTLOOK: mailparser.parse_from_file_msg,
             MAIL_STRING: mailparser.parse_from_string}
 
-        self.mails_analyzed = deque(maxlen=self.conf["maxlen_mails"])
-        self.network_analyzed = deque(maxlen=self.conf["maxlen_network"])
-        self.attachments_analyzed = deque(
-            maxlen=self.conf["maxlen_attachments"])
+    def load_filters(self):
+        for i in self.filter_types:
+            if getattr(self, "filter_" + i):
+                path = self.get_persistent_path(i)
+                if os.path.exists(path):
+                    obj = load_obj(path)
+                    setattr(self, "analyzed_" + i, obj)
+                else:
+                    setattr(self, "analyzed_" + i, deque(
+                        maxlen=getattr(self, "maxlen_" + i)))
 
-        self._load_filters()
-
-    def _load_filters(self):
-        self.filter_mails_enabled = self.conf["filter_mails"]
-        self.filter_network_enabled = self.conf["filter_network"]
-        self.filter_attachments_enabled = self.conf["filter_attachments"]
+    def dump_filters(self):
+        for i in self.filter_types:
+            if getattr(self, "filter_" + i):
+                path = self.get_persistent_path(i)
+                dump_obj(path, getattr(self, "analyzed_" + i))
+                self.log("Dumped RAM filter {!r} in {!r}".format(i, path))
 
     def _make_mail(self, tup):
         raw_mail = tup.values[0]
@@ -123,7 +146,7 @@ class Tokenizer(AbstractBolt):
     def process_tick(self, freq):
         """Every freq seconds you reload configuration. """
         super(Tokenizer, self).process_tick(freq)
-        self._load_filters()
+        self.dump_filters()
 
     def process(self, tup):
         try:
@@ -138,24 +161,24 @@ class Tokenizer(AbstractBolt):
 
             # If filter network is enabled
             is_filtered_net = False
-            if self.filter_network_enabled:
-                if mail["sender_ip"] in self.network_analyzed:
+            if self.filter_network:
+                if mail["sender_ip"] in self.analyzed_network:
                     is_filtered_net = True
 
                 # Update database ip addresses analyzed
-                self.network_analyzed.append(mail["sender_ip"])
+                self.analyzed_network.append(mail["sender_ip"])
 
             # If filter mails is enabled
             is_filtered_mail = False
-            if self.filter_mails_enabled:
-                if mail["sha1"] in self.mails_analyzed:
+            if self.filter_mails:
+                if mail["sha1"] in self.analyzed_mails:
                     mail.pop("body", None)
                     body = six.text_type()
                     raw_mail = six.text_type()
                     is_filtered_mail = True
 
                 # Update database mails analyzed
-                self.mails_analyzed.append(mail["sha1"])
+                self.analyzed_mails.append(mail["sha1"])
 
             if self.parser.attachments:
                 with_attachments = True
@@ -163,9 +186,9 @@ class Tokenizer(AbstractBolt):
                     self.parser.attachments)
 
                 # If filter attachments is enabled
-                if self.filter_attachments_enabled:
-                    hashes = attachments.filter(self.attachments_analyzed)
-                    self.attachments_analyzed.extend(hashes)
+                if self.filter_attachments:
+                    hashes = attachments.filter(self.analyzed_attachments)
+                    self.analyzed_attachments.extend(hashes)
 
         except TypeError, e:
             self.raise_exception(e, tup)

@@ -24,6 +24,7 @@ import os
 import time
 import unittest
 from operator import itemgetter
+from collections import deque
 
 from pyfaup.faup import Faup
 import mailparser
@@ -479,6 +480,17 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(r)
         r = utils.is_file_older_than(text_file, seconds=3153600000)
         self.assertFalse(r)
+
+    def test_dump_load(self):
+        path = "/tmp/object.dump"
+        d = deque(maxlen=5)
+        d.append(1)
+        d.append(2)
+        self.assertIsInstance(d, deque)
+        utils.dump_obj(path, d)
+        d_dumped = utils.load_obj(path)
+        self.assertIsInstance(d_dumped, deque)
+        self.assertEqual(d, d_dumped)
 
 
 if __name__ == '__main__':

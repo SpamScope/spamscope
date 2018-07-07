@@ -22,13 +22,14 @@ from __future__ import unicode_literals
 import copy
 import datetime
 import errno
+import functools
 import logging
 import os
+import pickle
 import re
 import signal
 import tempfile
 import time
-import functools
 
 import six
 import yaml
@@ -495,3 +496,30 @@ def is_file_older_than(file_path, seconds=60):
     if (time.time() - os.path.getmtime(file_path)) >= seconds:
         return True
     return False
+
+
+def dump_obj(path, obj):
+    """
+    Dump obj in path
+
+    Args:
+        path (string): path where dump the obj
+        obj (object): object to dump
+
+    Returns:
+        path where you dumped
+    """
+    with open(path, "wb") as fp:
+        pickle.dump(obj, fp)
+    return path
+
+
+def load_obj(path):
+    """
+    Load dumped path and return object
+
+    Args:
+        path (string): path with dump
+    """
+    with open(path, "rb") as fp:
+        return pickle.load(fp)

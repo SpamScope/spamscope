@@ -67,6 +67,9 @@ phishing:
 
 
 tokenizer:
+    # Persistent where store dumps of hashes.
+    persistent_path: /tmp
+
     # If true mails with same hash are filtered and not analyzed.
     # Only the body will not saved
     filter_mails: true
