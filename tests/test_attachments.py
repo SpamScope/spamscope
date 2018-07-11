@@ -19,7 +19,6 @@ limitations under the License.
 
 import logging
 import os
-import sys
 import unittest
 from collections import deque
 
@@ -46,6 +45,7 @@ mail_test_1 = os.path.join(base_path, 'samples', 'mail_test_1')
 mail_test_2 = os.path.join(base_path, 'samples', 'mail_test_2')
 mail_test_3 = os.path.join(base_path, 'samples', 'mail_test_3')
 mail_test_8 = os.path.join(base_path, 'samples', 'mail_test_8')
+mail_huge_archive = os.path.join(base_path, 'samples', 'mail_huge_archive')
 
 
 # Set environment variables to change defaults:
@@ -82,6 +82,9 @@ class TestAttachments(unittest.TestCase):
 
         p = mailparser.parse_from_file(mail_test_8)
         self.attachments_test_8 = p.attachments
+
+        p = mailparser.parse_from_file(mail_huge_archive)
+        self.attachments_huge_archive = p.attachments
 
     def test_not_extract_content_types(self):
         t = MailAttachments.withhashes(self.attachments_test_2)
@@ -367,6 +370,39 @@ class TestAttachments(unittest.TestCase):
             self.assertIn("payload", i)
             self.assertIn("mail_content_type", i)
             self.assertIn("content_transfer_encoding", i)
+
+    def test_filterforsize(self):
+        parameters = {"commons": {
+            "size.filter.enabled": True,
+            "max.size": 3145728}}
+        t = MailAttachments.withhashes(self.attachments_huge_archive)
+        t.reload(**parameters)
+        t(intelligence=False)
+        self.assertNotIn("files", t[0])
+
+        parameters = {"commons": {
+            "size.filter.enabled": True,
+            "max.size": 1024}}
+        t = MailAttachments.withhashes(self.attachments_huge_archive)
+        t.reload(**parameters)
+        t(intelligence=False)
+        self.assertNotIn("payload", t[0])
+
+        parameters = {"commons": {
+            "size.filter.enabled": True,
+            "max.size": "1024"}}
+        t = MailAttachments.withhashes(self.attachments_huge_archive)
+        t.reload(**parameters)
+        t(intelligence=False)
+        self.assertNotIn("payload", t[0])
+
+        parameters = {"commons": {
+            "size.filter.enabled": False,
+            "max.size": "1024"}}
+        t = MailAttachments.withhashes(self.attachments_huge_archive)
+        t.reload(**parameters)
+        t(intelligence=False)
+        self.assertIn("payload", t[0])
 
 
 if __name__ == '__main__':

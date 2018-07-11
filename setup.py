@@ -19,6 +19,8 @@ limitations under the License.
 
 import os
 import runpy
+import subprocess
+import sys
 from setuptools import setup, find_packages
 from setuptools.command.install import install as SetupToolsInstall
 
@@ -34,17 +36,17 @@ with open(os.path.join(current, 'README.rst')) as f:
 with open(os.path.join(current, 'requirements.txt')) as f:
     requirements = f.read().splitlines()
 
-with open(os.path.join(current, 'requirements_editable.txt')) as f:
-    requirements_editable = f.read().splitlines()
-
 
 class Install(SetupToolsInstall):
     """Customized setuptools install command which uses pip. """
 
     def run(self, *args, **kwargs):
-        import pip
-        pip.main(["install", "-e"] + requirements_editable)
-        pip.main(['install'] + requirements)
+        subprocess.check_call([
+            sys.executable, '-m',
+            'pip', 'install', '-r', "requirements_editable.txt"])
+        subprocess.check_call([
+            sys.executable, '-m',
+            'pip', 'install', '-r', "requirements.txt"])
         SetupToolsInstall.run(self, *args, **kwargs)
 
 

@@ -41,11 +41,6 @@ from .exceptions import HashError, ContentTypeError
 from .post_processing import processors
 from .utils import fingerprints, check_archive, contenttype, extension
 
-try:
-    from modules import TimeoutError
-except ImportError:
-    from ...modules import TimeoutError
-
 
 log = logging.getLogger(__name__)
 
@@ -77,8 +72,6 @@ class Attachments(UserList):
             except AttributeError:
                 log.warning(
                     "AttributeError: {!r} doesn't exist".format(p.__name__))
-            except TimeoutError as e:
-                log.warning(repr(e))
 
     def removeall(self):
         """Remove all items from object. """
@@ -90,6 +83,8 @@ class Attachments(UserList):
         self._addmetadata()
 
         self._filtercontenttypes()
+
+        self._filterforsize()
 
         if intelligence:
             self._intelligence()
@@ -195,6 +190,41 @@ class Attachments(UserList):
         else:
             for i in to_remove:
                 self.remove(i)
+
+    def _filterforsize(self):
+        """
+        Filter all attachments or archived files greater than fixed size
+        """
+        if not self.commons.get("size.filter.enabled", False):
+            return
+
+        max_size = int(self.commons.get("max.size", 3145728))
+
+        for i in self:
+            if not i.get("is_filtered", False):
+                if i["size"] >= max_size:
+                    i.pop("payload", None)
+                    i.pop("files", None)
+                    i["is_filtered"] = True
+                    i["filter_reason"] = "greater that {} bytes".format(
+                        max_size)
+                else:
+                    if i.get("files", []):
+                        files = []
+                        for j in i["files"]:
+                            if j["size"] < max_size:
+                                files.append(j)
+                            else:
+                                log.warning(
+                                    "File {!r} greater than {} bytes".format(
+                                        j["sha1"], max_size))
+
+                        if len(files) != len(i["files"]):
+                            i["filter_files"] = True
+                            if files:
+                                i["files"] = files
+                            else:
+                                i.pop("files", None)
 
     def _filtercontenttypes(self):
         """Filtering of all content types in

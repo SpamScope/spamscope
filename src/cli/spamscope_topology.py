@@ -89,7 +89,7 @@ def get_args():
     submit.add_argument(
         "-p",
         "--max-pending",
-        default=200,
+        default=1,
         type=int,
         help="This value puts a limit on how many mails can be in flight.",
         dest="max_pending")
@@ -105,7 +105,7 @@ def get_args():
     submit.add_argument(
         "-t",
         "--timeout",
-        default=45,
+        default=20,
         type=int,
         help=("How long (in s) between heartbeats until supervisor considers "
               "that worker dead."),

@@ -1,6 +1,6 @@
 {
   "order": 0,
-  "version": 6,
+  "version": 8,
   "index_patterns": "spamscope_mails-*",
   "settings": {
     "analysis": {
@@ -38,12 +38,21 @@
     "_doc": {
       "dynamic_templates": [
         {
-          "cert_serial": {
+          "shodan_cert_serial": {
             "mapping": {
               "type": "text",
               "norms": false
             },
             "path_match": "network.shodan.data.ssl.cert.serial"
+          }
+        },
+        {
+          "shodan_vulns": {
+            "mapping": {
+              "type": "text",
+              "norms": false
+            },
+            "path_match": "network.shodan.data.vulns.*.cvss"
           }
         },
         {
@@ -105,6 +114,15 @@
           }
         },
         {
+          "number": {
+            "mapping": {
+              "type": "long"
+            },
+            "match_pattern": "regex",
+            "match": "(^|.*\\.)(size)$"
+          }
+        },
+        {
           "structured": {
             "mapping": {
               "type": "keyword",
@@ -126,13 +144,13 @@
               "type": "ip"
             },
             "latitude": {
-              "type": "half_float"
+              "type": "float"
             },
             "location": {
               "type": "geo_point"
             },
             "longitude": {
-              "type": "half_float"
+              "type": "float"
             }
           }
         },

@@ -24,9 +24,9 @@ import os
 from simplejson import JSONDecodeError
 
 try:
-    from modules import register, timeout
+    from modules import register
 except ImportError:
-    from ...modules import register, timeout
+    from ...modules import register
 
 
 # The processors is a set of tuples (function, priority)
@@ -102,9 +102,11 @@ def tika(conf, attachments):
 
                     # tika-app only gets payload in base64
                     try:
-                        a["tika"] = tika.extract_all_content(
+                        results = tika.extract_all_content(
                             payload=payload,
                             convert_to_obj=True)
+                        if results:
+                            a["tika"] = results
                     except JSONDecodeError:
                         log.warning(
                             "JSONDecodeError for {!r} in Tika analysis".format(
@@ -149,7 +151,6 @@ def virustotal(conf, attachments):
                         i["virustotal"] = i_result
 
 
-@timeout(seconds=30, error_message="Thug analysis in timeout")
 @register(processors, active=True)
 def thug(conf, attachments):
     """This method updates the attachments results
