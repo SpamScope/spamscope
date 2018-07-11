@@ -5,7 +5,7 @@
     "index.codec": "best_compression",
     "index.number_of_replicas": 0,
     "index.refresh_interval": "5s",
-    "index.mapping.total_fields.limit": 10000,
+    "index.mapping.total_fields.limit": 100000,
     "index.mapping.ignore_malformed": true
   }
 }
