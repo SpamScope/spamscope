@@ -19,7 +19,6 @@ limitations under the License.
 
 import logging
 import os
-import sys
 import unittest
 
 try:
@@ -27,7 +26,7 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
-from context import mails
+from context import mails, DEFAULTS
 
 
 base_path = os.path.realpath(os.path.dirname(__file__))
@@ -40,8 +39,6 @@ obj_report = mails.obj_report
 analysis_from_file = mails.analysis_from_file
 report_from_file = mails.report_from_file
 
-
-DEFAULTS = {"SPAMASSASSIN_ENABLED": "False"}
 OPTIONS = ChainMap(os.environ, DEFAULTS)
 
 logging.getLogger().addHandler(logging.NullHandler())

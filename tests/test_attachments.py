@@ -29,14 +29,13 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
-from context import attachments, utils
+from context import attachments, utils, DEFAULTS
 
 
 MailAttachments = attachments.MailAttachments
 write_payload = utils.write_payload
 HashError = attachments.attachments.HashError
 ContentTypeError = attachments.attachments.ContentTypeError
-
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 mail = os.path.join(base_path, 'samples', 'mail_malformed_1')
@@ -46,15 +45,6 @@ mail_test_2 = os.path.join(base_path, 'samples', 'mail_test_2')
 mail_test_3 = os.path.join(base_path, 'samples', 'mail_test_3')
 mail_test_8 = os.path.join(base_path, 'samples', 'mail_test_8')
 mail_huge_archive = os.path.join(base_path, 'samples', 'mail_huge_archive')
-
-
-# Set environment variables to change defaults:
-# Example export VIRUSTOTAL_APIKEY=your_api_key
-
-DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.16.jar",
-            "VIRUSTOTAL_ENABLED": "False",
-            "ZEMANA_ENABLED": "False",
-            "THUG_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
 

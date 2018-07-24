@@ -19,7 +19,6 @@ limitations under the License.
 
 import logging
 import os
-import sys
 import unittest
 
 try:
@@ -27,14 +26,9 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
-from context import MAIL_PATH
+from context import MAIL_PATH, DEFAULTS
 
-# Set environment variables to change defaults:
-# Example export SPAMASSASSIN_ENABLED=True
-
-DEFAULTS = {"SPAMASSASSIN_ENABLED": "False"}
 OPTIONS = ChainMap(os.environ, DEFAULTS)
-
 
 base_path = os.path.realpath(os.path.dirname(__file__))
 mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
