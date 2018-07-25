@@ -89,7 +89,8 @@ def tika(conf, attachments):
 
         for a in attachments:
             if not a.get("is_filtered", False):
-                if a["Content-Type"] in conf["whitelist_content_types"]:
+                if a["Content-Type"] in \
+                        conf.get("whitelist_content_types", []):
                     payload = a["payload"]
 
                     if a["content_transfer_encoding"] != "base64":
