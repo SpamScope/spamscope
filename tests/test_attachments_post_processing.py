@@ -160,12 +160,14 @@ class TestPostProcessing(unittest.TestCase):
             tika(conf, attachments)
 
         # attachments a key of conf
-        with self.assertRaises(KeyError):
-            conf_inner = {"enabled": True,
-                          "path_jar": OPTIONS["TIKA_APP_JAR"],
-                          "memory_allocation": None}
-            attachments = MailAttachments.withhashes(self.attachments)
-            tika(conf_inner, attachments)
+        conf_inner = {
+            "enabled": True,
+            "path_jar": OPTIONS["TIKA_APP_JAR"],
+            "memory_allocation": None}
+        attachments = MailAttachments.withhashes(self.attachments)
+        tika(conf_inner, attachments)
+        for i in attachments:
+            self.assertNotIn("tika", i)
 
     def test_tika_bug_incorrect_padding(self):
         """Test add Tika processing."""
