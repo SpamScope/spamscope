@@ -84,7 +84,7 @@ class Tokenizer(AbstractBolt):
                 try:
                     obj = load_obj(path)
                     setattr(self, "analyzed_" + i, obj)
-                except (IOError, EOFError):
+                except (IOError, EOFError, ValueError):
                     setattr(self, "analyzed_" + i, deque(
                         maxlen=getattr(self, "maxlen_" + i)))
 
