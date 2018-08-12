@@ -64,6 +64,7 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
  - [The Honeynet Project](http://honeynet.org/node/1329)
  - [securityonline.info](http://securityonline.info/pcileech-direct-memory-access-dma-attack-software/)
  - [jekil/awesome-hacking](https://github.com/jekil/awesome-hacking)
+ - [Linux Security Expert](https://linuxsecurity.expert/tools/spamscope/)
 
 # Authors
 
