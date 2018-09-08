@@ -22,17 +22,36 @@ This module is based on Analysis of SMTP dialects
 (https://sissden.eu/blog/analysis-of-smtp-dialects)
 """
 
+
+import datetime
+import logging
+import re
+
 try:
     from elasticsearch import Elasticsearch
     from elasticsearch import ElasticsearchException
 except ImportError:
     raise ImportError("To use dialects module, you must use Elasticsearch")
 
-import datetime
-import logging
+try:
+    from modules.attachments import fingerprints
+except ImportError:
+    from ...modules.attachments import fingerprints
 
 
 log = logging.getLogger(__name__)
+
+
+DIALECT_CLIENT_REGX = re.compile(
+    (
+        r'(rcpt\s+to\s*:?\s*|'
+        r'(?:ehlo|helo)\s*|'
+        r'mail\s+from\s*:?\s*|'
+        r'data\s*|'
+        r'quit\s*).*'
+    ),
+    re.IGNORECASE
+)
 
 
 # This query gets the code in postfix index
@@ -122,7 +141,8 @@ query_dialect = """
 
 
 def get_elastic_indices(index_prefix="postfix-"):
-    """This function gets an Elastisearch index prefix
+    """
+    This function gets an Elastisearch index prefix
     and returns a string comma-separated of indices of
     yesterday and today.
     The indices must be prefix-YEAR.MONTH.DAY
@@ -144,14 +164,29 @@ def get_elastic_indices(index_prefix="postfix-"):
     return indices
 
 
-def get_dialect(message_id, servers, index_prefix):
+def get_messages(message_id, elastic_server, index_prefix, max_size=100):
+    """
+    This function returns a list with all SMTP messages between
+    client and server (dialect)
+
+    Arguments:
+        message_id {string} -- email message-id header
+        elastic_server {list/string} -- Elasticsearch server
+        index_prefix {string} -- prefix of Postfix index
+
+    Keyword Arguments:
+        max_size {int} -- Max size of messages to save (default: {100})
+
+    Returns:
+        list -- List tuples of SMTP messages. Every tuple has actor and message
+    """
 
     try:
         # get indices to query
         indices = get_elastic_indices(index_prefix)
 
         # connect to Elasticsearch
-        es = Elasticsearch(hosts=servers)
+        es = Elasticsearch(hosts=elastic_server)
 
         # From message_id get code of comunication from client and server
         r = es.search(
@@ -173,11 +208,81 @@ def get_dialect(message_id, servers, index_prefix):
                 "timestamp": timestamp,
                 "client_ip": client_ip,
                 "client_name": client_name},
-            size=100)
-        dialects = [i["_source"]["dialect"] for i in r["hits"]["hits"]]
+            size=max_size)
+        messages = [(i["_source"]["actor"],
+                    i["_source"]["dialect"]) for i in r["hits"]["hits"]]
 
     except ElasticsearchException:
         log.exception(
             "Failed query Elasticsearch for dialect: {!r}".format(message_id))
 
-    return dialects
+    return messages
+
+
+def get_messages_str(messages):
+    """
+    From messeges list returns a string with all
+    conversation between client and server
+
+    Arguments:
+        messages {list} -- list of messages from get_messages
+
+    Returns:
+        str -- string of conversation
+    """
+
+    messages_str = ""
+    for i in messages:
+        messages_str += "{}: {}\n".format(i[0], i[1])
+    return messages_str.strip("\n\t ")
+
+
+def get_dialect(messages):
+    """
+    This function gets only the client parts related
+    the SMTP command
+
+    Arguments:
+        messages {list} -- list of messages from get_messages
+
+    Returns:
+        list -- List of commands of client
+    """
+
+    dialect = []
+    for i in messages:
+        if i[0] == "client":
+            r = DIALECT_CLIENT_REGX.findall(i[1])
+            if r:
+                dialect.append(r[0])
+    return dialect
+
+
+def get_dialect_str(dialect):
+    """
+    From list of dialect returns a string
+
+    Arguments:
+        dialect {list} -- output of get_dialect
+
+    Returns:
+        str -- string of client commands
+    """
+
+    return " ".join(dialect)
+
+
+def get_dialect_fingerprints(dialect):
+    """
+    Given a dialect list returns the hashes of its string
+    version
+
+    Arguments:
+        dialect {list} -- output of get_dialect
+
+    Returns:
+        namedtuple -- fingerprints md5, sha1, sha256, sha512, ssdeep
+    """
+
+    dialect_str = get_dialect_str(dialect)
+    return fingerprints(dialect_str)
