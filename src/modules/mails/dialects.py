@@ -286,3 +286,12 @@ def get_dialect_fingerprints(dialect):
 
     dialect_str = get_dialect_str(dialect)
     return fingerprints(dialect_str)
+
+
+def make_dialect_report(
+    message_id,
+    elastic_server,
+    index_prefix,
+    max_size=100
+):
+    pass

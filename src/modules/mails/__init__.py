@@ -27,4 +27,5 @@ from .dialects import (
     get_dialect_str,
     get_dialect,
     get_messages_str,
-    get_messages)
+    get_messages,
+    make_dialect_report)

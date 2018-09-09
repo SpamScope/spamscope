@@ -91,3 +91,34 @@ def spamassassin(conf, raw_mail, mail_type, results):
             MAIL_STRING: report_from_string}
 
         results["spamassassin"] = spamassassin[mail_type](raw_mail)
+
+
+@register(processors, active=True)
+def dialect(conf, raw_mail, mail_type, results):
+    """This method updates the mail results
+    with the dialect report.
+
+    Args:
+        conf (dict): dict of configuration
+        raw_mail (string): raw mail
+        mail_type (string): type of mail (mail path, mail string, ...)
+        results (dict): dict where will put the results
+
+    Returns:
+        This method updates the results dict given
+    """
+
+    if conf["enabled"]:
+        import mailparser
+        from .dialects import make_dialect_report
+
+        parser = {
+            MAIL_PATH: mailparser.parse_from_file,
+            MAIL_STRING: mailparser.parse_from_string}
+
+        message_id = parser[mail_type](raw_mail).message_id
+        elastic_server = conf["elasticsearch"]["hosts"]
+        index_prefix = conf["elasticsearch"]["index.prefix.postfix"]
+
+        results["dialect"] = make_dialect_report(
+            message_id, elastic_server, index_prefix)

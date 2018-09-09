@@ -110,6 +110,20 @@ raw_mail:
     spamassassin:
         enabled: false
 
+    # Dialect analysis: https://sissden.eu/blog/analysis-of-smtp-dialects
+    dialect:
+        enabled: false
+        
+        # elasticsearch instance where are postfix logs
+        elasticsearch:
+            hosts:
+                - "node1:9200"
+                - "node2"
+
+            # Prefix with dash '-' of Postfix index in Elasticsearch
+            # The format of indices should be postfix-2018.12.30
+            index.prefix.postfix: postfix-
+
 
 # Attachments bolt configuration
 attachments:
