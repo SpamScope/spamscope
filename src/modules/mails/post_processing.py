@@ -120,5 +120,8 @@ def dialect(conf, raw_mail, mail_type, results):
         elastic_server = conf["elasticsearch"]["hosts"]
         index_prefix = conf["elasticsearch"]["index.prefix.postfix"]
 
-        results["dialect"] = make_dialect_report(
+        report = make_dialect_report(
             message_id, elastic_server, index_prefix)
+
+        if report:
+            results["dialect"]

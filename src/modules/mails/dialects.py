@@ -191,6 +191,7 @@ def get_messages(message_id, elastic_server, index_prefix, max_size=100):
         # From message_id get code of comunication from client and server
         r = es.search(
             index=indices, body=query_code % {"message_id": message_id})
+
         code = r["hits"]["hits"][0]["_source"]["code"]
         timestamp = r["hits"]["hits"][0]["_source"]["@timestamp"]
         log.debug("The code of {!r} is {!r}".format(message_id, code))
@@ -216,7 +217,11 @@ def get_messages(message_id, elastic_server, index_prefix, max_size=100):
         log.exception(
             "Failed query Elasticsearch for dialect: {!r}".format(message_id))
 
-    return messages
+    except IndexError:
+        log.debug("message-id {!r} not found".format(message_id))
+
+    else:
+        return messages
 
 
 def get_messages_str(messages):
@@ -294,4 +299,20 @@ def make_dialect_report(
     index_prefix,
     max_size=100
 ):
-    pass
+    messages = get_messages(message_id, elastic_server, index_prefix, max_size)
+
+    if messages:
+        communication = get_messages_str(messages)
+        print communication
+        dialect = get_dialect(messages)
+        dialect_str = get_dialect_str(dialect)
+
+        report = {
+            "communication": communication,
+            "dialect": dialect_str}
+
+        report["md5"], report["sha1"], report["sha256"], \
+            report["sha512"], report["ssdeep"] = get_dialect_fingerprints(
+                dialect)
+
+        return report
