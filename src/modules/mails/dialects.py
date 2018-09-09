@@ -303,7 +303,6 @@ def make_dialect_report(
 
     if messages:
         communication = get_messages_str(messages)
-        print communication
         dialect = get_dialect(messages)
         dialect_str = get_dialect_str(dialect)
 

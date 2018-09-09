@@ -124,4 +124,4 @@ def dialect(conf, raw_mail, mail_type, results):
             message_id, elastic_server, index_prefix)
 
         if report:
-            results["dialect"]
+            results["dialect"] = report
