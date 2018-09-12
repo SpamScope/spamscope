@@ -1,0 +1,5 @@
+POSTFIX_CODE %{NOTSPACE:code}:\s+message-id=%{NOTSPACE:message_id}
+POSTFIX_CLIENT %{NOTSPACE:code}:\s+client=%{NOTSPACE:client_name}\[%{NOTSPACE:client_ip}\]
+POSTFIX_DIALECT (>|<)\s+%{NOTSPACE:client_name}\[%{NOTSPACE:client_ip}\]:\s+%{GREEDYDATA:dialect}
+POSTFIX_CONNECT connect\sfrom\s%{NOTSPACE:client_name}\[%{NOTSPACE:client_ip}\]
+POSTFIX_DISCONNECT disconnect\sfrom\s%{NOTSPACE:client_name}\[%{NOTSPACE:client_ip}\]\s%{GREEDYDATA}

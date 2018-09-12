@@ -26,11 +26,12 @@ If you want to know, what the **SMTP dialect** is, you should read [this article
 To explain SMTP dialect is out of scope. I will explain how SpamScope analyzes it.
 
 ## Requirements
-This module works only if you have the logs of `Postfix` SMTP server, related the emails that you are ingesting, stored in `Elasticsearch`.
+This module works only if you have the logs of `Postfix` SMTP server, related the emails that you are ingesting, stored in `Elasticsearch`. You should use pipeline and postfix patterns saved [here](../../../conf/logstash/).
+
 The logs of Postfix server must be in verbose mode (see [here](http://www.postfix.org/DEBUG_README.html#verbose)), to log also the communication from client and server.
 
 ## How it works
-SpamScope from the `message-id` header, get the communication from client and server:
+SpamScope from the `message-id` header, gets the communication from client and server:
 
 ```
 server: 220 localhost ESMTP Postfix
