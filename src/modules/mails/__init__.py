@@ -26,6 +26,7 @@ from .dialects import (
     get_dialect_fingerprints,
     get_dialect_str,
     get_dialect,
+    get_elastic_indices,
     get_messages_str,
     get_messages,
     make_dialect_report)

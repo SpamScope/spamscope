@@ -27,6 +27,8 @@ import datetime
 import logging
 import re
 
+from operator import itemgetter
+
 try:
     from elasticsearch import Elasticsearch
     from elasticsearch import ElasticsearchException
@@ -42,16 +44,13 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
-DIALECT_CLIENT_REGX = re.compile(
-    (
-        r'(rcpt\s+to\s*:?\s*|'
-        r'(?:ehlo|helo)\s*|'
-        r'mail\s+from\s*:?\s*|'
-        r'data\s*|'
-        r'quit\s*).*'
-    ),
-    re.IGNORECASE
-)
+DIALECT_CLIENT_REGX_SORTED = [
+    (re.compile(r'(?:ehlo|helo)\s*', re.I), 0),
+    (re.compile(r'mail\s+from\s*:?\s*', re.I), 1),
+    (re.compile(r'rcpt\s+to\s*:?\s*', re.I), 2),
+    (re.compile(r'data\s*', re.I), 3),
+    (re.compile(r'quit\s*', re.I), 4),
+]
 
 
 # This query gets the code in postfix index
@@ -254,13 +253,16 @@ def get_dialect(messages):
         list -- List of commands of client
     """
 
-    dialect = []
-    for i in messages:
-        if i[0] == "client":
-            r = DIALECT_CLIENT_REGX.findall(i[1])
-            if r:
-                dialect.append(r[0])
-    return dialect
+    dialect = set()
+    for j in DIALECT_CLIENT_REGX_SORTED:
+        for i in messages:
+            if i[0] == "client":
+                r = j[0].findall(i[1])
+                if r:
+                    dialect.add((r[0], j[1]))
+    else:
+        dialect = sorted(dialect, key=itemgetter(1))
+        return [i[0] for i in dialect]
 
 
 def get_dialect_str(dialect):

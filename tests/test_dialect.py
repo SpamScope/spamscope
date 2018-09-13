@@ -17,6 +17,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+
+import datetime
 import logging
 import os
 import unittest
@@ -50,6 +52,46 @@ class TestDialect(unittest.TestCase):
             ('server', '250 2.0.0 Ok: queued as 319A8641319'),
             ('server', '221 2.0.0 Bye'),
             ('client', 'QUIT')]
+
+    def test_multiple_communications(self):
+        messages_mixed = [
+            ('server', '220 localhost ESMTP Postfix'),
+            ('server', '250-ENHANCEDSTATUSCODES'),
+            ('server', '250-localhost'),
+            ('client', 'EHLO vip.90.com'),
+            ('server', '250-PIPELINING'),
+            ('server', '250-SIZE 10240000'),
+            ('client', 'EHLO mixed.90.com'),  # mixed
+            ('server', '250-ETRN'),
+            ('client', 'MAIL FROM:<test@vip.90.com>'),  # mixed
+            ('server', '250 DSN'),
+            ('server', '250-8BITMIME'),
+            ('server', '250-VRFY'),
+            ('client', 'MAIL FROM:<sywangwq@vip.90.com>'),
+            ('client', 'RCPT TO:<mixed@test_mail.net>'),  # mixed
+            ('server', '250 2.1.0 Ok'),
+            ('client', 'RCPT TO:<pramood48in@test_mail.net>'),
+            ('server', '250 2.1.5 Ok'),
+            ('server', '354 End data with <CR><LF>.<CR><LF>'),
+            ('client', 'DATA'),
+            ('server', '250 2.0.0 Ok: queued as 319A8641319'),
+            ('client', 'DATA'),
+            ('client', 'QUIT'),
+            ('server', '221 2.0.0 Bye'),
+            ('client', 'QUIT')]
+
+        dialect = ["EHLO ", "MAIL FROM:", "RCPT TO:", "DATA", "QUIT"]
+        dialect_not_mixed = mails.get_dialect(self.messages)
+        dialect_mixed = mails.get_dialect(messages_mixed)
+        self.assertEquals(dialect_mixed, dialect_not_mixed)
+        self.assertEquals(dialect, dialect_mixed)
+
+    def test_get_elastic_indices(self):
+        indices = mails.get_elastic_indices()
+        self.assertIsInstance(indices, str)
+        indices = indices.split(",")
+        self.assertIsInstance(indices, list)
+        self.assertEquals(len(indices), 2)
 
     def test_get_messages_str(self):
         messages_str = mails.get_messages_str(self.messages)
