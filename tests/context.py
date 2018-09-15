@@ -13,3 +13,12 @@ from src.modules import (
     networks,
     utils,
     MAIL_PATH)
+
+DEFAULTS = {
+    "SHODAN_ENABLED": "False",
+    "SPAMASSASSIN_ENABLED": "False",
+    "THUG_ENABLED": "False",
+    "TIKA_APP_JAR": "/opt/tika/tika-app-1.18.jar",
+    "VIRUSTOTAL_ENABLED": "False",
+    "ZEMANA_ENABLED": "False",
+}

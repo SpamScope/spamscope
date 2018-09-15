@@ -144,6 +144,9 @@ class TestAttachmentsUtils(unittest.TestCase):
         reformat_virustotal(report)
         self.assertFalse(report)
 
+    def test_get_urls_tika(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

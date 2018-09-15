@@ -1,4 +1,7 @@
-|PyPI version| |Build Status| |Coverage Status| |BCH compliance|
+`PyPI version <https://badge.fury.io/py/SpamScope>`__ `Build
+Status <https://travis-ci.org/SpamScope/spamscope>`__ `Coverage
+Status <https://coveralls.io/github/SpamScope/spamscope?branch=develop>`__
+`BCH compliance <https://bettercodehub.com/>`__
 
 .. figure:: https://raw.githubusercontent.com/SpamScope/spamscope/develop/docs/logo/spamscope.png
    :alt: SpamScope
@@ -26,20 +29,55 @@ folder <./topologies/>`__, but you can make others topologies.
 
    Schema topology
 
+What Does SpamScope do?
+=======================
+
+SpamScope gets the raw emails (both RFC822 and Outlook formats) in input
+and returns an JSON object. Then it extracts urls and attachments (if
+they are zipped extracts the content files). All informations are saved
+in JSON objects. This is the first analysis. After that SpamScope runs a
+*phishing* module, that gives a *phishing score* to the emails.
+
+Then you can enable/disable post processing modules, that connect
+SpamScope with third party tools. There are three main categories: - raw
+emails analysis - attachments analysis - sender emails analysis
+
+It’s possible to add new modules in these three categories, if you want
+connect SpamScope with others tools.
+
+Raw emails analysis
+-------------------
+
+These modules (see `here <./src/modules/mails>`__) analyze the raw
+emails: - SMTP dialect - SpamAssassin
+
+Attachments analysis
+--------------------
+
+These modules (see `here <./src/modules/attachments>`__) analyze the
+attachments of emails: - Apache Tika - Store sample on disk (as default
+SpamScope saves samples in JSON objects) - Thug - VirusTotal - Zemana
+
+Sender emails analysis
+----------------------
+
+SpamScope can detects the exact sender IP and then it can analyze it
+(see `here <./src/modules/networks>`__): - Shodan - VirusTotal
+
 Why should I use SpamScope
 ==========================
 
--  It's very fast: the job is splitted in functionalities that work in
+-  It’s very fast: the job is splitted in functionalities that work in
    parallel.
--  It's flexible: you can choose what SpamScope has to do.
--  It's distributed: SpamScope uses Apache Storm, free and open source
+-  It’s flexible: you can choose what SpamScope has to do.
+-  It’s distributed: SpamScope uses Apache Storm, free and open source
    distributed realtime computation system.
 -  It makes JSON output that you can save where you want.
--  It's easy to setup: there are docker images and docker-compose ready
+-  It’s easy to setup: there are docker images and docker-compose ready
    for use.
--  It's integrated with Apache Tika, VirusTotal, Thug, Shodan and
+-  It’s integrated with Apache Tika, VirusTotal, Thug, Shodan and
    SpamAssassin (for now).
--  It's free and open source (for special functions you can contact me).
+-  It’s free and open source (for special functions you can contact me).
 -  It can analyze Outlook msg.
 
 Distributed
@@ -58,12 +96,12 @@ SpamScope comes with the following bolts: - **tokenizer** splits mail in
 token like headers, body, attachments and it can filter emails,
 attachments and ip addresses already seen - **phishing** looks for your
 keywords in email and connects email to targets (bank, your customers,
-etc.) - **raw\_mail** is for all third party tools that analyze raw
-mails like SpamAssassin - **attachments** analyzes all mail attachments
-and uses third party tools like VirusTotal - **network** analyzes all
-sender ip addresses with third party tools like Shodan - **urls**
-extracts all urls in email and attachments - **json\_maker** and
-**outputs** make the json report and save it
+etc.) - **raw_mail** is for all third party tools that analyze raw mails
+like SpamAssassin - **attachments** analyzes all mail attachments and
+uses third party tools like VirusTotal - **network** analyzes all sender
+ip addresses with third party tools like Shodan - **urls** extracts all
+urls in email and attachments - **json_maker** and **outputs** make the
+json report and save it
 
 Store where you want
 --------------------
@@ -80,13 +118,13 @@ and/or remove spouts and bolts.
 API
 ---
 
-For now SpamScope doesn't have its own API, because it isn't tied to any
-tecnology. If you use ``Redis`` as spout (input), you'll use Redis API
-to put mails in topology. If you use ``Elasticsearch`` as output, you'll
+For now SpamScope doesn’t have its own API, because it isn’t tied to any
+tecnology. If you use ``Redis`` as spout (input), you’ll use Redis API
+to put mails in topology. If you use ``Elasticsearch`` as output, you’ll
 use Elasticsearch API to get results.
 
-It's possible to develop a middleware API that it talks with input,
-output and changes the configuration, but now there isn't.
+It’s possible to develop a middleware API that it talks with input,
+output and changes the configuration, but now there isn’t.
 
 Apache 2 Open Source License
 ============================
@@ -94,7 +132,7 @@ Apache 2 Open Source License
 SpamScope can be downloaded, used, and modified free of charge. It is
 available under the Apache 2 license.
 
-|Donate|
+`Donate <https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2>`__
 
 SpamScope on Web
 ================
@@ -104,6 +142,8 @@ SpamScope on Web
 -  `The Honeynet Project <http://honeynet.org/node/1329>`__
 -  `securityonline.info <http://securityonline.info/pcileech-direct-memory-access-dma-attack-software/>`__
 -  `jekil/awesome-hacking <https://github.com/jekil/awesome-hacking>`__
+-  `Linux Security
+   Expert <https://linuxsecurity.expert/tools/spamscope/>`__
 
 Authors
 =======
@@ -124,7 +164,7 @@ For Python requirements you can read: \* `mandatory
 requirements <./requirements.txt>`__ \* `optional
 requirements <./requirements_optional.txt>`__
 
-*Thug* is another optional requirement, that it's not in requirements.
+*Thug* is another optional requirement, that it’s not in requirements.
 See `Thug section <#thug-optional>`__ for more details.
 
 Apache Storm
@@ -197,32 +237,32 @@ errors in Apache Storm. To avoid any issue set
 
 ::
 
-    nr. user agents * timeout_thug < supervisor.worker.timeout.secs
+   nr. user agents * timeout_thug < supervisor.worker.timeout.secs
 
 The best value for ``threshold`` is 1.
 
 VirusTotal (optional)
 ---------------------
 
-It's possible add to results (for mail attachments and sender ip
+It’s possible add to results (for mail attachments and sender ip
 address) the VirusTotal report. You need a private API key.
 
 Shodan (optional)
 -----------------
 
-It's possible add to results the Shodan report for sender ip address.
+It’s possible add to results the Shodan report for sender ip address.
 You need a private API key.
 
 Elasticsearch (optional)
 ------------------------
 
-It's possible to store the results in Elasticsearch. In this case you
+It’s possible to store the results in Elasticsearch. In this case you
 should install ``elasticsearch`` package.
 
 Redis (optional)
 ----------------
 
-It's possible to store the results in Redis. In this case you should
+It’s possible to store the results in Redis. In this case you should
 install ``redis`` package.
 
 Configuration
@@ -231,12 +271,12 @@ Configuration
 Read the `example of main configuration
 file <./conf/spamscope.example.yml>`__. The default value where
 SpamScope will search the configuration file is
-``/etc/spamscope/spamscope.yml``, but it's possible to set the
+``/etc/spamscope/spamscope.yml``, but it’s possible to set the
 environment variable ``SPAMSCOPE_CONF_FILE``:
 
 ::
 
-    $ export SPAMSCOPE_CONF_FILE=/etc/spamscope/spamscope.yml
+   $ export SPAMSCOPE_CONF_FILE=/etc/spamscope/spamscope.yml
 
 When you change the configuration file, SpamScope automatically reloads
 the new changes.
@@ -252,11 +292,11 @@ Topologies
 ==========
 
 SpamScope comes with three topologies: -
-`spamscope\_debug <./topologies/spamscope_debug.py>`__: the output are
+`spamscope_debug <./topologies/spamscope_debug.py>`__: the output are
 JSON files on file system. -
-`spamscope\_elasticsearch <./topologies/spamscope_elasticsearch.py>`__:
+`spamscope_elasticsearch <./topologies/spamscope_elasticsearch.py>`__:
 the output are stored in Elasticsearch indexes. -
-`spamscope\_redis <./topologies/spamscope_redis.py>`__: the output are
+`spamscope_redis <./topologies/spamscope_redis.py>`__: the output are
 stored in Redis.
 
 If you want submit SpamScope topology use ``spamscope-topology submit``
@@ -264,9 +304,9 @@ tool. For more details `see SpamScope cli tools <src/cli/README.md>`__:
 
 ::
 
-    $ spamscope-topology submit --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis}
+   $ spamscope-topology submit --topology {spamscope_debug,spamscope_elasticsearch,spamscope_redis}
 
-It's possible to change the default settings for all Apache Storm
+It’s possible to change the default settings for all Apache Storm
 options. I suggest to change these options:
 
 -  **topology.tick.tuple.freq.secs**: reload configuration of all bolts
@@ -297,16 +337,16 @@ variables:
 
 ::
 
-    $ export THUG_ENABLED=True
-    $ export VIRUSTOTAL_ENABLED=True
-    $ export VIRUSTOTAL_APIKEY="your key"
-    $ export ZEMANA_ENABLED=True
-    $ export ZEMANA_APIKEY="your key"
-    $ export ZEMANA_PARTNERID="your partner id"
-    $ export ZEMANA_USERID="your userid"
-    $ export SHODAN_ENABLED=True
-    $ export SHODAN_APIKEY="your key"
-    $ export SPAMASSASSIN_ENABLED=True
+   $ export THUG_ENABLED=True
+   $ export VIRUSTOTAL_ENABLED=True
+   $ export VIRUSTOTAL_APIKEY="your key"
+   $ export ZEMANA_ENABLED=True
+   $ export ZEMANA_APIKEY="your key"
+   $ export ZEMANA_PARTNERID="your partner id"
+   $ export ZEMANA_USERID="your userid"
+   $ export SHODAN_ENABLED=True
+   $ export SHODAN_APIKEY="your key"
+   $ export SPAMASSASSIN_ENABLED=True
 
 Output example
 ==============
@@ -338,14 +378,3 @@ Screenshots
    :alt: SpamScope Map
 
    SpamScope Map
-
-.. |PyPI version| image:: https://badge.fury.io/py/SpamScope.svg
-   :target: https://badge.fury.io/py/SpamScope
-.. |Build Status| image:: https://travis-ci.org/SpamScope/spamscope.svg?branch=master
-   :target: https://travis-ci.org/SpamScope/spamscope
-.. |Coverage Status| image:: https://coveralls.io/repos/github/SpamScope/spamscope/badge.svg?branch=develop
-   :target: https://coveralls.io/github/SpamScope/spamscope?branch=develop
-.. |BCH compliance| image:: https://bettercodehub.com/edge/badge/SpamScope/spamscope?branch=develop
-   :target: https://bettercodehub.com/
-.. |Donate| image:: https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif
-   :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2

@@ -20,7 +20,6 @@ limitations under the License.
 import logging
 import os
 import six
-import sys
 import unittest
 import mailparser
 
@@ -29,7 +28,7 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
-from context import attachments
+from context import attachments, DEFAULTS
 
 MailAttachments = attachments.MailAttachments
 
@@ -39,14 +38,6 @@ mail_thug = os.path.join(base_path, 'samples', 'mail_thug')
 mail_test_4 = os.path.join(base_path, 'samples', 'mail_test_4')
 mail_test_9 = os.path.join(base_path, 'samples', 'mail_test_9')
 mail_test_10 = os.path.join(base_path, 'samples', 'mail_test_10')
-
-# Set environment variables to change defaults:
-# Example export VIRUSTOTAL_APIKEY=your_api_key
-
-DEFAULTS = {"TIKA_APP_JAR": "/opt/tika/tika-app-1.16.jar",
-            "VIRUSTOTAL_ENABLED": "False",
-            "ZEMANA_ENABLED": "False",
-            "THUG_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
 
@@ -169,12 +160,14 @@ class TestPostProcessing(unittest.TestCase):
             tika(conf, attachments)
 
         # attachments a key of conf
-        with self.assertRaises(KeyError):
-            conf_inner = {"enabled": True,
-                          "path_jar": OPTIONS["TIKA_APP_JAR"],
-                          "memory_allocation": None}
-            attachments = MailAttachments.withhashes(self.attachments)
-            tika(conf_inner, attachments)
+        conf_inner = {
+            "enabled": True,
+            "path_jar": OPTIONS["TIKA_APP_JAR"],
+            "memory_allocation": None}
+        attachments = MailAttachments.withhashes(self.attachments)
+        tika(conf_inner, attachments)
+        for i in attachments:
+            self.assertNotIn("tika", i)
 
     def test_tika_bug_incorrect_padding(self):
         """Test add Tika processing."""

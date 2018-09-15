@@ -10,8 +10,7 @@ python:
     - "2.7"
 
 env:
-    - TIKA_VER=1.16
-      TIKA_APP_JAR=/tmp/tika-app-${TIKA_VER}.jar
+    - TIKA_APP_JAR=/tmp/tika-app-${TIKA_VER}.jar
       FAUP_PATH=/tmp/faup
       ZEMANA_PATH=/tmp/zemana
       DOCKER_ELASTICSEARCH_PATH=/tmp/docker-elasticsearch

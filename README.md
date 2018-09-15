@@ -16,6 +16,34 @@ SpamScope has some topologies in [topologies folder](./topologies/), but you can
 
 ![Schema topology](docs/images/schema_topology.png?raw=true "Schema topology")
 
+# What Does SpamScope do?
+SpamScope gets the raw emails (both RFC822 and Outlook formats) in input and returns an JSON object. Then it extracts urls and attachments (if they are zipped extracts the content files). All informations are saved in JSON objects. This is the first analysis. After that SpamScope runs a _phishing_ module, that gives a _phishing score_ to the emails.
+
+Then you can enable/disable post processing modules, that connect SpamScope with third party tools. There are three main categories:
+ - raw emails analysis
+ - attachments analysis
+ - sender emails analysis
+
+ It's possible to add new modules in these three categories, if you want connect SpamScope with others tools.
+
+## Raw emails analysis
+These modules (see [here](./src/modules/mails)) analyze the raw emails:
+ - SMTP dialect
+ - SpamAssassin
+
+## Attachments analysis
+These modules (see [here](./src/modules/attachments)) analyze the attachments of emails:
+ - Apache Tika
+ - Store sample on disk (as default SpamScope saves samples in JSON objects)
+ - Thug
+ - VirusTotal
+ - Zemana
+
+## Sender emails analysis
+SpamScope can detects the exact sender IP and then it can analyze it (see [here](./src/modules/networks)):
+ - Shodan
+ - VirusTotal
+
 # Why should I use SpamScope
 - It's very fast: the job is splitted in functionalities that work in parallel.
 - It's flexible: you can choose what SpamScope has to do.
@@ -64,6 +92,7 @@ SpamScope can be downloaded, used, and modified free of charge. It is available 
  - [The Honeynet Project](http://honeynet.org/node/1329)
  - [securityonline.info](http://securityonline.info/pcileech-direct-memory-access-dma-attack-software/)
  - [jekil/awesome-hacking](https://github.com/jekil/awesome-hacking)
+ - [Linux Security Expert](https://linuxsecurity.expert/tools/spamscope/)
 
 # Authors
 

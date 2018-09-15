@@ -20,7 +20,6 @@ limitations under the License.
 import logging
 import os
 import six
-import sys
 import unittest
 import simplejson as json
 
@@ -29,11 +28,8 @@ try:
 except ImportError:
     from chainmap import ChainMap
 
-# Set environment variables to change defaults:
-# Example export VIRUSTOTAL_APIKEY=your_api_key
+from context import DEFAULTS
 
-DEFAULTS = {"VIRUSTOTAL_ENABLED": "False",
-            "SHODAN_ENABLED": "False"}
 
 OPTIONS = ChainMap(os.environ, DEFAULTS)
 

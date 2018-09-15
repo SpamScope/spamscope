@@ -25,7 +25,7 @@ import errno
 import functools
 import logging
 import os
-import pickle
+import cPickle as pickle
 import re
 import signal
 import tempfile

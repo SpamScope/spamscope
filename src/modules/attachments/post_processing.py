@@ -84,12 +84,20 @@ def tika(conf, attachments):
 
     if conf["enabled"]:
         from tikapp import TikaApp
-        tika = TikaApp(file_jar=conf["path_jar"],
-                       memory_allocation=conf["memory_allocation"])
+
+        tika = TikaApp(
+            file_jar=conf["path_jar"],
+            memory_allocation=conf["memory_allocation"])
+
+        wtlist = conf.get("whitelist_content_types", [])
+        if not wtlist:
+            log.warning(
+                "Apache Tika analysis setted, without whitelist content types")
+            return
 
         for a in attachments:
             if not a.get("is_filtered", False):
-                if a["Content-Type"] in conf["whitelist_content_types"]:
+                if a["Content-Type"] in wtlist:
                     payload = a["payload"]
 
                     if a["content_transfer_encoding"] != "base64":
@@ -131,7 +139,13 @@ def virustotal(conf, attachments):
         from .utils import reformat_virustotal
 
         vt = VirusTotalPublicApi(conf["api_key"])
-        wtlist = conf["whitelist_content_types"]
+        wtlist = conf.get("whitelist_content_types", [])
+
+        # I don't have content types to analyze
+        if not wtlist:
+            log.warning(
+                "Virustotal analysis setted, without whitelist content types")
+            return
 
         for a in attachments:
             if not a.get("is_filtered", False) and a["Content-Type"] in wtlist:

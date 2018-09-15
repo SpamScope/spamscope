@@ -32,6 +32,11 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
+try:
+    from modules import urls_extractor
+except ImportError:
+    from ...modules import urls_extractor
+
 log = logging.getLogger(__name__)
 
 
@@ -217,3 +222,21 @@ def remove_file(file_path):
         os.remove(file_path)
     except OSError:
         pass
+
+
+def get_urls_tika(attachments, faup):
+    """
+    This function extracts the urls from Apache Tika analysis
+
+    Args:
+        attachments (list): attachments list from SpamScope analysis
+        faup: Faup object
+
+    Returns:
+        a dict with a key for every second-level domain and
+        value a list of disassembled urls (output Faup tool).
+    """
+    for i in attachments:
+        if i.get("tika", False):
+            content = i["tika"].get("X-TIKA:content", six.text_type())
+            return urls_extractor(content, faup)

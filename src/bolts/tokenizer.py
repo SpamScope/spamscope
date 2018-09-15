@@ -81,10 +81,10 @@ class Tokenizer(AbstractBolt):
         for i in self.filter_types:
             if getattr(self, "filter_" + i):
                 path = self.get_persistent_path(i)
-                if os.path.exists(path):
+                try:
                     obj = load_obj(path)
                     setattr(self, "analyzed_" + i, obj)
-                else:
+                except (IOError, EOFError, ValueError):
                     setattr(self, "analyzed_" + i, deque(
                         maxlen=getattr(self, "maxlen_" + i)))
 
