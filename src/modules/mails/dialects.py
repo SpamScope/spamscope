@@ -48,8 +48,8 @@ DIALECT_CLIENT_REGX_SORTED = [
     (re.compile(r'(?:ehlo|helo)\s*', re.I), 0),
     (re.compile(r'mail\s+from\s*:?\s*', re.I), 1),
     (re.compile(r'rcpt\s+to\s*:?\s*', re.I), 2),
-    (re.compile(r'data\s*', re.I), 3),
-    (re.compile(r'quit\s*', re.I), 4),
+    (re.compile(r'^[\b\s]*data[\b\s]*$', re.I), 3),
+    (re.compile(r'^[\b\s]*quit[\b\s]*$', re.I), 4),
 ]
 
 

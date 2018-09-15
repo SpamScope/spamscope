@@ -29,6 +29,41 @@ folder <./topologies/>`__, but you can make others topologies.
 
    Schema topology
 
+What Does SpamScope do?
+=======================
+
+SpamScope gets the raw emails (both RFC822 and Outlook formats) in input
+and returns an JSON object. Then it extracts urls and attachments (if
+they are zipped extracts the content files). All informations are saved
+in JSON objects. This is the first analysis. After that SpamScope runs a
+*phishing* module, that gives a *phishing score* to the emails.
+
+Then you can enable/disable post processing modules, that connect
+SpamScope with third party tools. There are three main categories: - raw
+emails analysis - attachments analysis - sender emails analysis
+
+It’s possible to add new modules in these three categories, if you want
+connect SpamScope with others tools.
+
+Raw emails analysis
+-------------------
+
+These modules (see `here <./src/modules/mails>`__) analyze the raw
+emails: - SMTP dialect - SpamAssassin
+
+Attachments analysis
+--------------------
+
+These modules (see `here <./src/modules/attachments>`__) analyze the
+attachments of emails: - Apache Tika - Store sample on disk (as default
+SpamScope saves samples in JSON objects) - Thug - VirusTotal - Zemana
+
+Sender emails analysis
+----------------------
+
+SpamScope can detects the exact sender IP and then it can analyze it
+(see `here <./src/modules/networks>`__): - Shodan - VirusTotal
+
 Why should I use SpamScope
 ==========================
 
