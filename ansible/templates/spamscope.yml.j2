@@ -51,6 +51,9 @@ phishing:
 
 
 tokenizer:
+    # Persistent where store dumps of hashes.
+    persistent_path: /tmp
+
     # If true mails with same hash are filtered and not analyzed.
     # Only the body will not saved
     filter_mails: true
@@ -84,19 +87,37 @@ network:
         enabled: false
         api_key: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
-
 # RawMail bolt configuration
 raw_mail:
     # SpamAssassin analysis: https://spamassassin.apache.org/
     spamassassin:
         enabled: false
 
+    # Dialect analysis: https://sissden.eu/blog/analysis-of-smtp-dialects
+    dialect:
+        enabled: false
+        
+        # elasticsearch instance where are postfix logs
+        elasticsearch:
+            hosts:
+                - "node1:9200"
+                - "node2"
 
+            # Prefix with dash '-' of Postfix index in Elasticsearch
+            # The format of indices should be postfix-2018.12.30
+            index.prefix.postfix: postfix-
+    
 # Attachments bolt configuration
 attachments:
-    # The lists of all components must be under lists keyword to load them
-    # automatically
     commons:
+        # enable or disable filter on size
+        size.filter.enabled: false
+
+        # max size to analyze in bytes
+        max.size: 3145728
+        
+        # The lists of all components must be under lists keyword to load them
+        # automatically
         lists:
             blacklist_content_types:
                 # All content types to remove from results

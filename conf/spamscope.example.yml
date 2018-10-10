@@ -113,7 +113,7 @@ raw_mail:
     # Dialect analysis: https://sissden.eu/blog/analysis-of-smtp-dialects
     dialect:
         enabled: false
-        
+
         # elasticsearch instance where are postfix logs
         elasticsearch:
             hosts:
@@ -127,14 +127,15 @@ raw_mail:
 
 # Attachments bolt configuration
 attachments:
-    # The lists of all components must be under lists keyword to load them
-    # automatically
     commons:
         # enable or disable filter on size
         size.filter.enabled: false
+
         # max size to analyze in bytes
         max.size: 3145728
 
+        # The lists of all components must be under lists keyword to load them
+        # automatically
         lists:
             blacklist_content_types:
                 # All content types to remove from results
