@@ -189,7 +189,9 @@ def get_messages(message_id, elastic_server, index_prefix, max_size=100):
 
         # From message_id get code of comunication from client and server
         r = es.search(
-            index=indices, body=query_code % {"message_id": message_id})
+            index=indices,
+            body=query_code % {"message_id": message_id},
+            ignore_unavailable=True)
 
         code = r["hits"]["hits"][0]["_source"]["code"]
         timestamp = r["hits"]["hits"][0]["_source"]["@timestamp"]
@@ -197,7 +199,9 @@ def get_messages(message_id, elastic_server, index_prefix, max_size=100):
 
         # From code get client (ip and name)
         r = es.search(
-            index=indices, body=query_client % {"code": code})
+            index=indices,
+            body=query_client % {"code": code},
+            ignore_unavailable=True)
         client_ip = r["hits"]["hits"][0]["_source"]["client_ip"]
         client_name = r["hits"]["hits"][0]["_source"]["client_name"]
 
@@ -208,7 +212,8 @@ def get_messages(message_id, elastic_server, index_prefix, max_size=100):
                 "timestamp": timestamp,
                 "client_ip": client_ip,
                 "client_name": client_name},
-            size=max_size)
+            size=max_size,
+            ignore_unavailable=True)
         messages = [(i["_source"]["actor"],
                     i["_source"]["dialect"]) for i in r["hits"]["hits"]]
 
