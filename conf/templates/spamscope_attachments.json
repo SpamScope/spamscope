@@ -1,38 +1,44 @@
 {
   "order": 0,
-  "version": 2,
-  "index_patterns": "spamscope_attachments-*",
+  "version": 3,
+  "index_patterns": [
+    "spamscope_attachments-*"
+  ],
   "settings": {
-    "analysis": {
-      "analyzer": {
-        "header": {
-          "tokenizer": "uax_url_email",
-          "filter": [
-            "lowercase"
-          ]
-        },
-        "html_body": {
-          "char_filter": [
-            "html_strip"
-          ],
-          "tokenizer": "uax_url_email",
-          "filter": [
-            "lowercase"
-          ]
-        },
-        "path_pattern": {
-          "tokenizer": "path_hierarchy",
-          "filter": [
-            "lowercase"
-          ]
+    "index": {
+      "codec": "best_compression",
+      "mapping": {
+        "ignore_malformed": "true"
+      },
+      "refresh_interval": "5s",
+      "analysis": {
+        "analyzer": {
+          "header": {
+            "filter": [
+              "lowercase"
+            ],
+            "tokenizer": "uax_url_email"
+          },
+          "html_body": {
+            "filter": [
+              "lowercase"
+            ],
+            "char_filter": [
+              "html_strip"
+            ],
+            "tokenizer": "uax_url_email"
+          },
+          "path_pattern": {
+            "filter": [
+              "lowercase"
+            ],
+            "tokenizer": "path_hierarchy"
+          }
         }
-      }
-    },
-    "index.codec": "best_compression",
-    "index.number_of_shards": 1,
-    "index.number_of_replicas": 0,
-    "index.refresh_interval": "5s",
-    "index.mapping.ignore_malformed": true
+      },
+      "number_of_shards": "1",
+      "number_of_replicas": "0"
+    }
   },
   "mappings": {
     "_doc": {
@@ -83,6 +89,30 @@
         },
         "@version": {
           "type": "keyword"
+        }
+      }
+    }
+  },
+  "aliases": {
+    "attachments": {},
+    "attachments_thug": {
+      "filter": {
+        "exists": {
+          "field": "thug"
+        }
+      }
+    },
+    "attachments_tika": {
+      "filter": {
+        "exists": {
+          "field": "tika"
+        }
+      }
+    },
+    "attachments_virustotal": {
+      "filter": {
+        "exists": {
+          "field": "virustotal"
         }
       }
     }
