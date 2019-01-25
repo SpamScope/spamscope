@@ -48,7 +48,7 @@ install:
     - pip install --upgrade pip setuptools
     - python setup.py install
     - pip install -r requirements_optional.txt
-    - git clone https://$GITHUB_USER:$GITHUB_TOKEN@https://github.com/fedelemantuano/zemana-api.git $ZEMANA_PATH && cd $ZEMANA_PATH && python setup.py install && cd -
+    - git clone https://$GITHUB_USER:$GITHUB_TOKEN@github.com/fedelemantuano/zemana-api.git $ZEMANA_PATH && cd $ZEMANA_PATH && python setup.py install && cd -
     - src/cli/faup.sh
     - pip install coveralls
 
