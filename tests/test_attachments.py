@@ -307,8 +307,7 @@ class TestAttachments(unittest.TestCase):
 
     @unittest.skipIf(
         OPTIONS["THUG_ENABLED"].capitalize() == "False" or OPTIONS[
-            "VIRUSTOTAL_ENABLED"].capitalize() == "False" or OPTIONS[
-                "ZEMANA_ENABLED"].capitalize() == "False",
+            "VIRUSTOTAL_ENABLED"].capitalize() == "False",
         "Complete post processing test skipped: "
         "set env variables 'THUG_ENABLED', "
         "'VIRUSTOTAL_ENABLED' and 'ZEMANA_ENABLED' to True")
@@ -337,12 +336,12 @@ class TestAttachments(unittest.TestCase):
         for i in t:
             self.assertIn("tika", i)
             self.assertIn("virustotal", i)
-            self.assertIn("zemana", i)
+            self.assertNotIn("zemana", i)
             self.assertNotIn("thug", i)
 
             for j in i.get("files", []):
                 self.assertIn("virustotal", j)
-                self.assertIn("zemana", j)
+                self.assertNotIn("zemana", j)
                 self.assertIn("thug", j)
 
     def test_incorrect_padding(self):
