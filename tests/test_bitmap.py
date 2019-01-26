@@ -18,8 +18,6 @@ limitations under the License.
 """
 
 import logging
-import os
-import sys
 import unittest
 
 from context import bitmap

@@ -6,10 +6,12 @@ _resources
 .env
 .idea/
 .ropeproject
+.tox/
 .vscode/
 *.pyc
 build/
 dist/
 logs/
+report/
 SpamScope.egg-info/
 venv/

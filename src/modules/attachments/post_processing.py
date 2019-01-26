@@ -192,8 +192,8 @@ def thug(conf, attachments):
                         i["thug"] = thug.run(i, **conf)
 
 
-@register(processors, active=True)
-def zemana(conf, attachments):
+@register(processors, active=False)
+def zemana(conf, attachments):  # pragma: no cover
     """This method updates the attachments results
     with Zemana AntiMalware reports.
 
