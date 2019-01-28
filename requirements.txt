@@ -10,4 +10,4 @@ python-magic
 simplejson
 six
 ssdeep
-streamparse==3.13.1
+streamparse==3.15.1
