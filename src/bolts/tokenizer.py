@@ -101,7 +101,11 @@ class Tokenizer(AbstractBolt):
         mail_type = tup.values[5]
         rand = '_' + ''.join(random.choice('0123456789') for i in range(10))
         self.parser = self.mailparser[mail_type](raw_mail)
-        mail = self.parser.mail
+
+        # get only the mains headers because this number can explode
+        # Elastic can't manage all possible headers
+        mail = self.parser.mail_partial
+        mail["headers"] = self.parser.headers_json
 
         # Data mail sources
         mail["mail_server"] = tup.values[1]
