@@ -141,7 +141,10 @@ class Attachments(UserList):
         remove = []
 
         for i in self:
-            if not i.get("is_filtered", False):
+            filtered = i.get("is_filtered", False)
+            m_content_type = i["mail_content_type"].lower()
+
+            if not filtered:
                 try:
                     if i["Content-Type"].lower() == content_type:
                         remove.append(i)
@@ -164,8 +167,7 @@ class Attachments(UserList):
             # you should remove sample from results.
             # You can't use Content-Type because we don't have payload, so
             # we use mail_content_type
-            elif (i.get("is_filtered") and
-                  i["mail_content_type"].lower() == content_type):
+            elif (filtered and m_content_type == content_type):
                 remove.append(i)
 
         else:

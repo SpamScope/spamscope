@@ -192,8 +192,8 @@ def thug(conf, attachments):
                         i["thug"] = thug.run(i, **conf)
 
 
-@register(processors, active=True)
-def zemana(conf, attachments):
+@register(processors, active=False)
+def zemana(conf, attachments):  # pragma: no cover
     """This method updates the attachments results
     with Zemana AntiMalware reports.
 
@@ -224,10 +224,10 @@ def zemana(conf, attachments):
                     log.exception(
                         "HTTPError in Zemana query for md5 {!r}".format(
                             a["md5"]))
-
-                if result:
-                    a["zemana"] = result.json
-                    a["zemana"]["type"] = result.type
+                else:
+                    if result:
+                        a["zemana"] = result.json
+                        a["zemana"]["type"] = result.type
 
                 for i in a.get("files", []):
                     try:
@@ -236,10 +236,10 @@ def zemana(conf, attachments):
                         log.exception(
                             "HTTPError in Zemana query for md5 {!r}".format(
                                 i["md5"]))
-
-                    if i_result:
-                        i["zemana"] = i_result.json
-                        i["zemana"]["type"] = i_result.type
+                    else:
+                        if i_result:
+                            i["zemana"] = i_result.json
+                            i["zemana"]["type"] = i_result.type
 
 
 @register(processors, priority=999, active=True)

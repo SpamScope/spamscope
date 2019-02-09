@@ -90,11 +90,12 @@ class TestPostProcessing(unittest.TestCase):
         shodan(conf, "8.8.8", results)
         self.assertFalse(results)
 
-    @unittest.skipIf(OPTIONS["SHODAN_ENABLED"].capitalize() == "False" or
-                     OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False",
-                     "Complete post processing test skipped: "
-                     "set env variables 'SHODAN_ENABLED' and "
-                     "'VIRUSTOTAL_ENABLED' to True")
+    @unittest.skipIf(
+        OPTIONS["SHODAN_ENABLED"].capitalize() == "False" or OPTIONS[
+            "VIRUSTOTAL_ENABLED"].capitalize() == "False",
+        "Complete post processing test skipped: "
+        "set env variables 'SHODAN_ENABLED' and "
+        "'VIRUSTOTAL_ENABLED' to True")
     def test_processors(self):
         """Test all post processing."""
 

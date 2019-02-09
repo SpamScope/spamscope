@@ -75,7 +75,8 @@ class TestPostProcessing(unittest.TestCase):
         p_ordered = [i[0] for i in sorted(mails.processors, key=itemgetter(1))]
 
         conf = {
-            "spamassassin": {"enabled": True}}
+            "spamassassin": {"enabled": True},
+            "dialect": {"enabled": False}}
 
         results = {}
         self.assertFalse(results)
@@ -85,6 +86,7 @@ class TestPostProcessing(unittest.TestCase):
 
         self.assertTrue(results)
         self.assertIn("spamassassin", results)
+        self.assertNotIn("dialect", results)
 
 
 if __name__ == '__main__':

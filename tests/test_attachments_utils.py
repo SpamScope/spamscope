@@ -19,7 +19,6 @@ limitations under the License.
 
 import logging
 import os
-import sys
 import unittest
 
 import simplejson as json

@@ -18,9 +18,7 @@ limitations under the License.
 """
 
 
-import datetime
 import logging
-import os
 import unittest
 
 from context import mails

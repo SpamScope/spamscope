@@ -305,12 +305,12 @@ class TestAttachments(unittest.TestCase):
         self.assertEqual(len(t), 1)
         self.assertEqual(len(t[0]["files"]), 0)
 
-    @unittest.skipIf(OPTIONS["THUG_ENABLED"].capitalize() == "False" or
-                     OPTIONS["VIRUSTOTAL_ENABLED"].capitalize() == "False" or
-                     OPTIONS["ZEMANA_ENABLED"].capitalize() == "False",
-                     "Complete post processing test skipped: "
-                     "set env variables 'THUG_ENABLED', "
-                     "'VIRUSTOTAL_ENABLED' and 'ZEMANA_ENABLED' to True")
+    @unittest.skipIf(
+        OPTIONS["THUG_ENABLED"].capitalize() == "False" or OPTIONS[
+            "VIRUSTOTAL_ENABLED"].capitalize() == "False",
+        "Complete post processing test skipped: "
+        "set env variables 'THUG_ENABLED', "
+        "'VIRUSTOTAL_ENABLED' and 'ZEMANA_ENABLED' to True")
     def test_post_processing(self):
         t = MailAttachments.withhashes(self.attachments_thug)
         parameters = {
@@ -325,7 +325,7 @@ class TestAttachments(unittest.TestCase):
                      "user_agents": ["win7ie90", "winxpie80"],
                      "referer": "http://www.google.com/",
                      "timeout": 300},
-            "zemana": {"enabled": True,
+            "zemana": {"enabled": False,
                        "PartnerId": OPTIONS["ZEMANA_PARTNERID"],
                        "UserId": OPTIONS["ZEMANA_USERID"],
                        "ApiKey": OPTIONS["ZEMANA_APIKEY"],
@@ -336,12 +336,12 @@ class TestAttachments(unittest.TestCase):
         for i in t:
             self.assertIn("tika", i)
             self.assertIn("virustotal", i)
-            self.assertIn("zemana", i)
+            self.assertNotIn("zemana", i)
             self.assertNotIn("thug", i)
 
             for j in i.get("files", []):
                 self.assertIn("virustotal", j)
-                self.assertIn("zemana", j)
+                self.assertNotIn("zemana", j)
                 self.assertIn("thug", j)
 
     def test_incorrect_padding(self):

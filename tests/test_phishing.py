@@ -20,7 +20,6 @@ limitations under the License.
 import logging
 import copy
 import os
-import sys
 import unittest
 
 import mailparser
