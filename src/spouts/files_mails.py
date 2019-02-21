@@ -128,17 +128,21 @@ class FilesMailSpout(AbstractSpout):
             self.log("EMITTED - {!r}".format(mail_string))
 
             processing = mail.filename + ".processing"
-            shutil.move(mail.filename, processing)
 
-            self.emit([
-                processing,  # 0
-                mail.mail_server,  # 1
-                mail.mailbox,  # 2
-                mail.priority,  # 3
-                mail.trust,  # 4
-                mail.mail_type,  # 5
-                mail.headers],  # 6
-                tup_id=mail.filename)
+            try:
+                shutil.move(mail.filename, processing)
+            except IOError:
+                self.log("ALREADY EMITTED - {!r}".format(mail_string))
+            else:
+                self.emit([
+                    processing,  # 0
+                    mail.mail_server,  # 1
+                    mail.mailbox,  # 2
+                    mail.priority,  # 3
+                    mail.trust,  # 4
+                    mail.mail_type,  # 5
+                    mail.headers],  # 6
+                    tup_id=mail.filename)
 
     def ack(self, tup_id):
         """Acknowledge tup_id, that is the path_mail. """
