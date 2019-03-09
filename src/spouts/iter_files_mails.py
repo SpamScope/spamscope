@@ -70,12 +70,16 @@ class IterFilesMailSpout(AbstractSpout):
             if v.get("outlook", False):
                 mail_type = MAIL_PATH_OUTLOOK
 
-            for mail in glob.iglob(os.path.join(path, pattern)):
+            mails = sorted(
+                glob.iglob(os.path.join(path, pattern)),
+                key=os.path.getmtime)
+
+            for mail in mails:
                 yield MailItem(
                     filename=mail,
                     mail_server=v["mail_server"],
                     mailbox=k,
-                    priority=v["priority"],
+                    priority=None,
                     trust=v["trust_string"],
                     mail_type=mail_type,
                     headers=v.get("headers", []))

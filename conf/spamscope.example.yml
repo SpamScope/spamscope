@@ -49,6 +49,50 @@ files-mails:
             path_mails: /path/mails2
 
 
+# Spout file on file system
+# Use an iterator. Safe for RAM
+iter-files-mails:
+
+    # The mails in processing older that fail.after.seconds will be failed
+    fail.after.seconds: 60
+
+    # Post processing
+    post_processing:
+
+        # move or remove mails analyzed, default remove
+        what: remove
+
+        # Where you want move the analyzed mails, default /tmp/moved
+        where: /tmp/moved
+
+        # Where you want move the failed mails, default /tmp/failed
+        where.failed: /tmp/failed
+
+    # Mailboxes
+    mailboxes:
+        test:
+            mail_server: hostname
+            # Trust string is used to get sender IP address from mail server.
+            # More details:
+            # https://github.com/SpamScope/mail-parser/blob/v0.4.6/mailparser/__init__.py#L221
+            trust_string: "test_trust_string"
+            files_pattern: "*untroubled*"
+            path_mails: /path/mails1
+
+            # This flag enables Outlook msg parsing for every mails in mailbox
+            # Default value is false
+            outlook: false
+
+            # List of others headers to get
+            headers:
+                - custom_one
+                - custom_two
+        test1:
+            mail_server: hostname
+            trust_string: "test1_trust_string"
+            files_pattern: "*"
+            path_mails: /path/mails2
+
 # Bolts configurations
 # Phishing bolt configuration
 phishing:
