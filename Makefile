@@ -80,3 +80,12 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+debug-iter-topology:
+	mkdir /tmp/logs/ 2>/dev/null || echo /tmp/logs/ already exist
+	sparse run \
+		-n spamscope_debug_iter \
+		-e debug \
+		-o topology.max.spout.pending=1 \
+		-o "topology.sleep.spout.wait.strategy.time.ms=10" \
+		-o "topology.tick.tuple.freq.secs=10"

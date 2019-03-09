@@ -15,3 +15,4 @@ limitations under the License.
 """
 
 from .files_mails import FilesMailSpout
+from .iter_files_mails import IterFilesMailSpout
