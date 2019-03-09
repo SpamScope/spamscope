@@ -7,6 +7,9 @@ In this topology the results are stored on file system.
 
 ![Schema spamscope_debug](../docs/images/schema_spamscope_debug.png?raw=true "Schema spamscope_debug")
 
+# spamscope_debug_iter
+In this topology the results are stored on file system. It's same to `spamscope_debug` but it uses `iter-files-mails` spout.
+
 # spamscope_elasticsearch
 In this topology the results are stored in Elasticsearch. 
 
@@ -14,5 +17,10 @@ In this topology the results are stored in Elasticsearch.
 
 # spamscope_redis
 In this topology the results are stored in Redis. 
+
+![Schema spamscope_redis](../docs/images/schema_spamscope_redis.png?raw=true "Schema spamscope_redis")
+
+# spamscope_redis_iter
+In this topology the results are stored in Redis. It's same to `spamscope_redis` but it uses `iter-files-mails` spout.
 
 ![Schema spamscope_redis](../docs/images/schema_spamscope_redis.png?raw=true "Schema spamscope_redis")

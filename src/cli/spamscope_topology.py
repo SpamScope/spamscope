@@ -57,8 +57,13 @@ def get_args():
     submit.add_argument(
         "-g",
         "--topology",
-        choices=["spamscope_debug", "spamscope_elasticsearch",
-                 "spamscope_redis"],
+        choices=[
+            "spamscope_debug_iter",
+            "spamscope_debug",
+            "spamscope_elasticsearch",
+            "spamscope_redis_iter"
+            "spamscope_redis",
+        ],
         default="debug",
         help="SpamScope topology.",
         dest="topology")
