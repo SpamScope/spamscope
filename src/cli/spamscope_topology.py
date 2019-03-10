@@ -61,7 +61,7 @@ def get_args():
             "spamscope_debug_iter",
             "spamscope_debug",
             "spamscope_elasticsearch",
-            "spamscope_redis_iter"
+            "spamscope_redis_iter",
             "spamscope_redis",
         ],
         default="debug",
