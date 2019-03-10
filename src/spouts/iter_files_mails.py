@@ -92,28 +92,26 @@ class IterFilesMailSpout(AbstractSpout):
             # check if processing
             if mail.filename.endswith(".processing"):
                 self._fail_old_mails(mail.filename)
-                return
-
-            mail_string = mail.filename.split("/")[-1]
-            self.log("EMITTED - {!r}".format(mail_string))
-
-            processing = mail.filename + ".processing"
-
-            try:
-                shutil.move(mail.filename, processing)
-            except IOError:
-                self.log("ALREADY EMITTED - {!r}".format(mail_string))
             else:
-                self.emit([
-                    processing,  # 0
-                    mail.mail_server,  # 1
-                    mail.mailbox,  # 2
-                    mail.priority,  # 3
-                    mail.trust,  # 4
-                    mail.mail_type,  # 5
-                    mail.headers],  # 6
-                    tup_id=mail.filename)
+                mail_string = mail.filename.split("/")[-1]
+                self.log("EMITTED - {!r}".format(mail_string))
 
+                processing = mail.filename + ".processing"
+
+                try:
+                    shutil.move(mail.filename, processing)
+                except IOError:
+                    self.log("ALREADY EMITTED - {!r}".format(mail_string))
+                else:
+                    self.emit([
+                        processing,  # 0
+                        mail.mail_server,  # 1
+                        mail.mailbox,  # 2
+                        mail.priority,  # 3
+                        mail.trust,  # 4
+                        mail.mail_type,  # 5
+                        mail.headers],  # 6
+                        tup_id=mail.filename)
         except StopIteration:
             # Reload general spout conf
             self._conf_loader()
