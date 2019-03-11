@@ -72,7 +72,11 @@ class IterFilesMailSpout(AbstractSpout):
 
             for mail in glob.iglob(os.path.join(path, pattern)):
                 if mail.endswith(".processing"):
-                    self._fail_old_mails(mail)
+                    try:
+                        self._fail_old_mails(mail)
+                    except OSError:
+                        # mail already deleted
+                        pass
                 else:
                     yield MailItem(
                         filename=mail,
