@@ -70,48 +70,42 @@ class IterFilesMailSpout(AbstractSpout):
             if v.get("outlook", False):
                 mail_type = MAIL_PATH_OUTLOOK
 
-            mails = sorted(
-                glob.iglob(os.path.join(path, pattern)),
-                key=os.path.getmtime)
-
-            for mail in mails:
-                yield MailItem(
-                    filename=mail,
-                    mail_server=v["mail_server"],
-                    mailbox=k,
-                    priority=None,
-                    trust=v["trust_string"],
-                    mail_type=mail_type,
-                    headers=v.get("headers", []))
+            for mail in glob.iglob(os.path.join(path, pattern)):
+                if mail.endswith(".processing"):
+                    self._fail_old_mails(mail)
+                else:
+                    yield MailItem(
+                        filename=mail,
+                        mail_server=v["mail_server"],
+                        mailbox=k,
+                        priority=None,
+                        trust=v["trust_string"],
+                        mail_type=mail_type,
+                        headers=v.get("headers", []))
 
     def next_tuple(self):
         try:
             # get the next mail
             mail = next(self.mails)
+            mail_string = mail.filename.split("/")[-1]
+            self.log("EMITTED - {!r}".format(mail_string))
+            processing = mail.filename + ".processing"
 
-            # check if processing
-            if mail.filename.endswith(".processing"):
-                self._fail_old_mails(mail.filename)
+            try:
+                shutil.move(mail.filename, processing)
+            except IOError:
+                self.log("ALREADY EMITTED - {!r}".format(mail_string))
             else:
-                mail_string = mail.filename.split("/")[-1]
-                self.log("EMITTED - {!r}".format(mail_string))
+                self.emit([
+                    processing,  # 0
+                    mail.mail_server,  # 1
+                    mail.mailbox,  # 2
+                    mail.priority,  # 3
+                    mail.trust,  # 4
+                    mail.mail_type,  # 5
+                    mail.headers],  # 6
+                    tup_id=mail.filename)
 
-                processing = mail.filename + ".processing"
-
-                try:
-                    shutil.move(mail.filename, processing)
-                except IOError:
-                    self.log("ALREADY EMITTED - {!r}".format(mail_string))
-                else:
-                    self.emit([
-                        processing,  # 0
-                        mail.mail_server,  # 1
-                        mail.mailbox,  # 2
-                        mail.priority,  # 3
-                        mail.trust,  # 4
-                        mail.mail_type,  # 5
-                        mail.headers],  # 6
-                        tup_id=mail.filename)
         except StopIteration:
             # Reload general spout conf
             self._conf_loader()
