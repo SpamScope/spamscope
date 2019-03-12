@@ -2,6 +2,8 @@
 In this folder there are all SpamScope topologies.
 You will see that all topologies are same, except that changes where you store the JSON results.
 
+The topologies `_iter` are more stable because use generator to send mails to bolts. They are RAM safe.
+
 # spamscope_debug
 In this topology the results are stored on file system. 
 
@@ -14,6 +16,9 @@ In this topology the results are stored on file system. It's same to `spamscope_
 In this topology the results are stored in Elasticsearch. 
 
 ![Schema spamscope_elasticsearch](../docs/images/schema_spamscope_elasticsearch.png?raw=true "Schema spamscope_elasticsearch")
+
+# spamscope_elasticsearch_iter
+In this topology the results are stored in Elasticsearch. It's same to `spamscope_elasticsearch` but it uses `iter-files-mails` spout.
 
 # spamscope_redis
 In this topology the results are stored in Redis. 

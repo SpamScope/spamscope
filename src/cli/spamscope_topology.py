@@ -60,6 +60,7 @@ def get_args():
         choices=[
             "spamscope_debug_iter",
             "spamscope_debug",
+            "spamscope_elasticsearch_iter",
             "spamscope_elasticsearch",
             "spamscope_redis_iter",
             "spamscope_redis",
