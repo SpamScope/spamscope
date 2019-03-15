@@ -24,7 +24,7 @@ import os
 import random
 import six
 from collections import deque
-from cPickle import BadPickleGet
+from cPickle import PickleError
 
 from streamparse import Stream
 import mailparser
@@ -85,7 +85,7 @@ class Tokenizer(AbstractBolt):
                 try:
                     obj = load_obj(path)
                     setattr(self, "analyzed_" + i, obj)
-                except (IOError, EOFError, ValueError, BadPickleGet):
+                except (IOError, EOFError, ValueError, PickleError):
                     setattr(self, "analyzed_" + i, deque(
                         maxlen=getattr(self, "maxlen_" + i)))
 
