@@ -353,9 +353,11 @@ class Attachments(UserList):
                 try:
                     payload = base64.b64decode(i["payload"])
                 except TypeError, e:
-                    payload = base64.b64decode(i["payload"] + "===")
-                    i.setdefault("errors", []).append(repr(e))
-
+                    try:
+                        payload = base64.b64decode(i["payload"] + "===")
+                        i.setdefault("errors", []).append(repr(e))
+                    except TypeError:
+                        continue
             else:
                 payload = i["payload"]
 

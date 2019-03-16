@@ -58,8 +58,12 @@ def generate_json_report():
     if m is None:
         return
 
-    report = json.loads(m(tempfile.gettempdir()))
-    return report
+    try:
+        report = json.loads(m(tempfile.gettempdir()))
+    except TypeError:
+        return
+    else:
+        return report
 
 
 class CustomWatchdog(Watchdog):

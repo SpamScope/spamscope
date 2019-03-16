@@ -177,10 +177,13 @@ You can use:
   * [Ansible](./ansible/README.md): to install and run SpamScope on server
 
 # Topologies
-SpamScope comes with three topologies:
+SpamScope comes with six topologies:
    - [spamscope_debug](./topologies/spamscope_debug.py): the output are JSON files on file system.
    - [spamscope_elasticsearch](./topologies/spamscope_elasticsearch.py): the output are stored in Elasticsearch indexes.
    - [spamscope_redis](./topologies/spamscope_redis.py): the output are stored in Redis.
+   - [spamscope_debug_iter](./topologies/spamscope_debug_iter.py): It uses generator to send mails in topology. The output are JSON files on file system.
+   - [spamscope_elasticsearch_iter](./topologies/spamscope_elasticsearch_iter.py): It uses generator to send mails in topology. The output are stored in Elasticsearch indexes.
+   - [spamscope_redis_iter](./topologies/spamscope_redis_iter.py): It uses generator to send mails in topology. The output are stored in Redis.
 
 If you want submit SpamScope topology use `spamscope-topology submit` tool. For more details [see SpamScope cli tools](src/cli/README.md):
 
