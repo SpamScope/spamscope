@@ -123,7 +123,7 @@ class Tokenizer(AbstractBolt):
             self.log("{}: {}".format(mail_string, mail["sha256"]))
             with open(raw_mail) as f:
                 mail["size"] = len(f.read())
-        elif mail_type in (MAIL_STRING):
+        elif mail_type in (MAIL_STRING,):
             mail["size"] = len(raw_mail)
 
         # Add path to result
