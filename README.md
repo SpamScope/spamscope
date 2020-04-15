@@ -8,7 +8,7 @@
 # Overview
 SpamScope is an advanced spam analysis tool that use [Apache Storm](http://storm.apache.org/) with [streamparse](https://github.com/Parsely/streamparse) to process a stream of mails.
 To understand how SpamScope works, I suggest to read these overviews:
- - [Apache Storm Concepts](http://storm.apache.org/releases/1.2.1/Concepts.html)
+ - [Apache Storm Concepts](http://storm.apache.org/releases/1.2.3/Concepts.html)
  - [Streamparse Quickstart](http://streamparse.readthedocs.io/en/stable/quickstart.html)
 
 In general the first step is run Apache Storm, then you can run the topologies on it.
