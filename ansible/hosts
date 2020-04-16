@@ -6,8 +6,8 @@ bin_path="/usr/local/bin"
 install_path="/opt"
 
 # Apache Storm
-distro_name="apache-storm-1.2.1"
-apache_storm_mirror="http://it.apache.contactlab.it/storm"
+distro_name="apache-storm-1.2.3"
+apache_storm_mirror="https://downloads.apache.org/storm"
 file_distro_name="{{ distro_name }}.tar.gz"
 storm_url="{{ apache_storm_mirror }}/{{ distro_name }}/{{ file_distro_name }}"
 delay=30

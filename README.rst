@@ -16,7 +16,7 @@ Storm <http://storm.apache.org/>`__ with
 `streamparse <https://github.com/Parsely/streamparse>`__ to process a
 stream of mails. To understand how SpamScope works, I suggest to read
 these overviews: - `Apache Storm
-Concepts <http://storm.apache.org/releases/1.2.1/Concepts.html>`__ -
+Concepts <http://storm.apache.org/releases/1.2.3/Concepts.html>`__ -
 `Streamparse
 Quickstart <http://streamparse.readthedocs.io/en/stable/quickstart.html>`__
 
