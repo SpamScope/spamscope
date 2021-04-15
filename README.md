@@ -16,6 +16,17 @@ SpamScope has some topologies in [topologies folder](./topologies/), but you can
 
 ![Schema topology](docs/images/schema_topology.png?raw=true "Schema topology")
 
+# Apache 2 Open Source License
+SpamScope can be downloaded, used, and modified free of charge. It is available under the Apache 2 license.
+
+## Support the project
+
+**Dogecoin**: `DAUbDUttkf8WN1kwP9YYQQKyEJYY2WWtEG`
+
+[![Donate with Bitcoin](https://en.cryptobadges.io/badge/big/1BCJ8wok4DNW8KbdL8H3VwZviXAWibhEPe)](https://en.cryptobadges.io/donate/1BCJ8wok4DNW8KbdL8H3VwZviXAWibhEPe)
+
+[![Donate](https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2)
+
 # What Does SpamScope do?
 SpamScope gets the raw emails (both RFC822 and Outlook formats) in input and returns an JSON object. Then it extracts urls and attachments (if they are zipped extracts the content files). All informations are saved in JSON objects. This is the first analysis. After that SpamScope runs a _phishing_ module, that gives a _phishing score_ to the emails.
 
@@ -81,11 +92,6 @@ If you use `Redis` as spout (input), you'll use Redis API to put mails in topolo
 If you use `Elasticsearch` as output, you'll use Elasticsearch API to get results.
 
 It's possible to develop a middleware API that it talks with input, output and changes the configuration, but now there isn't.
-
-# Apache 2 Open Source License
-SpamScope can be downloaded, used, and modified free of charge. It is available under the Apache 2 license.
-
-[![Donate](https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VEPXYP745KJF2)
 
 # SpamScope on Web
  - [Shodan Applications & Integrations](https://developer.shodan.io/apps)
