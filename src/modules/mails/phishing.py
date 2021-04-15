@@ -146,6 +146,8 @@ def check_phishing(**kwargs):
                 bitmap.set_property_score(v)
 
     # Check subject
+    if isinstance(subject, list):
+        subject = " ".join(subject)
     if swt(subject, subject_keys):
         bitmap.set_property_score("mail_subject")
 
